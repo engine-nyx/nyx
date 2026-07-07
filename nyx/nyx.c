@@ -1,3 +1,4 @@
+#include <nyx/uci.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -7,5 +8,8 @@ main(int argc, char **argv)
 	(void) argc, (void) argv;
 
 	puts("nyx chess engine by Kilian Chung");
+
+	uci_loop();
+
 	return EXIT_SUCCESS;
 }
