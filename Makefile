@@ -29,7 +29,7 @@ $(TARGET_RELEASE): $(OBJS) | $(BUILD_DIR)
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(TARGET_LUT_GEN): tools/attack_lut_gen.c | $(BUILD_DIR)
+$(TARGET_LUT_GEN): tools/attacks_lut_gen.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $^ -o $@
 
 $(BUILD_DIR)/movegen.o: $(LUTS)

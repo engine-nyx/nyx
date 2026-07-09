@@ -51,10 +51,10 @@ calc_bishop_attacks(bitboard occ, enum square sq)
 
 	attacks = 0;
 
-	for (bishop = sqbb(sq); bishop; bishop = noea(bishop) & ~occ) attacks |= bishop;
-	for (bishop = sqbb(sq); bishop; bishop = soea(bishop) & ~occ) attacks |= bishop;
-	for (bishop = sqbb(sq); bishop; bishop = nowe(bishop) & ~occ) attacks |= bishop;
-	for (bishop = sqbb(sq); bishop; bishop = sowe(bishop) & ~occ) attacks |= bishop;
+	for (bishop = sqbb(sq); bishop; bishop &= ~occ) attacks |= (bishop = noea(bishop));
+	for (bishop = sqbb(sq); bishop; bishop &= ~occ) attacks |= (bishop = soea(bishop));
+	for (bishop = sqbb(sq); bishop; bishop &= ~occ) attacks |= (bishop = nowe(bishop));
+	for (bishop = sqbb(sq); bishop; bishop &= ~occ) attacks |= (bishop = sowe(bishop));
 
 	attacks &= ~sqbb(sq);
 
@@ -98,10 +98,10 @@ calc_rook_attacks(bitboard occ, enum square sq)
 
 	attacks = 0;
 
-	for (rook = sqbb(sq); rook; rook = no(rook) & ~occ) attacks |= rook;
-	for (rook = sqbb(sq); rook; rook = so(rook) & ~occ) attacks |= rook;
-	for (rook = sqbb(sq); rook; rook = ea(rook) & ~occ) attacks |= rook;
-	for (rook = sqbb(sq); rook; rook = we(rook) & ~occ) attacks |= rook;
+	for (rook = sqbb(sq); rook; rook &= ~occ) attacks |= (rook = no(rook));
+	for (rook = sqbb(sq); rook; rook &= ~occ) attacks |= (rook = so(rook));
+	for (rook = sqbb(sq); rook; rook &= ~occ) attacks |= (rook = ea(rook));
+	for (rook = sqbb(sq); rook; rook &= ~occ) attacks |= (rook = we(rook));
 
 	attacks &= ~sqbb(sq);
 
