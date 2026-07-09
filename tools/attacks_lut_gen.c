@@ -217,7 +217,7 @@ main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	char fname_buf[strlen(argv[1]) + 200];
+	char fname_buf[strlen(argv[1]) + 20];
 
 	lut_init();
 
