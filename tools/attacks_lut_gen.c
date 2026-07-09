@@ -56,8 +56,6 @@ calc_bishop_attacks(bitboard occ, enum square sq)
 	for (bishop = sqbb(sq); bishop; bishop &= ~occ) attacks |= (bishop = nowe(bishop));
 	for (bishop = sqbb(sq); bishop; bishop &= ~occ) attacks |= (bishop = sowe(bishop));
 
-	attacks &= ~sqbb(sq);
-
 	return attacks;
 }
 
@@ -102,8 +100,6 @@ calc_rook_attacks(bitboard occ, enum square sq)
 	for (rook = sqbb(sq); rook; rook &= ~occ) attacks |= (rook = so(rook));
 	for (rook = sqbb(sq); rook; rook &= ~occ) attacks |= (rook = ea(rook));
 	for (rook = sqbb(sq); rook; rook &= ~occ) attacks |= (rook = we(rook));
-
-	attacks &= ~sqbb(sq);
 
 	return attacks;
 }
