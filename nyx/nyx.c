@@ -1,4 +1,6 @@
+#include <nyx/attacks.h>
 #include <nyx/uci.h>
+#include <nyx/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -8,6 +10,8 @@ main(int argc, char **argv)
 	(void) argc, (void) argv;
 
 	puts("nyx chess engine by Kilian Chung");
+
+	attacks_init();
 
 	uci_loop();
 
