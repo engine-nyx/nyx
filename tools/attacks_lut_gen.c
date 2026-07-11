@@ -45,7 +45,7 @@ static inline bitboard sowewe(bitboard b) { return we(sowe(b)); }
 static inline bitboard sosowe(bitboard b) { return so(sowe(b)); }
 
 static bitboard
-calc_bishop_attacks(bitboard occ, enum square sq)
+calc_bishop_attacks(bitboard occ, square sq)
 {
 	bitboard attacks, bishop;
 
@@ -63,7 +63,7 @@ static void
 lut_fill_bishop_attacks(void)
 {
 	size_t offset;
-	enum square sq;
+	square sq;
 	unsigned num_entries;
 	bitboard board;
 
@@ -90,7 +90,7 @@ lut_fill_bishop_attacks(void)
 }
 
 static bitboard
-calc_rook_attacks(bitboard occ, enum square sq)
+calc_rook_attacks(bitboard occ, square sq)
 {
 	bitboard attacks, rook;
 
@@ -108,7 +108,7 @@ static void
 lut_fill_rook_attacks(void)
 {
 	size_t offset;
-	enum square sq;
+	square sq;
 	unsigned file, rank, num_entries;
 	bitboard board;
 
@@ -137,7 +137,7 @@ lut_fill_rook_attacks(void)
 static void
 lut_fill_knight_attacks(void)
 {
-	enum square sq;
+	square sq;
 	bitboard knight;
 
 	for (sq = A1; sq < NUM_SQUARES; ++sq)
@@ -158,21 +158,21 @@ lut_fill_knight_attacks(void)
 static void
 lut_fill_king_attacks(void)
 {
-	enum square sq;
+	square sq;
 	bitboard king;
 
 	for (sq = A1; sq < NUM_SQUARES; ++sq)
 	{
 		king = sqbb(sq);
 
-		lut_knight_attacks[sq] |= no(king);
-		lut_knight_attacks[sq] |= so(king);
-		lut_knight_attacks[sq] |= ea(king);
-		lut_knight_attacks[sq] |= we(king);
-		lut_knight_attacks[sq] |= noea(king);
-		lut_knight_attacks[sq] |= soea(king);
-		lut_knight_attacks[sq] |= nowe(king);
-		lut_knight_attacks[sq] |= sowe(king);
+		lut_king_attacks[sq] |= no(king);
+		lut_king_attacks[sq] |= so(king);
+		lut_king_attacks[sq] |= ea(king);
+		lut_king_attacks[sq] |= we(king);
+		lut_king_attacks[sq] |= noea(king);
+		lut_king_attacks[sq] |= soea(king);
+		lut_king_attacks[sq] |= nowe(king);
+		lut_king_attacks[sq] |= sowe(king);
 	}
 }
 
