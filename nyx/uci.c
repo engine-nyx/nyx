@@ -112,10 +112,10 @@ const struct
 static void
 uci_handle(const char *cmd)
 {
-	constexpr size_t uci_handler_count = sizeof(UCI_HANDLERS) / sizeof(*UCI_HANDLERS);
+	constexpr size_t num_uci_handlers = sizeof(UCI_HANDLERS) / sizeof(*UCI_HANDLERS);
 	size_t i;
 
-	for (i = 0; i < uci_handler_count; ++i)
+	for (i = 0; i < num_uci_handlers; ++i)
 	{
 		if (str_consume(&cmd, UCI_HANDLERS[i].cmd))
 		{
