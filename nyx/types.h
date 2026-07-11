@@ -6,8 +6,11 @@
 
 typedef enum
 {
+	NONE,
 	PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING,
+	ALL
 } ptype;
+constexpr size_t NUM_PIECE_TYPES = 8;
 
 typedef enum
 {
@@ -21,6 +24,7 @@ typedef enum
 	WHITE = WHITE_PAWN - PAWN,
 	BLACK = BLACK_PAWN - PAWN,
 } color;
+constexpr size_t NUM_COLORS = 2;
 static inline color
 other_color(color c) { return WHITE + BLACK - c; }
 
