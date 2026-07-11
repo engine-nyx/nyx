@@ -9,9 +9,33 @@ BEFORE()
 	return TEST_SUCCESS;
 }
 
-TEST(bishop_attacks)
+TEST(pseudo_bishop_attacks)
 {
 	bitboard occ, exp;
+
+	occ = 0b\
+00000000\
+00000000\
+00000000\
+00000000\
+00010000\
+00000000\
+00000000\
+00000000\
+;
+	exp = 0b\
+10000000\
+01000001\
+00100010\
+00010100\
+00000000\
+00010100\
+00100010\
+01000001\
+;
+
+	if (attacks_bishop(F4, occ) != exp)
+		return TEST_FAILURE("Position 1 failed!");
 
 	occ = 0b\
 00000000\
@@ -34,12 +58,36 @@ TEST(bishop_attacks)
 00000100\
 ;
 
-	return attacks_bishop(F4, occ) == exp ? TEST_SUCCESS : TEST_FAILURE("Position 1 failed!");
+	return attacks_bishop(D4, occ) == exp ? TEST_SUCCESS : TEST_FAILURE("Position 2 failed!");
 }
 
-TEST(rook_attacks)
+TEST(pseudo_rook_attacks)
 {
 	bitboard occ, exp;
+
+	occ = 0b\
+00000000\
+00000001\
+00000000\
+00000000\
+00010001\
+00000000\
+00000000\
+00000000\
+;
+	exp = 0b\
+00000000\
+00000001\
+00000001\
+00000001\
+00011110\
+00000001\
+00000001\
+00000001\
+;
+
+	if (attacks_rook(E3, occ) != exp)
+		return TEST_FAILURE("Position 1 failed!");
 
 	occ = 0b\
 00000001\
@@ -62,5 +110,69 @@ TEST(rook_attacks)
 00000000\
 ;
 
-	return attacks_rook(E3, occ) == exp ? TEST_SUCCESS : TEST_FAILURE("Position 1 failed!");
+	return attacks_rook(A4, occ) == exp ? TEST_SUCCESS : TEST_FAILURE("Position 2 failed!");
+}
+
+TEST(pseudo_king_attacks)
+{
+	bitboard exp;
+
+	exp = 0b\
+00000000\
+00000000\
+00000000\
+00011100\
+00010100\
+00011100\
+00000000\
+00000000\
+;
+
+	if (attacks_king(D4) != exp)
+		return TEST_FAILURE("Position 1 failed!");
+
+	exp = 0b\
+00000000\
+00000000\
+00000000\
+00000000\
+00000000\
+00000000\
+11000000\
+01000000\
+;
+
+	return attacks_king(H1) == exp ? TEST_SUCCESS : TEST_FAILURE("Position 2 failed!");
+}
+
+TEST(pseudo_knight_attacks)
+{
+	bitboard exp;
+
+	exp = 0b\
+00000000\
+00000000\
+00010100\
+00100010\
+00000000\
+00100010\
+00010100\
+00000000\
+;
+
+	if (attacks_knight(D4) != exp)
+		return TEST_FAILURE("Position 1 failed!");
+
+	exp = 0b\
+00000000\
+00000000\
+00000000\
+00000000\
+00000000\
+00000010\
+00000100\
+00000000\
+;
+
+	return attacks_knight(A1) == exp ? TEST_SUCCESS : TEST_FAILURE("Position 2 failed!");
 }
