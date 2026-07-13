@@ -1,13 +1,19 @@
+#include <assert.h>
+#include <nyx/perft.h>
+#include <nyx/position.h>
 #include <nyx/uci.h>
 #include <nyx/time.h>
 #include <nyx/utils.h>
 #include <stdatomic.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 static struct
 {
 	struct time_manager tm;
 	atomic_bool stop;
+	position p;
+	state_frame sf;
 
 	bool quit;
 } UCI_state;
@@ -65,16 +71,39 @@ uci_setoption(const char *args)
 	(void) args;
 }
 
+static const char *startpos = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
 static void
 uci_position(const char *args)
 {
-	(void) args;
+	if (str_consume(&args, "startpos"))
+	{
+		parse_fen(startpos, &UCI_state.p, &UCI_state.sf);
+	}
+
+	else if (str_consume(&args, "fen"))
+	{
+		assert(str_ltrim(&args) > 0 && "fen separator");
+		parse_fen(args, &UCI_state.p, &UCI_state.sf);
+	}
+
+	else
+	{
+		assert(false && "Invalid position command");
+	}
+
+	if (!str_ltrim(&args) || !str_consume(&args, "moves")) return;
+	// TODO: make moves
 }
 
 static void
 uci_go(const char *args)
 {
-	(void) args;
+	if (str_consume(&args, "perft"))
+	{
+		str_ltrim(&args);
+		perft(&UCI_state.p, atoi(args));
+	}
 }
 
 static void
@@ -89,6 +118,14 @@ static void
 uci_ponderhit(const char *args)
 {
 	(void) args;
+}
+
+static void
+uci_d(const char *args)
+{
+	(void) args;
+
+	print(&UCI_state.p);
 }
 
 const struct
@@ -106,6 +143,7 @@ const struct
 	{ "go"        , uci_go },
 	{ "stop"      , uci_stop },
 	{ "ponderhit" , uci_ponderhit },
+	{ "d"         , uci_d },
 };
 
 
@@ -119,6 +157,7 @@ uci_handle(const char *cmd)
 	{
 		if (str_consume(&cmd, UCI_HANDLERS[i].cmd))
 		{
+			str_ltrim(&cmd);
 			UCI_HANDLERS[i].handler(cmd);
 			return;
 		}
