@@ -14,10 +14,11 @@ constexpr size_t NUM_PIECE_TYPES = 8;
 
 typedef enum
 {
+	EMPTY,
 	WHITE_PAWN, WHITE_KNIGHT, WHITE_BISHOP, WHITE_ROOK, WHITE_QUEEN, WHITE_KING,
 	BLACK_PAWN, BLACK_KNIGHT, BLACK_BISHOP, BLACK_ROOK, BLACK_QUEEN, BLACK_KING,
 } cptype;
-constexpr size_t NUM_COLORED_PIECE_TYPES = 12;
+constexpr size_t NUM_COLORED_PIECE_TYPES = 13;
 
 typedef enum
 {
@@ -27,6 +28,10 @@ typedef enum
 constexpr size_t NUM_COLORS = 2;
 static inline color
 other_color(color c) { return WHITE + BLACK - c; }
+static inline color
+color_of(cptype cp) { return cp < BLACK_PAWN ? WHITE : BLACK; }
+static inline ptype
+ptype_of(cptype cp) { return ((cp - 1) % 6) + 1; }
 
 typedef enum
 {
@@ -38,12 +43,24 @@ typedef enum
 	A6, B6, C6, D6, E6, F6, G6, H6,
 	A7, B7, C7, D7, E7, F7, G7, H7,
 	A8, B8, C8, D8, E8, F8, G8, H8,
+	NO_EP,
 } square;
 constexpr size_t NUM_SQUARES = 64;
 static inline unsigned
 rank_of(square sq) { return (sq >> 3); }
 static inline unsigned
 file_of(square sq) { return (sq & 7); }
+static inline square
+square_of(unsigned file, unsigned rank) { return ((rank << 3) | file); }
+
+typedef enum : uint8_t
+{
+	NO_CASTLING = 0,
+	WHITE_OO    = 1,
+	WHITE_OOO   = 2,
+	BLACK_OO    = 4,
+	BLACK_OOO   = 8,
+} castling_rights;
 
 
 typedef uint64_t bitboard;
