@@ -17,8 +17,8 @@ typedef enum
 	EMPTY,
 	WHITE_PAWN, WHITE_KNIGHT, WHITE_BISHOP, WHITE_ROOK, WHITE_QUEEN, WHITE_KING,
 	BLACK_PAWN, BLACK_KNIGHT, BLACK_BISHOP, BLACK_ROOK, BLACK_QUEEN, BLACK_KING,
-} cptype;
-constexpr size_t NUM_COLORED_PIECE_TYPES = 13;
+} pctype;
+constexpr size_t NUM_PIECE_COLORED_TYPES = 13;
 
 typedef enum
 {
@@ -29,9 +29,9 @@ constexpr size_t NUM_COLORS = 2;
 static inline color
 other_color(color c) { return WHITE + BLACK - c; }
 static inline color
-color_of(cptype cp) { return cp < BLACK_PAWN ? WHITE : BLACK; }
+color_of(pctype pc) { return pc < BLACK_PAWN ? WHITE : BLACK; }
 static inline ptype
-ptype_of(cptype cp) { return ((cp - 1) % 6) + 1; }
+ptype_of(pctype pc) { return ((pc - 1) % 6) + 1; }
 
 typedef enum
 {

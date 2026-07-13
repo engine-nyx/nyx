@@ -125,7 +125,7 @@ uci_d(const char *args)
 {
 	(void) args;
 
-	print(&UCI_state.p);
+	print_board(&UCI_state.p);
 }
 
 const struct

@@ -55,7 +55,7 @@ bb_print(bitboard bb)
 	printf("└───┴───┴───┴───┴───┴───┴───┴───┘\n");
 }
 
-static char PIECE_CHAR[NUM_COLORED_PIECE_TYPES] =
+static char PIECE_CHAR[NUM_PIECE_COLORED_TYPES] =
 {
 	[EMPTY]=' ',
 	[WHITE_PAWN]='P', [WHITE_KNIGHT]='N', [WHITE_BISHOP]='B', [WHITE_ROOK]='R', [WHITE_QUEEN]='Q', [WHITE_KING]='K',
@@ -63,7 +63,7 @@ static char PIECE_CHAR[NUM_COLORED_PIECE_TYPES] =
 };
 
 void
-print(position *p)
+print_board(position *p)
 {
 	size_t i, j;
 	square sq;
@@ -85,15 +85,6 @@ print(position *p)
 	}
 
 	printf("└───┴───┴───┴───┴───┴───┴───┴───┘\n");
-}
-
-static void
-put_piece(position *p, cptype pc, square sq)
-{
-	p->by_square[sq] = pc;
-	p->by_ptype[ALL]          |= sqbb(sq);
-	p->by_ptype[ptype_of(pc)] |= sqbb(sq);
-	p->by_color[color_of(pc)] |= sqbb(sq);
 }
 
 static size_t
