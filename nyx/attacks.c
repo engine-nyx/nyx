@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <nyx/attacks.h>
 #include <nyx/types.h>
 
@@ -112,12 +113,31 @@ attacks_queen(square sq, bitboard occ)
 		attacks_bishop(sq, occ);
 }
 
-bitboard attacks_knight(square sq)
+bitboard
+attacks_knight(square sq)
 {
 	return lut_knight_attacks[sq];
 }
 
-bitboard attacks_king(square sq)
+bitboard
+attacks_king(square sq)
 {
 	return lut_king_attacks[sq];
+}
+
+bitboard
+attacks_piece(ptype pt, square sq, bitboard occ)
+{
+	switch (pt)
+	{
+	case QUEEN:    return attacks_queen(sq, occ);
+	case ROOK:     return attacks_rook(sq, occ);
+	case BISHOP:   return attacks_bishop(sq, occ);
+	case KNIGHT:   return attacks_knight(sq);
+	case KING:     return attacks_king(sq);
+	case PAWN:     assert(false && "Pawn attacks not implemented");
+	case ALL:      return ((bitboard) 0xFFFFFFFFFFFFFFFF);
+	case NONE:
+	default:       return ((bitboard) 0);
+	}
 }
