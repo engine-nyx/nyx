@@ -3,27 +3,31 @@
 
 #include <nyx/types.h>
 
-typedef struct
+typedef struct state_frame
 {
 	square ep;
-	cptype capture;
+	pctype capture;
 	castling_rights castle;
 	unsigned rule50;
-	unsigned plies;
+
+	struct state_frame *previous;
 } state_frame;
 
 typedef struct
 {
 	color stm;
+	unsigned ply;
 
 	state_frame *sf;
 
 	bitboard by_color[NUM_COLORS];
 	bitboard by_ptype[NUM_PIECE_TYPES];
-	cptype by_square[NUM_SQUARES];
+	pctype by_square[NUM_SQUARES];
 } position;
 
-state_frame do_move(position *p, move m);
+void put_piece(position *p, pctype pc, square sq);
+
+void do_move(position *p, move m, state_frame *sf);
 void undo_move(position *p, move m, state_frame sf);
 
 #endif // NYX_POSITION_H
