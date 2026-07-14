@@ -4,6 +4,16 @@
 #include <stddef.h>
 #include <stdint.h>
 
+typedef uint8_t u8;
+typedef uint64_t u64;
+
+typedef enum
+{
+	WHITE,
+	BLACK,
+} color;
+constexpr size_t NUM_COLORS = 2;
+
 typedef enum
 {
 	NONE,
@@ -12,28 +22,36 @@ typedef enum
 } ptype;
 constexpr size_t NUM_PIECE_TYPES = 8;
 
-typedef enum
+typedef enum : u8
 {
 	EMPTY,
-	WHITE_PAWN, WHITE_KNIGHT, WHITE_BISHOP, WHITE_ROOK, WHITE_QUEEN, WHITE_KING,
-	BLACK_PAWN, BLACK_KNIGHT, BLACK_BISHOP, BLACK_ROOK, BLACK_QUEEN, BLACK_KING,
-} pctype;
-constexpr size_t NUM_PIECE_COLORED_TYPES = 13;
 
-typedef enum
-{
-	WHITE = WHITE_PAWN - PAWN,
-	BLACK = BLACK_PAWN - PAWN,
-} color;
-constexpr size_t NUM_COLORS = 2;
+	WHITE_PAWN   = PAWN   + (WHITE << 3),
+	WHITE_KNIGHT = KNIGHT + (WHITE << 3),
+	WHITE_BISHOP = BISHOP + (WHITE << 3),
+	WHITE_ROOK   = ROOK   + (WHITE << 3),
+	WHITE_QUEEN  = QUEEN  + (WHITE << 3),
+	WHITE_KING   = KING   + (WHITE << 3),
+
+	BLACK_PAWN   = PAWN   + (BLACK << 3),
+	BLACK_KNIGHT = KNIGHT + (BLACK << 3),
+	BLACK_BISHOP = BISHOP + (BLACK << 3),
+	BLACK_ROOK   = ROOK   + (BLACK << 3),
+	BLACK_QUEEN  = QUEEN  + (BLACK << 3),
+	BLACK_KING   = KING   + (BLACK << 3),
+} pctype;
+constexpr size_t NUM_PIECE_COLORED_TYPES = 16;
+
 static inline color
 other_color(color c) { return WHITE + BLACK - c; }
 static inline color
 color_of(pctype pc) { return pc < BLACK_PAWN ? WHITE : BLACK; }
 static inline ptype
 ptype_of(pctype pc) { return ((pc - 1) % 6) + 1; }
+static inline pctype
+pctype_of(ptype pt, color c) { return (3 << c) + pt; }
 
-typedef enum
+typedef enum : u8
 {
 	A1, B1, C1, D1, E1, F1, G1, H1,
 	A2, B2, C2, D2, E2, F2, G2, H2,
@@ -53,7 +71,7 @@ file_of(square sq) { return (sq & 7); }
 static inline square
 square_of(unsigned file, unsigned rank) { return ((rank << 3) | file); }
 
-typedef enum : uint8_t
+typedef enum : u8
 {
 	NO_CASTLING = 0,
 	WHITE_OO    = 1,
@@ -63,7 +81,7 @@ typedef enum : uint8_t
 } castling_rights;
 
 
-typedef uint64_t bitboard;
+typedef u64 bitboard;
 static inline bitboard
 sqbb(square sq) { return (((bitboard) 1) << sq); }
 
