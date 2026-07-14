@@ -138,16 +138,16 @@ const struct
 	void (*handler)(const char *args);
 } UCI_HANDLERS[] =
 {
-	{ "quit"      , uci_quit },
+	{ "quit"      , uci_quit       },
 	{ "ucinewgame", uci_ucinewgame },
-	{ "uci"       , uci_uci },
-	{ "isready"   , uci_isready },
-	{ "setoption" , uci_setoption },
-	{ "position"  , uci_position },
-	{ "go"        , uci_go },
-	{ "stop"      , uci_stop },
-	{ "ponderhit" , uci_ponderhit },
-	{ "d"         , uci_d },
+	{ "uci"       , uci_uci        },
+	{ "isready"   , uci_isready    },
+	{ "setoption" , uci_setoption  },
+	{ "position"  , uci_position   },
+	{ "go"        , uci_go         },
+	{ "stop"      , uci_stop       },
+	{ "ponderhit" , uci_ponderhit  },
+	{ "d"         , uci_d          },
 };
 
 
