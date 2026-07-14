@@ -1,3 +1,4 @@
+#include "nyx/movegen.h"
 #include <assert.h>
 #include <nyx/perft.h>
 #include <nyx/position.h>
@@ -99,10 +100,13 @@ uci_position(const char *args)
 static void
 uci_go(const char *args)
 {
+	unsigned long long perft_res;
+
 	if (str_consume(&args, "perft"))
 	{
 		str_ltrim(&args);
-		perft(&UCI_state.p, atoi(args));
+		perft_res = perft(&UCI_state.p, atoi(args));
+		printf("%llu\n", perft_res);
 	}
 }
 
