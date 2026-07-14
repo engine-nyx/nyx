@@ -31,7 +31,7 @@ str_ltrim(const char **s)
 }
 
 void
-bb_print(bitboard bb)
+print_bitboard(bitboard bb)
 {
 	size_t i, j;
 	bitboard mask;
@@ -204,17 +204,17 @@ parse_rule50(const char *s, state_frame *sf)
 }
 
 static size_t
-parse_plies(const char *s, state_frame *sf)
+parse_ply(const char *s, position *p)
 {
 	size_t i;
 
 	assert(isdigit(s[0]) && "Invalid fullmove counter");
 
-	sf->plies = s[0] - '0';
-	if (!sf->plies) return 1;
+	p->ply = s[0] - '0';
+	if (!p->ply) return 1;
 
 	for (i = 1; isdigit(s[i]); ++i)
-		sf->plies = (sf->plies * 10) + (s[i] - '0');
+		p->ply = (p->ply * 10) + (s[i] - '0');
 
 	return i;
 }
@@ -232,7 +232,47 @@ parse_fen(const char *fen, position *p, state_frame *sf)
 	i += parse_castle(fen + i, sf); assert(fen[i] == ' ' && "Single space separator"); ++i;
 	i += parse_ep    (fen + i, sf); assert(fen[i] == ' ' && "Single space separator"); ++i;
 	i += parse_rule50(fen + i, sf); assert(fen[i] == ' ' && "Single space separator"); ++i;
-	i += parse_plies (fen + i, sf);
+	i += parse_ply   (fen + i, p);
+
+	p->sf = sf;
 
 	return i;
+}
+
+void
+print_square(square sq)
+{
+	printf("%c%c", file_of(sq) + 'A', rank_of(sq) + '1');
+}
+
+void
+print_move(move m)
+{
+	print_square(m.from);
+	printf(" -> ");
+	print_square(m.to);
+}
+
+bitboard
+strbb(const char *s)
+{
+	bitboard res;
+	unsigned file, rank;
+
+	res = 0;
+
+	for (rank = 7; rank < 8; --rank)
+	{
+		for (file = 0; file < 8; ++file)
+		{
+			switch (*s++)
+			{
+			case '\0': return res;
+			case ' ' : break;
+			default  : res |= sqbb(square_of(file, rank));
+			}
+		}
+	}
+
+	return res;
 }
