@@ -5,6 +5,8 @@
 #include <nyx/types.h>
 #include <stddef.h>
 
+constexpr size_t MAX_MOVES = 256;
+
 size_t generate_captures     (const position *p, move *ms);
 size_t generate_quiets       (const position *p, move *ms);
 size_t generate_evasions     (const position *p, move *ms);
