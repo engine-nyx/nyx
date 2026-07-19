@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stdbit.h>
 #include <ctype.h>
 #include <nyx/types.h>
 #include <nyx/utils.h>
@@ -242,14 +243,13 @@ parse_fen(const char *fen, position *p, state_frame *sf)
 void
 print_square(square sq)
 {
-	printf("%c%c", file_of(sq) + 'A', rank_of(sq) + '1');
+	printf("%c%c", file_of(sq) + 'a', rank_of(sq) + '1');
 }
 
 void
 print_move(move m)
 {
 	print_square(m.from);
-	printf(" -> ");
 	print_square(m.to);
 }
 
@@ -275,4 +275,23 @@ strbb(const char *s)
 	}
 
 	return res;
+}
+
+inline square
+lsb(bitboard bb)
+{
+	assert(bb && "No lsb of empty bitboard");
+
+	return stdc_first_trailing_one(bb) - 1;
+}
+
+inline square
+pop_lsb(bitboard* bb)
+{
+	square sq;
+
+	sq = lsb(*bb);
+	*bb &= *bb - 1;
+
+	return sq;
 }

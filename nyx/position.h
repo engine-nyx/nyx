@@ -10,7 +10,10 @@ typedef struct state_frame
 	castling_rights castle;
 	unsigned rule50;
 
+	// transient
 	struct state_frame *previous;
+	bitboard checkers;
+	bitboard blockers[NUM_COLORS];
 } state_frame;
 
 typedef struct
@@ -29,5 +32,7 @@ void put_piece(position *p, pctype pc, square sq);
 
 void do_move(position *p, move m, state_frame *sf);
 void undo_move(position *p, move m, state_frame sf);
+
+size_t do_lan_move(position *p, const char *lan, state_frame *sf);
 
 #endif // NYX_POSITION_H

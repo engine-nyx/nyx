@@ -1,6 +1,8 @@
 #include <assert.h>
 #include <nyx/position.h>
 #include <nyx/types.h>
+#include <nyx/attacks.h>
+#include <nyx/utils.h>
 
 void
 put_piece(position *p, pctype pc, square sq)
@@ -51,11 +53,13 @@ do_move(position *p, move m, state_frame *sf)
 	assert(color_of(p->by_square[m.from]) == p->stm && "Wrong color moved");
 
 	pctype pc;
+	bool gives_check;
 
 	*sf = *p->sf;
 	sf->previous = p->sf;
-	p->sf = sf;
 
+	// TODO: detect check
+	gives_check = false;
 	pc = p->by_square[m.from];
 	sf->capture = (m.type == EN_PASSANT) ? pctype_of(PAWN, other_color(p->stm)) : p->by_square[m.to];
 
@@ -82,9 +86,14 @@ do_move(position *p, move m, state_frame *sf)
 		move_piece(p, m.from, m.to);
 		break;
 	case EN_PASSANT:
+		remove_piece(p, p->sf->ep + white_black(-8, +8, p->stm));
 		move_piece(p, m.from, m.to);
 		break;
 	}
+
+	sf->checkers = gives_check ? attackers(p, lsb(p->by_ptype[KING] & p->by_color[other_color(p->stm)])) : 0;
+
+	p->sf = sf;
 
 	p->stm = other_color(p->stm);
 	++p->ply;
@@ -106,10 +115,7 @@ undo_move(position *p, move m, state_frame sf)
 		break;
 	case EN_PASSANT:
 		move_piece(p, m.to, m.from);
-		if (p->stm == WHITE)
-			put_piece(p, pctype_of(PAWN, other_color(p->stm)), m.to - 8);
-		if (p->stm == BLACK)
-			put_piece(p, pctype_of(PAWN, other_color(p->stm)), m.to + 8);
+		put_piece(p, pctype_of(PAWN, other_color(p->stm)), m.to + white_black(-8, +8, p->stm));
 		break;
 	case NORMAL:
 		move_piece(p, m.to, m.from);
@@ -119,4 +125,49 @@ undo_move(position *p, move m, state_frame sf)
 	}
 
 	p->sf = sf.previous;
+}
+
+size_t
+do_lan_move(position *p, const char *lan, state_frame *sf)
+{
+	move m;
+	ptype pt;
+
+	m.from = square_of(lan[0] - 'a', lan[1] - '1');
+	m.to   = square_of(lan[2] - 'a', lan[3] - '1');
+
+	pt = ptype_of(p->by_square[m.from]);
+
+	if (pt == PAWN && (rank_of(m.to) == 0 || rank_of(m.to) == 7))
+	{
+		m.type = PROMOTION;
+
+		switch (lan[4])
+		{
+		case 'n': m.promotion = promtype_of(KNIGHT); break;
+		case 'b': m.promotion = promtype_of(BISHOP); break;
+		case 'r': m.promotion = promtype_of(ROOK  ); break;
+		case 'q': m.promotion = promtype_of(QUEEN ); break;
+		default: assert(false && "Invalid LAN promotion");
+		}
+	}
+
+	else if (pt == PAWN && file_of(m.from) != file_of(m.to) && p->by_square[m.to] == EMPTY)
+	{
+		m.type = EN_PASSANT;
+	}
+
+	else if (pt == KING && (file_of(m.to) == file_of(m.from) + 2 || file_of(m.from) == file_of(m.to) + 2))
+	{
+		m.type = CASTLING;
+	}
+
+	else
+	{
+		m.type = NORMAL;
+	}
+
+	do_move(p, m, sf);
+
+	return m.type == PROMOTION ? 5 : 4;
 }

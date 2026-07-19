@@ -17,4 +17,9 @@ void print_move(move m);
 
 bitboard strbb(const char *s);
 
+#define white_black(w, b, c) ((c) == WHITE ? (w) : (b))
+
+square lsb(bitboard bb);
+square pop_lsb(bitboard *bb);
+
 #endif // NYX_UTILS_H
