@@ -7,6 +7,8 @@
 
 constexpr size_t MAX_MOVES = 256;
 
+void movegen_init(void);
+
 size_t generate_captures     (const position *p, move *ms);
 size_t generate_quiets       (const position *p, move *ms);
 size_t generate_evasions     (const position *p, move *ms);
