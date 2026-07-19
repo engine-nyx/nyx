@@ -22,9 +22,9 @@ perft(position *p, unsigned depth)
 	{
 		m = ms[i];
 
-		do_move(p, m, &sf);
+		sf = do_move(p, m), p->sf = &sf;
 		nodes += perft(p, depth - 1);
-		undo_move(p, m, sf);
+		undo_move(p, m);
 	}
 
 	return nodes;

@@ -47,21 +47,22 @@ swap_piece(position *p, pctype pc, square sq)
 	put_piece(p, pc, sq);
 }
 
-void
-do_move(position *p, move m, state_frame *sf)
+state_frame
+do_move(position *p, move m)
 {
 	assert(color_of(p->by_square[m.from]) == p->stm && "Wrong color moved");
 
+	state_frame sf;
 	pctype pc;
 	bool gives_check;
 
-	*sf = *p->sf;
-	sf->previous = p->sf;
+	sf = *p->sf;
+	sf.previous = p->sf;
 
 	// TODO: detect check
 	gives_check = false;
 	pc = p->by_square[m.from];
-	sf->capture = (m.type == EN_PASSANT) ? pctype_of(PAWN, other_color(p->stm)) : p->by_square[m.to];
+	sf.capture = (m.type == EN_PASSANT) ? pctype_of(PAWN, other_color(p->stm)) : p->by_square[m.to];
 
 	switch (m.type)
 	{
@@ -69,7 +70,7 @@ do_move(position *p, move m, state_frame *sf)
 	case PROMOTION:
 		pc = pctype_of(m.promotion, p->stm);
 
-		if (sf->capture)
+		if (sf.capture)
 		{
 			remove_piece(p, m.from);
 			swap_piece(p, pc, m.to);
@@ -81,7 +82,7 @@ do_move(position *p, move m, state_frame *sf)
 		}
 		break;
 	case NORMAL:
-		if (sf->capture)
+		if (sf.capture)
 			remove_piece(p, m.to);
 		move_piece(p, m.from, m.to);
 		break;
@@ -91,16 +92,16 @@ do_move(position *p, move m, state_frame *sf)
 		break;
 	}
 
-	sf->checkers = gives_check ? attackers(p, lsb(p->by_ptype[KING] & p->by_color[other_color(p->stm)])) : 0;
-
-	p->sf = sf;
+	sf.checkers = gives_check ? attackers(p, lsb(p->by_ptype[KING] & p->by_color[other_color(p->stm)])) : 0;
 
 	p->stm = other_color(p->stm);
 	++p->ply;
+
+	return sf;
 }
 
 void
-undo_move(position *p, move m, state_frame sf)
+undo_move(position *p, move m)
 {
 	--p->ply;
 	p->stm = other_color(p->stm);
@@ -119,12 +120,12 @@ undo_move(position *p, move m, state_frame sf)
 		break;
 	case NORMAL:
 		move_piece(p, m.to, m.from);
-		if (sf.capture)
-			put_piece(p, sf.capture, m.to);
+		if (p->sf->capture)
+			put_piece(p, p->sf->capture, m.to);
 		break;
 	}
 
-	p->sf = sf.previous;
+	p->sf = p->sf->previous;
 }
 
 size_t
@@ -167,7 +168,7 @@ do_lan_move(position *p, const char *lan, state_frame *sf)
 		m.type = NORMAL;
 	}
 
-	do_move(p, m, sf);
+	do_move(p, m);
 
 	return m.type == PROMOTION ? 5 : 4;
 }
