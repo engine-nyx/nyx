@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 typedef uint8_t u8;
+typedef uint16_t u16;
 typedef uint64_t u64;
 
 typedef enum
@@ -43,13 +44,15 @@ typedef enum : u8
 constexpr size_t NUM_PIECE_COLORED_TYPES = 16;
 
 static inline color
-other_color(color c) { return WHITE + BLACK - c; }
+other_color(color c) { return (WHITE + BLACK) - c; }
 static inline color
 color_of(pctype pc) { return pc < BLACK_PAWN ? WHITE : BLACK; }
 static inline ptype
-ptype_of(pctype pc) { return ((pc - 1) % 6) + 1; }
+ptype_of(pctype pc) { return pc & 7; }
 static inline pctype
 pctype_of(ptype pt, color c) { return (3 << c) + pt; }
+static inline u16
+promtype_of(ptype pt) { return pt - PAWN; }
 
 typedef enum : u8
 {
@@ -95,7 +98,7 @@ typedef enum
 
 typedef struct
 {
-	uint16_t
+	u16
 		to        : 6,
 		from      : 6,
 		promotion : 2,
