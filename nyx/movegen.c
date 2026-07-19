@@ -100,6 +100,7 @@ generate_quiet_pawn_moves(const position *p, bitboard target, move *ms)
 
 	num_moves = 0;
 	num_moves += generate_pawn_quiet_promotion_moves(p, target, KNIGHT, ms + num_moves);
+	num_moves += generate_pawn_quiet_promotion_moves(p, target, ROOK  , ms + num_moves);
 	num_moves += generate_pawn_quiet_promotion_moves(p, target, BISHOP, ms + num_moves);
 
 	while (singles)
