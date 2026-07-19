@@ -64,6 +64,8 @@ reverse(bitboard bb)
 	size_t i;
 	bitboard res;
 
+	res = 0;
+
 	for (i = 0; i < 64; ++i)
 	{
 		res <<= 1;
@@ -136,8 +138,26 @@ attacks_piece(ptype pt, square sq, bitboard occ)
 	case KNIGHT:   return attacks_knight(sq);
 	case KING:     return attacks_king(sq);
 	case PAWN:     assert(false && "Pawn attacks not implemented");
-	case ALL:      return ((bitboard) 0xFFFFFFFFFFFFFFFF);
+	case ALL:      return (bitboard) 0xFFFFFFFFFFFFFFFF;
 	case NONE:
-	default:       return ((bitboard) 0);
+	default:       return (bitboard) 0;
 	}
+}
+
+bitboard
+attackers(const position *p, square sq)
+{
+	bitboard attackers;
+
+	attackers = 0;
+
+	attackers |= attacks_piece(ROOK  , sq, p->by_ptype[ALL]) & p->by_ptype[ROOK];
+	attackers |= attacks_piece(ROOK  , sq, p->by_ptype[ALL]) & p->by_ptype[QUEEN];
+	attackers |= attacks_piece(BISHOP, sq, p->by_ptype[ALL]) & p->by_ptype[BISHOP];
+	attackers |= attacks_piece(BISHOP, sq, p->by_ptype[ALL]) & p->by_ptype[QUEEN];
+	attackers |= attacks_piece(KNIGHT, sq, p->by_ptype[ALL]) & p->by_ptype[KNIGHT];
+	attackers |= (sqbb(sq) << 7 | sqbb(sq) << 9) & (p->by_ptype[PAWN] & p->by_color[BLACK]);
+	attackers |= (sqbb(sq) >> 7 | sqbb(sq) >> 9) & (p->by_ptype[PAWN] & p->by_color[WHITE]);
+
+	return attackers;
 }
