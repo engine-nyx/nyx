@@ -8,6 +8,7 @@
 #include <stdatomic.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 static struct
 {
@@ -70,9 +71,22 @@ static void
 uci_setoption(const char *args)
 {
 	(void) args;
+
+	// TODO
 }
 
 static const char *startpos = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
+static bool
+is_file(char c) { return c >= 'a' && c <= 'h'; }
+static bool
+is_rank(char c) { return c >= '1' && c <= '8'; }
+
+static bool
+is_move(const char *s)
+{
+	return strlen(s) >= 4 && is_file(s[0]) && is_rank(s[1]) && is_file(s[2]) && is_rank(s[3]);
+}
 
 static void
 uci_position(const char *args)
@@ -93,8 +107,14 @@ uci_position(const char *args)
 		assert(false && "Invalid position command");
 	}
 
-	if (!str_ltrim(&args) || !str_consume(&args, "moves")) return;
-	// TODO: make moves
+	if (!str_ltrim(&args) || !str_consume(&args, "moves") || !str_ltrim(&args))
+		return;
+
+	while (is_move(args))
+	{
+		args += do_lan_move(&UCI_state.p, args, &UCI_state.sf);
+		if (!str_ltrim(&args)) break;
+	}
 }
 
 static void
@@ -130,6 +150,14 @@ uci_d(const char *args)
 	(void) args;
 
 	print_board(&UCI_state.p);
+
+	move ms[MAX_MOVES];
+	size_t num_moves = generate_legals(&UCI_state.p, ms);
+	for (size_t i = 0; i < num_moves; ++i)
+	{
+		print_move(ms[i]);
+		printf("\n");
+	}
 }
 
 const struct
