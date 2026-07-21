@@ -11,7 +11,7 @@ perft(position *p, unsigned depth)
 	if (!depth) return 1;
 
 	uint_fast64_t nodes;
-	move ms[MAX_MOVES], m;
+	move ms[MAX_MOVES];
 	size_t num_moves, i;
 	state_frame sf;
 
@@ -20,11 +20,9 @@ perft(position *p, unsigned depth)
 
 	for (i = 0; i < num_moves; ++i)
 	{
-		m = ms[i];
-
-		do_move(p, m, &sf);
+		do_move(p, ms[i], &sf);
 		nodes += perft(p, depth - 1);
-		undo_move(p, m);
+		undo_move(p, ms[i]);
 	}
 
 	return nodes;
