@@ -87,6 +87,8 @@ typedef enum : u8
 typedef u64 bitboard;
 static inline bitboard
 sqbb(square sq) { return (((bitboard) 1) << sq); }
+constexpr bitboard FULLBB = 0xFFFFFFFFFFFFFFFF;
+constexpr bitboard EMPTYBB = 0;
 
 typedef enum
 {

@@ -63,6 +63,17 @@ do_move(position *p, move m, state_frame *sf)
 	pc = p->by_square[m.from];
 	sf->capture = (m.type == EN_PASSANT) ? pctype_of(PAWN, other_color(p->stm)) : p->by_square[m.to];
 
+	sf->ep = NO_EP;
+	if (ptype_of(pc) == PAWN)
+	{
+		if ((m.from ^ m.to) == 16)
+		{
+			sf->ep = (m.from + m.to) / 2;
+
+			// TODO: skip if no one can take ep
+		}
+	}
+
 	switch (m.type)
 	{
 	case CASTLING: break;

@@ -63,6 +63,7 @@ generate_pawn_quiet_promotion_moves(const position *p, bitboard target, ptype pr
 
 	promotions = p->by_ptype[PAWN] & p->by_color[p->stm];
 	promotions = white_black(promotions << 8, promotions >> 8, p->stm);
+	promotions &= ~p->by_ptype[ALL];
 	promotions &= RANK_1 | RANK_8;
 	promotions &= target;
 
@@ -82,7 +83,7 @@ generate_pawn_quiet_promotion_moves(const position *p, bitboard target, ptype pr
 	return num_moves;
 }
 
-// pawn promotions: quiet knight, quiet bishop
+// pawn promotions: quiet knight, quiet bishop, quiet rook
 static size_t
 generate_quiet_pawn_moves(const position *p, bitboard target, move *ms)
 {
@@ -92,8 +93,9 @@ generate_quiet_pawn_moves(const position *p, bitboard target, move *ms)
 
 	singles = p->by_ptype[PAWN] & p->by_color[p->stm];
 	singles = white_black(singles << 8, singles >> 8, p->stm);
-	singles &= target;
+	singles &= ~p->by_ptype[ALL];
 	singles &= ~(RANK_1 | RANK_8);
+	singles &= target;
 
 	doubles = white_black((singles << 8) & 0xFF000000ull, (singles >> 8) & 0xFF00000000ull, p->stm);
 	doubles &= target;
@@ -141,8 +143,8 @@ generate_capture_pawn_moves(const position *p, bitboard target, move *ms)
 
 	singles = p->by_ptype[PAWN] & p->by_color[p->stm];
 	singles = white_black(singles << 8, singles >> 8, p->stm);
-	east = (singles << 1) & 0xFEFEFEFEFEFEFEFEull & target;
-	west = (singles >> 1) & 0x7F7F7F7F7F7F7F7Full & target;
+	east = (singles << 1) & 0xFEFEFEFEFEFEFEFEull & p->by_color[other_color(p->stm)] & target;
+	west = (singles >> 1) & 0x7F7F7F7F7F7F7F7Full & p->by_color[other_color(p->stm)] & target;
 	east_prom = east & (RANK_1 | RANK_8);
 	west_prom = west & (RANK_1 | RANK_8);
 	east ^= east_prom;
@@ -239,7 +241,7 @@ generate_captures(const position *p, move *ms)
 
 	num_moves = 0;
 	num_moves += generate_all_piece_moves   (p, target, ms + num_moves);
-	num_moves += generate_capture_pawn_moves(p, target, ms + num_moves);
+	num_moves += generate_capture_pawn_moves(p, FULLBB, ms + num_moves);
 
 	return num_moves;
 }
@@ -254,7 +256,7 @@ generate_quiets(const position *p, move *ms)
 
 	num_moves = 0;
 	num_moves += generate_all_piece_moves (p, target, ms + num_moves);
-	num_moves += generate_quiet_pawn_moves(p, target, ms + num_moves);
+	num_moves += generate_quiet_pawn_moves(p, FULLBB, ms + num_moves);
 
 	return num_moves;
 }
@@ -286,8 +288,8 @@ generate_non_evasions(const position *p, move *ms)
 
 	num_moves = 0;
 	num_moves += generate_all_piece_moves   (p, target, ms + num_moves);
-	num_moves += generate_quiet_pawn_moves  (p, target, ms + num_moves);
-	num_moves += generate_capture_pawn_moves(p, target, ms + num_moves);
+	num_moves += generate_quiet_pawn_moves  (p, FULLBB, ms + num_moves);
+	num_moves += generate_capture_pawn_moves(p, FULLBB, ms + num_moves);
 
 	return num_moves;
 }
