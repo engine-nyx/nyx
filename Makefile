@@ -44,7 +44,6 @@ $(TEST_BUILD_DIR)/%.o: $(TEST_DIR)/%.c | $(TEST_BUILD_DIR)
 $(TARGET_LUT_GEN): tools/attacks_lut_gen.c | $(LUT_DIR)
 	$(CC) $(CFLAGS) $^ -o $@
 
-#$(BUILD_DIR)/movegen.o: $(LUTS)
 $(LUTS): $(TARGET_LUT_GEN) | $(LUT_DIR)
 	./$(TARGET_LUT_GEN) $(LUT_DIR)
 

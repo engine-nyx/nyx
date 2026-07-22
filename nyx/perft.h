@@ -1,7 +1,7 @@
 #ifndef NYX_PERFT_H
 #define NYX_PERFT_H
 
-#include <nyx/movegen.h>
+#include <nyx/generation.h>
 #include <nyx/position.h>
 #include <nyx/types.h>
 

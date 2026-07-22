@@ -1,4 +1,4 @@
-#include "nyx/movegen.h"
+#include <nyx/generation.h>
 #include <assert.h>
 #include <nyx/perft.h>
 #include <nyx/position.h>

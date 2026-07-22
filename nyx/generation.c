@@ -2,7 +2,7 @@
 #include <nyx/utils.h>
 #include <assert.h>
 #include <nyx/attacks.h>
-#include <nyx/movegen.h>
+#include <nyx/generation.h>
 #include <nyx/types.h>
 
 static square
@@ -298,7 +298,7 @@ static bitboard dia_straight_lut[NUM_SQUARES][NUM_SQUARES];
 static bitboard between_lut[NUM_SQUARES][NUM_SQUARES];
 
 void
-movegen_init(void)
+generation_init(void)
 {
 	square sq1, sq2;
 
