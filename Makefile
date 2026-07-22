@@ -1,4 +1,4 @@
-SRC_DIR           := nyx
+SRC_DIR           := src
 TEST_DIR          := test
 BUILD_DIR         := build
 RELEASE_BUILD_DIR := $(BUILD_DIR)/release
@@ -24,7 +24,7 @@ LUTS += knight_attacks
 LUTS += king_attacks
 LUTS := $(addprefix $(LUT_DIR)/,$(addsuffix .bin,$(LUTS)))
 
-CFLAGS := -Wall -Wextra -Wpedantic -Werror -I. -MMD -MP
+CFLAGS := -Wall -Wextra -Wpedantic -Werror -Iinclude -MMD -MP
 CFLAGS += -march=native
 
 all: $(TARGET_RELEASE) $(TARGET_TEST)
