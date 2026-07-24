@@ -26,7 +26,7 @@ LUTS := $(addprefix $(LUT_DIR)/,$(addsuffix .bin,$(LUTS)))
 
 CFLAGS := -Wall -Wextra -Wpedantic -Werror -Iinclude -MMD -MP
 CFLAGS += -march=native
-CLFAGS += std=c23
+CLFAGS += -std=c23
 
 all: $(TARGET_RELEASE) $(TARGET_TEST)
 
