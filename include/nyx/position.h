@@ -33,6 +33,6 @@ void put_piece(position *p, pctype pc, square sq);
 void do_move(position *p, move m, state_frame *sf);
 void undo_move(position *p, move m);
 
-size_t do_lan_move(position *p, const char *lan, state_frame *sf);
+square king_square(const position *p, color c);
 
 #endif // NYX_POSITION_H

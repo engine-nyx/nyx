@@ -46,13 +46,13 @@ constexpr size_t NUM_PIECE_COLORED_TYPES = 16;
 static inline color
 other_color(color c) { return (WHITE + BLACK) - c; }
 static inline color
-color_of(pctype pc) { return pc < BLACK_PAWN ? WHITE : BLACK; }
+color_of(pctype pc) { return pc >> 3; }
 static inline ptype
 ptype_of(pctype pc) { return pc & 7; }
 static inline pctype
 pctype_of(ptype pt, color c) { return (3 << c) + pt; }
 static inline u16
-promtype_of(ptype pt) { return pt - PAWN; }
+to_promtype(ptype pt) { return pt - PAWN; }
 
 typedef enum : u8
 {
@@ -68,11 +68,11 @@ typedef enum : u8
 } square;
 constexpr size_t NUM_SQUARES = 64;
 static inline unsigned
-rank_of(square sq) { return (sq >> 3); }
+rank_of(square sq) { return sq >> 3; }
 static inline unsigned
-file_of(square sq) { return (sq & 7); }
+file_of(square sq) { return sq & 7; }
 static inline square
-square_of(unsigned file, unsigned rank) { return ((rank << 3) | file); }
+square_of(unsigned file, unsigned rank) { return (rank << 3) | file; }
 
 typedef enum : u8
 {
@@ -106,5 +106,8 @@ typedef struct
 		promotion : 2,
 		type      : 2;
 } move;
+
+static inline ptype
+promtype_of(move m) { return m.promotion + PAWN; }
 
 #endif // NYX_TYPES_H

@@ -5,12 +5,6 @@
 #include <nyx/generation.h>
 #include <nyx/types.h>
 
-static square
-king_square(const position *p, color c)
-{
-	return lsb(p->by_ptype[KING] & p->by_color[c]);
-}
-
 static size_t
 splat_moves(square from, bitboard target, move *ms)
 {
@@ -76,7 +70,7 @@ generate_pawn_quiet_promotion_moves(const position *p, bitboard target, ptype pr
 			.from=from,
 			.to  =to,
 			.type=PROMOTION,
-			.promotion=promtype_of(promtype),
+			.promotion=to_promtype(promtype),
 		};
 	}
 
@@ -125,10 +119,10 @@ generate_quiet_pawn_moves(const position *p, bitboard target, move *ms)
 static size_t
 pawn_all_promotions(square from, square to, move *ms)
 {
-	ms[0] = (move) { .from=from, .to=to, .type=PROMOTION, .promotion=promtype_of(QUEEN ) };
-	ms[1] = (move) { .from=from, .to=to, .type=PROMOTION, .promotion=promtype_of(KNIGHT) };
-	ms[2] = (move) { .from=from, .to=to, .type=PROMOTION, .promotion=promtype_of(ROOK  ) };
-	ms[3] = (move) { .from=from, .to=to, .type=PROMOTION, .promotion=promtype_of(BISHOP) };
+	ms[0] = (move) { .from=from, .to=to, .type=PROMOTION, .promotion=to_promtype(QUEEN ) };
+	ms[1] = (move) { .from=from, .to=to, .type=PROMOTION, .promotion=to_promtype(KNIGHT) };
+	ms[2] = (move) { .from=from, .to=to, .type=PROMOTION, .promotion=to_promtype(ROOK  ) };
+	ms[3] = (move) { .from=from, .to=to, .type=PROMOTION, .promotion=to_promtype(BISHOP) };
 
 	return 4;
 }
