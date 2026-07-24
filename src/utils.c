@@ -295,3 +295,48 @@ pop_lsb(bitboard* bb)
 
 	return sq;
 }
+
+size_t
+do_lan_move(position *p, const char *lan, state_frame *sf)
+{
+	move m;
+	ptype pt;
+
+	m.from = square_of(lan[0] - 'a', lan[1] - '1');
+	m.to   = square_of(lan[2] - 'a', lan[3] - '1');
+
+	pt = ptype_of(p->by_square[m.from]);
+
+	if (pt == PAWN && (rank_of(m.to) == 0 || rank_of(m.to) == 7))
+	{
+		m.type = PROMOTION;
+
+		switch (lan[4])
+		{
+		case 'n': m.promotion = to_promtype(KNIGHT); break;
+		case 'b': m.promotion = to_promtype(BISHOP); break;
+		case 'r': m.promotion = to_promtype(ROOK  ); break;
+		case 'q': m.promotion = to_promtype(QUEEN ); break;
+		default: assert(false && "Invalid LAN promotion");
+		}
+	}
+
+	else if (pt == PAWN && file_of(m.from) != file_of(m.to) && p->by_square[m.to] == EMPTY)
+	{
+		m.type = EN_PASSANT;
+	}
+
+	else if (pt == KING && (file_of(m.to) == file_of(m.from) + 2 || file_of(m.from) == file_of(m.to) + 2))
+	{
+		m.type = CASTLING;
+	}
+
+	else
+	{
+		m.type = NORMAL;
+	}
+
+	do_move(p, m, sf);
+
+	return m.type == PROMOTION ? 5 : 4;
+}

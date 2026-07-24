@@ -22,4 +22,6 @@ bitboard strbb(const char *s);
 square lsb(bitboard bb);
 square pop_lsb(bitboard *bb);
 
+size_t do_lan_move(position *p, const char *lan, state_frame *sf);
+
 #endif // NYX_UTILS_H

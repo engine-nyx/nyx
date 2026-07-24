@@ -1,7 +1,6 @@
 #include <nyx/generation.h>
 #include <assert.h>
 #include <nyx/perft.h>
-#include <nyx/position.h>
 #include <nyx/uci.h>
 #include <nyx/time.h>
 #include <nyx/utils.h>
