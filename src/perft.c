@@ -19,7 +19,7 @@ perft_rec(position *p, unsigned depth)
 	for (i = 0; i < num_moves; ++i)
 	{
 		do_move(p, ms[i], &sf);
-		nodes += perft(p, depth - 1);
+		nodes += perft_rec(p, depth - 1);
 		undo_move(p, ms[i]);
 	}
 

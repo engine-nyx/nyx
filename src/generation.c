@@ -92,6 +92,7 @@ generate_quiet_pawn_moves(const position *p, bitboard target, move *ms)
 	singles &= target;
 
 	doubles = white_black((singles << 8) & 0xFF000000ull, (singles >> 8) & 0xFF00000000ull, p->stm);
+	doubles &= ~p->by_ptype[ALL];
 	doubles &= target;
 
 	num_moves = 0;
@@ -338,7 +339,7 @@ is_legal(const position *p, move m)
 		return (attackers(p, m.to) | attackers(p, (m.from + m.to) / 2)) & enemy;
 
 	if (ptype_of(pc) == KING)
-		return attackers(p, m.to) & enemy;
+		return !(attackers(p, m.to) & enemy);
 
 	if (!(p->sf->blockers[p->stm] & sqbb(m.from)))
 		return true;

@@ -235,6 +235,8 @@ parse_fen(const char *fen, position *p, state_frame *sf)
 	i += parse_rule50(fen + i, sf); assert(fen[i] == ' ' && "Single space separator"); ++i;
 	i += parse_ply   (fen + i, p);
 
+	sf->checkers = EMPTYBB;
+	sf->previous = nullptr;
 	p->sf = sf;
 
 	return i;

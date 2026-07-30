@@ -46,6 +46,7 @@ uci_uci(const char *args)
 {
 	(void) args;
 
+	uci_position("startpos");
 	puts("uciok");
 }
 

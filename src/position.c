@@ -25,6 +25,8 @@ remove_piece(position *p, square sq)
 	pctype pc;
 
 	pc = p->by_square[sq];
+
+	p->by_ptype[ALL]          ^= sqbb(sq);
 	p->by_ptype[ptype_of(pc)] ^= sqbb(sq);
 	p->by_color[color_of(pc)] ^= sqbb(sq);
 	p->by_square[sq] = EMPTY;
