@@ -113,7 +113,7 @@ gives_check(const position *p, move m)
 	ksq = king_square(p, them);
 
 	// direct check
-	if (p->sf->check_squares[ptype_of(p->by_square[m.from])] & m.to)
+	if (p->sf->check_squares[ptype_of(p->by_square[m.from])] & sqbb(m.to))
 		return true;
 
 	// discovered check
@@ -154,17 +154,17 @@ do_move(position *p, move m, state_frame *sf)
 {
 	assert(color_of(p->by_square[m.from]) == p->stm && "Wrong color moved");
 
+	color them;
 	pctype pc;
+	bool check;
 
 	*sf = *p->sf;
 	sf->previous = p->sf;
 
-	update_blockers(p, WHITE);
-	update_blockers(p, BLACK);
-	update_check_squares(p);
-
+	them = other_color(p->stm);
 	pc = p->by_square[m.from];
-	sf->capture = (m.type == EN_PASSANT) ? pctype_of(PAWN, other_color(p->stm)) : p->by_square[m.to];
+	sf->capture = (m.type == EN_PASSANT) ? pctype_of(PAWN, them) : p->by_square[m.to];
+	check = gives_check(p, m);
 
 	sf->ep = NO_EP;
 	if (ptype_of(pc) == PAWN)
@@ -210,11 +210,21 @@ do_move(position *p, move m, state_frame *sf)
 		break;
 	}
 
-	sf->checkers = gives_check(p, m) ? attackers(p, lsb(p->by_ptype[KING])) & p->by_color[other_color(p->stm)] : 0;
+	sf->checkers = check ? attackers(p, king_square(p, them)) & p->by_color[p->stm] : 0;
 
 	p->sf = sf;
-	p->stm = other_color(p->stm);
+	p->stm = them;
 	++p->ply;
+
+	finalize_position(p);
+}
+
+void
+finalize_position(position *p)
+{
+	update_blockers(p, WHITE);
+	update_blockers(p, BLACK);
+	update_check_squares(p);
 }
 
 void

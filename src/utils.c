@@ -239,6 +239,8 @@ parse_fen(const char *fen, position *p, state_frame *sf)
 	sf->previous = nullptr;
 	p->sf = sf;
 
+	finalize_position(p);
+
 	return i;
 }
 

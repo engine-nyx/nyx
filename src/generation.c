@@ -89,11 +89,11 @@ generate_quiet_pawn_moves(const position *p, bitboard target, move *ms)
 	singles = white_black(singles << 8, singles >> 8, p->stm);
 	singles &= ~p->by_ptype[ALL];
 	singles &= ~(RANK_1 | RANK_8);
-	singles &= target;
 
 	doubles = white_black((singles << 8) & 0xFF000000ull, (singles >> 8) & 0xFF00000000ull, p->stm);
 	doubles &= ~p->by_ptype[ALL];
 	doubles &= target;
+	singles &= target;
 
 	num_moves = 0;
 	num_moves += generate_pawn_quiet_promotion_moves(p, target, KNIGHT, ms + num_moves);
@@ -344,7 +344,7 @@ is_legal(const position *p, move m)
 	if (!(p->sf->blockers[p->stm] & sqbb(m.from)))
 		return true;
 
-	return dia_straight_lut[m.from][m.to] & king_square(p, p->stm);
+	return dia_straight_lut[m.from][m.to] & sqbb(king_square(p, p->stm));
 }
 
 size_t
@@ -366,7 +366,7 @@ generate_legals(const position *p, move *ms)
 		m = ms[i];
 
 		check_legal =
-			(m.from & pinned) ||
+			(sqbb(m.from) & pinned) ||
 			m.from == king_square(p, p->stm) ||
 			m.type == EN_PASSANT;
 

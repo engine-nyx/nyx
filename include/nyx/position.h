@@ -36,4 +36,6 @@ void undo_move(position *p, move m);
 
 square king_square(const position *p, color c);
 
+void finalize_position(position *p);
+
 #endif // NYX_POSITION_H
