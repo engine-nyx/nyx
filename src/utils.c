@@ -340,3 +340,9 @@ do_lan_move(position *p, const char *lan, state_frame *sf)
 
 	return m.type == PROMOTION ? 5 : 4;
 }
+
+unsigned
+popcnt(bitboard bb)
+{
+	return stdc_count_ones(bb);
+}

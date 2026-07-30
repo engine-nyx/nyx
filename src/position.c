@@ -53,21 +53,95 @@ swap_piece(position *p, pctype pc, square sq)
 	put_piece(p, pc, sq);
 }
 
+extern bitboard between_lut[NUM_SQUARES][NUM_SQUARES];
+extern bitboard dia_straight_lut[NUM_SQUARES][NUM_SQUARES];
+
+static void
+update_blockers(position *p, color c)
+{
+	square ksq, sniper;
+	bitboard snipers, occ, line;
+
+	ksq = king_square(p, c);
+	snipers = EMPTYBB;
+	snipers |= attacks_rook  (ksq, EMPTYBB) & (p->by_ptype[QUEEN] | p->by_ptype[ROOK]);
+	snipers |= attacks_bishop(ksq, EMPTYBB) & (p->by_ptype[QUEEN] | p->by_ptype[BISHOP]);
+	snipers &= p->by_color[other_color(c)];
+	occ = p->by_ptype[ALL] ^ snipers;
+
+	p->sf->blockers[c] = EMPTYBB;
+	while (snipers)
+	{
+		sniper = pop_lsb(&snipers);
+		line = between_lut[ksq][sniper] & occ;
+
+		if (popcnt(line) == 1)
+		{
+			p->sf->blockers[c] |= line;
+		}
+	}
+}
+
+static void
+update_check_squares(position *p)
+{
+	square ksq;
+	bitboard occ;
+
+	ksq = king_square(p, other_color(p->stm));
+	occ = p->by_ptype[ALL];
+
+	p->sf->check_squares[KNIGHT] = attacks_knight(ksq);
+	p->sf->check_squares[BISHOP] = attacks_bishop(ksq, occ);
+	p->sf->check_squares[ROOK]   = attacks_rook  (ksq, occ);
+	p->sf->check_squares[QUEEN]  = attacks_queen (ksq, occ);
+	p->sf->check_squares[KING]   = EMPTYBB;
+	p->sf->check_squares[PAWN]   =
+		sqbb(ksq + white_black(-7, +7, p->stm)) |
+		sqbb(ksq + white_black(-9, +9, p->stm));
+}
+
 static bool
 gives_check(const position *p, move m)
 {
-	// TODO: additional checks
+	color them;
+	bitboard occ, ksq, attacks;
+
+	them = other_color(p->stm);
+	ksq = king_square(p, them);
+
+	// direct check
+	if (p->sf->check_squares[ptype_of(p->by_square[m.from])] & m.to)
+		return true;
+
+	// discovered check
+	if (p->sf->blockers[them] & sqbb(m.from))
+		return !(dia_straight_lut[m.from][m.to] & ksq) || m.type == CASTLING;
 
 	switch (m.type)
 	{
 	case NORMAL:
 		return false;
+
 	case PROMOTION:
-		return attacks_piece(promtype_of(m), m.to, p->by_ptype[ALL] ^ sqbb(m.from)) & king_square(p, other_color(p->stm));
+		attacks = attacks_piece(promtype_of(m), m.to, p->by_ptype[ALL] ^ sqbb(m.from));
+		return attacks & king_square(p, them);
+
 	case EN_PASSANT:
-		return false; // TODO: crazy logic
+		occ = p->by_ptype[ALL];
+		occ ^= sqbb(square_of(file_of(m.to), rank_of(m.from)));
+		occ ^= sqbb(m.from);
+		occ |= sqbb(m.to);
+
+		attacks = EMPTYBB;
+		attacks |= attacks_rook  (ksq, occ) & (p->by_ptype[QUEEN] | p->by_ptype[ROOK]);
+		attacks |= attacks_bishop(ksq, occ) & (p->by_ptype[QUEEN] | p->by_ptype[BISHOP]);
+
+		return attacks & p->by_color[p->stm];
+
 	case CASTLING:
-		return false; // TODO: crazy logic
+		return p->sf->check_squares[ROOK] &
+			sqbb(square_of(m.from < m.to ? F1 : D1, rank_of(m.from)));
 	}
 
 	assert(false);
@@ -83,7 +157,10 @@ do_move(position *p, move m, state_frame *sf)
 	*sf = *p->sf;
 	sf->previous = p->sf;
 
-	// TODO: detect check
+	update_blockers(p, WHITE);
+	update_blockers(p, BLACK);
+	update_check_squares(p);
+
 	pc = p->by_square[m.from];
 	sf->capture = (m.type == EN_PASSANT) ? pctype_of(PAWN, other_color(p->stm)) : p->by_square[m.to];
 
@@ -131,7 +208,7 @@ do_move(position *p, move m, state_frame *sf)
 		break;
 	}
 
-	sf->checkers = gives_check(p, m) ? attackers(p, lsb(p->by_ptype[KING] & p->by_color[other_color(p->stm)])) : 0;
+	sf->checkers = gives_check(p, m) ? attackers(p, lsb(p->by_ptype[KING])) & p->by_color[other_color(p->stm)] : 0;
 
 	p->sf = sf;
 	p->stm = other_color(p->stm);

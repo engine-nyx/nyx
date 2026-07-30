@@ -255,7 +255,7 @@ generate_quiets(const position *p, move *ms)
 	return num_moves;
 }
 
-static bitboard between_lut[NUM_SQUARES][NUM_SQUARES];
+bitboard between_lut[NUM_SQUARES][NUM_SQUARES];
 size_t
 generate_evasions(const position *p, move *ms)
 {
@@ -288,8 +288,8 @@ generate_non_evasions(const position *p, move *ms)
 	return num_moves;
 }
 
-static bitboard dia_straight_lut[NUM_SQUARES][NUM_SQUARES];
-static bitboard between_lut[NUM_SQUARES][NUM_SQUARES];
+bitboard dia_straight_lut[NUM_SQUARES][NUM_SQUARES];
+bitboard between_lut[NUM_SQUARES][NUM_SQUARES];
 
 void
 generation_init(void)

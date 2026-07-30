@@ -14,6 +14,7 @@ typedef struct state_frame
 	struct state_frame *previous;
 	bitboard checkers;
 	bitboard blockers[NUM_COLORS];
+	bitboard check_squares[NUM_PIECE_TYPES];
 } state_frame;
 
 typedef struct
