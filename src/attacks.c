@@ -60,20 +60,12 @@ attacks_init(void)
 static bitboard
 reverse(bitboard bb)
 {
-	// TODO: make faster
-	size_t i;
-	bitboard res;
-
-	res = 0;
-
-	for (i = 0; i < 64; ++i)
-	{
-		res <<= 1;
-		res |= bb & 1;
-		bb >>= 1;
-	}
-
-	return res;
+	bb = ((bb >> 1)  & 0x5555555555555555ull) | ((bb & 0x5555555555555555ull) << 1);
+	bb = ((bb >> 2)  & 0x3333333333333333ull) | ((bb & 0x3333333333333333ull) << 2);
+	bb = ((bb >> 4)  & 0x0F0F0F0F0F0F0F0Full) | ((bb & 0x0F0F0F0F0F0F0F0Full) << 4);
+	bb = ((bb >> 8)  & 0x00FF00FF00FF00FFull) | ((bb & 0x00FF00FF00FF00FFull) << 8);
+	bb = ((bb >> 16) & 0x0000FFFF0000FFFFull) | ((bb & 0x0000FFFF0000FFFFull) << 16);
+	return (bb >> 32) | (bb << 32);
 }
 
 static bitboard
@@ -156,8 +148,21 @@ attackers(const position *p, square sq)
 	attackers |= attacks_piece(BISHOP, sq, p->by_ptype[ALL]) & p->by_ptype[BISHOP];
 	attackers |= attacks_piece(BISHOP, sq, p->by_ptype[ALL]) & p->by_ptype[QUEEN];
 	attackers |= attacks_piece(KNIGHT, sq, p->by_ptype[ALL]) & p->by_ptype[KNIGHT];
-	attackers |= (sqbb(sq) << 7 | sqbb(sq) << 9) & (p->by_ptype[PAWN] & p->by_color[BLACK]);
 	attackers |= (sqbb(sq) >> 7 | sqbb(sq) >> 9) & (p->by_ptype[PAWN] & p->by_color[WHITE]);
+	attackers |= (sqbb(sq) << 7 | sqbb(sq) << 9) & (p->by_ptype[PAWN] & p->by_color[BLACK]);
 
 	return attackers;
+}
+
+bool
+attackers_exist(const position *p, square sq, bitboard occ, color c)
+{
+	return
+		attacks_piece(ROOK  , sq, occ) & p->by_color[c] & p->by_ptype[ROOK] ||
+		attacks_piece(ROOK  , sq, occ) & p->by_color[c] & p->by_ptype[QUEEN] ||
+		attacks_piece(BISHOP, sq, occ) & p->by_color[c] & p->by_ptype[BISHOP] ||
+		attacks_piece(BISHOP, sq, occ) & p->by_color[c] & p->by_ptype[QUEEN] ||
+		attacks_piece(KNIGHT, sq, occ) & p->by_color[c] & p->by_ptype[KNIGHT] ||
+		(c == WHITE && (sqbb(sq) >> 7 | sqbb(sq) >> 9) & (p->by_ptype[PAWN] & p->by_color[c])) ||
+		(c == BLACK && (sqbb(sq) << 7 | sqbb(sq) << 9) & (p->by_ptype[PAWN] & p->by_color[c]));
 }

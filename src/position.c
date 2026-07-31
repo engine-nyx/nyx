@@ -164,6 +164,7 @@ do_move(position *p, move m, state_frame *sf)
 	them = other_color(p->stm);
 	pc = p->by_square[m.from];
 	sf->capture = (m.type == EN_PASSANT) ? pctype_of(PAWN, them) : p->by_square[m.to];
+	assert(ptype_of(sf->capture) != KING && "Captured King");
 	check = gives_check(p, m);
 
 	sf->ep = NO_EP;

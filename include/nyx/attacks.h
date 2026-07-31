@@ -14,5 +14,6 @@ bitboard attacks_king  (square sq);
 bitboard attacks_piece (ptype pt, square sq, bitboard occ);
 
 bitboard attackers(const position *p, square sq);
+bool attackers_exist(const position *p, square sq, bitboard occ, color c);
 
 #endif // NYX_ATTACKS_H

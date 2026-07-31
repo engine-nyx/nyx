@@ -261,12 +261,18 @@ size_t
 generate_evasions(const position *p, move *ms)
 {
 	size_t num_moves;
-	bitboard target;
+	bitboard target, flee;
 
 	target = between_lut[lsb(p->sf->checkers)][king_square(p, p->stm)];
+	flee   = ~p->by_color[p->stm];
 
 	num_moves = 0;
-	num_moves += generate_all_piece_moves   (p, target, ms + num_moves);
+	num_moves += generate_piece_moves(p, KNIGHT, target, ms + num_moves);
+	num_moves += generate_piece_moves(p, BISHOP, target, ms + num_moves);
+	num_moves += generate_piece_moves(p, ROOK  , target, ms + num_moves);
+	num_moves += generate_piece_moves(p, QUEEN , target, ms + num_moves);
+	num_moves += generate_piece_moves(p, KING  , flee  , ms + num_moves);
+
 	num_moves += generate_quiet_pawn_moves  (p, target, ms + num_moves);
 	num_moves += generate_capture_pawn_moves(p, target, ms + num_moves);
 
@@ -301,16 +307,19 @@ generation_init(void)
 	{
 		for (sq2 = A1; sq2 < NUM_SQUARES; ++sq2)
 		{
+			// needed for evasions to also include capturing the sniper
+			between_lut[sq1][sq2] = sqbb(sq1);
+
 			if (attacks_rook(sq1, 0) & sqbb(sq2))
 			{
 				dia_straight_lut[sq1][sq2] = attacks_rook(sq1, 0) & attacks_rook(sq2, 0);
-				between_lut[sq1][sq2] = attacks_rook(sq1, sqbb(sq2)) & attacks_rook(sq2, sqbb(sq1));
+				between_lut[sq1][sq2] |= attacks_rook(sq1, sqbb(sq2)) & attacks_rook(sq2, sqbb(sq1));
 			}
 
 			else if (attacks_bishop(sq1, 0) & sqbb(sq2))
 			{
 				dia_straight_lut[sq1][sq2] = attacks_bishop(sq1, 0) & attacks_bishop(sq2, 0);
-				between_lut[sq1][sq2] = attacks_bishop(sq1, sqbb(sq2)) & attacks_bishop(sq2, sqbb(sq1));
+				between_lut[sq1][sq2] |= attacks_bishop(sq1, sqbb(sq2)) & attacks_bishop(sq2, sqbb(sq1));
 			}
 
 			else
@@ -320,9 +329,6 @@ generation_init(void)
 
 			dia_straight_lut[sq1][sq2] |= sqbb(sq1);
 			dia_straight_lut[sq1][sq2] |= sqbb(sq2);
-
-			// needed for evasions to also include capturing the sniper
-			between_lut[sq1][sq2] |= sqbb(sq1);
 		}
 	}
 }
@@ -332,7 +338,7 @@ static bool
 is_legal(const position *p, move m)
 {
 	pctype pc;
-	bitboard enemy;
+	bitboard enemy; // TODO: check if should use attackers or attackers_exist
 
 	pc = p->by_square[m.from];
 	enemy = p->by_color[other_color(p->stm)];
@@ -341,7 +347,7 @@ is_legal(const position *p, move m)
 		return (attackers(p, m.to) | attackers(p, (m.from + m.to) / 2)) & enemy;
 
 	if (ptype_of(pc) == KING)
-		return !(attackers(p, m.to) & enemy);
+		return !attackers_exist(p, m.to, p->by_ptype[ALL] ^ sqbb(m.from), other_color(p->stm));
 
 	if (!(p->sf->blockers[p->stm] & sqbb(m.from)))
 		return true;
