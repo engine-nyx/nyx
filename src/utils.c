@@ -227,6 +227,8 @@ parse_fen(const char *fen, position *p, state_frame *sf)
 
 	i = 0;
 	str_ltrim(&fen);
+	p->sf = sf;
+	p->sf->material = 0;
 
 	i += parse_board (fen + i, p ); assert(fen[i] == ' ' && "Single space separator"); ++i;
 	i += parse_stm   (fen + i, p ); assert(fen[i] == ' ' && "Single space separator"); ++i;
@@ -237,7 +239,6 @@ parse_fen(const char *fen, position *p, state_frame *sf)
 
 	sf->checkers = EMPTYBB;
 	sf->previous = nullptr;
-	p->sf = sf;
 
 	finalize_position(p);
 

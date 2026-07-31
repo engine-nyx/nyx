@@ -9,6 +9,7 @@ typedef struct state_frame
 	pctype capture;
 	castling_rights castle;
 	unsigned rule50;
+	int material;
 
 	// transient
 	struct state_frame *previous;

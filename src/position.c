@@ -10,6 +10,25 @@ king_square(const position *p, color c)
 	return lsb(p->by_ptype[KING] & p->by_color[c]);
 }
 
+static int PIECE_VALUE[NUM_PIECE_COLORED_TYPES] =
+{
+	[EMPTY] = 0,
+
+	[WHITE_PAWN]   = 10,
+	[WHITE_KNIGHT] = 20,
+	[WHITE_BISHOP] = 25,
+	[WHITE_ROOK]   = 50,
+	[WHITE_QUEEN]  = 90,
+	[WHITE_KING]   = 1000,
+
+	[BLACK_PAWN]   = -10,
+	[BLACK_KNIGHT] = -20,
+	[BLACK_BISHOP] = -25,
+	[BLACK_ROOK]   = -50,
+	[BLACK_QUEEN]  = -90,
+	[BLACK_KING]   = -1000,
+};
+
 void
 put_piece(position *p, pctype pc, square sq)
 {
@@ -17,6 +36,8 @@ put_piece(position *p, pctype pc, square sq)
 	p->by_ptype[ALL]          |= sqbb(sq);
 	p->by_ptype[ptype_of(pc)] |= sqbb(sq);
 	p->by_color[color_of(pc)] |= sqbb(sq);
+
+	p->sf->material += PIECE_VALUE[pc];
 }
 
 static void
@@ -30,6 +51,8 @@ remove_piece(position *p, square sq)
 	p->by_ptype[ALL]          ^= sqbb(sq);
 	p->by_ptype[ptype_of(pc)] ^= sqbb(sq);
 	p->by_color[color_of(pc)] ^= sqbb(sq);
+
+	p->sf->material -= PIECE_VALUE[pc];
 }
 
 static void
