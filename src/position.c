@@ -26,10 +26,10 @@ remove_piece(position *p, square sq)
 
 	pc = p->by_square[sq];
 
+	p->by_square[sq] = EMPTY;
 	p->by_ptype[ALL]          ^= sqbb(sq);
 	p->by_ptype[ptype_of(pc)] ^= sqbb(sq);
 	p->by_color[color_of(pc)] ^= sqbb(sq);
-	p->by_square[sq] = EMPTY;
 }
 
 static void
@@ -41,11 +41,11 @@ move_piece(position *p, square from, square to)
 	pc = p->by_square[from];
 	from_to = sqbb(from) | sqbb(to);
 
+	p->by_square[from] = EMPTY;
+	p->by_square[to]   = pc;
 	p->by_ptype[ALL]          ^= from_to;
 	p->by_ptype[ptype_of(pc)] ^= from_to;
 	p->by_color[color_of(pc)] ^= from_to;
-	p->by_square[from] = EMPTY;
-	p->by_square[to]   = pc;
 }
 
 static void
@@ -248,8 +248,8 @@ undo_move(position *p, move m)
 			put_piece(p, p->sf->capture, m.to);
 		break;
 	case EN_PASSANT:
+		put_piece(p, p->sf->capture, m.to + white_black(-8, +8, p->stm));
 		move_piece(p, m.to, m.from);
-		put_piece(p, pctype_of(PAWN, other_color(p->stm)), m.to + white_black(-8, +8, p->stm));
 		break;
 	case NORMAL:
 		move_piece(p, m.to, m.from);

@@ -201,7 +201,7 @@ generate_capture_pawn_moves(const position *p, bitboard target, move *ms)
 			from = lsb(west) + white_black(-8, +8, p->stm);
 			ms[num_moves++] = (move)
 			{
-				.from=lsb(west),
+				.from=from,
 				.to  =to,
 				.type=EN_PASSANT,
 			};

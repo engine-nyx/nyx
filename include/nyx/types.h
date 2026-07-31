@@ -50,7 +50,7 @@ color_of(pctype pc) { return pc >> 3; }
 static inline ptype
 ptype_of(pctype pc) { return pc & 7; }
 static inline pctype
-pctype_of(ptype pt, color c) { return (3 << c) + pt; }
+pctype_of(ptype pt, color c) { return pt + (c << 3); }
 static inline u16
 to_promtype(ptype pt) { return pt - PAWN; }
 
