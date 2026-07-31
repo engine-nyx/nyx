@@ -19,7 +19,7 @@ def run_perft(engine_path, fen, depth, moves):
         text=True,
     )
 
-    out, _ = proc.communicate(f"uci\nisready\n{pos_cmd}\ngo perft {depth}\nquit\n", timeout=600)
+    out, _ = proc.communicate(f"uci\nisready\n{pos_cmd}\ngo perft {depth}\nquit\n")
 
     result = {}
     for line in out.splitlines():
