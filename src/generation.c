@@ -263,7 +263,7 @@ generate_evasions(const position *p, move *ms)
 	size_t num_moves;
 	bitboard target;
 
-	target = between_lut[king_square(p, p->stm)][lsb(p->sf->checkers)];
+	target = between_lut[lsb(p->sf->checkers)][king_square(p, p->stm)];
 
 	num_moves = 0;
 	num_moves += generate_all_piece_moves   (p, target, ms + num_moves);
@@ -320,7 +320,9 @@ generation_init(void)
 
 			dia_straight_lut[sq1][sq2] |= sqbb(sq1);
 			dia_straight_lut[sq1][sq2] |= sqbb(sq2);
-			// TODO: stockfish added sq2 to between_lut, think about it when using between_lut
+
+			// needed for evasions to also include capturing the sniper
+			between_lut[sq1][sq2] |= sqbb(sq1);
 		}
 	}
 }

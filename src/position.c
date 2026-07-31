@@ -75,7 +75,7 @@ update_blockers(position *p, color c)
 	while (snipers)
 	{
 		sniper = pop_lsb(&snipers);
-		line = between_lut[ksq][sniper] & occ;
+		line = between_lut[sniper][ksq] & occ;
 
 		if (popcnt(line) == 1)
 		{
