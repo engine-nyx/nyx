@@ -239,7 +239,8 @@ do_move(position *p, move m, state_frame *sf)
 	p->stm = them;
 	++p->ply;
 
-	finalize_position(p);
+	if (!(ptype_of(sf->capture) == KING)) // TODO outsource this check to prev ply in search
+		finalize_position(p);
 }
 
 void
