@@ -5,9 +5,11 @@ select_move(selector *s, const position *p)
 {
 	while (s->current == s->num_moves)
 	{
-		if (s->stage == QUIETS) return (move) {};
+		if (s->stage++ >= CAPTURES) return (move) {};
 
-		s->num_moves = generate(++s->stage, p, s->ms);
+		s->stage = EVASIONS;
+
+		s->num_moves = generate_legals(p, s->ms);
 		s->current = 0;
 	}
 

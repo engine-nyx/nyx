@@ -183,22 +183,12 @@ do_move(position *p, move m, state_frame *sf)
 
 	*sf = *p->sf;
 	sf->previous = p->sf;
+	p->sf = sf;
 
 	them = other_color(p->stm);
 	pc = p->by_square[m.from];
 	sf->capture = (m.type == EN_PASSANT) ? pctype_of(PAWN, them) : p->by_square[m.to];
 	check = gives_check(p, m);
-
-	sf->ep = NO_EP;
-	if (ptype_of(pc) == PAWN)
-	{
-		if ((m.from ^ m.to) == 16)
-		{
-			sf->ep = (m.from + m.to) / 2;
-
-			// TODO: skip if no one can take ep
-		}
-	}
 
 	switch (m.type)
 	{
@@ -233,9 +223,19 @@ do_move(position *p, move m, state_frame *sf)
 		break;
 	}
 
+	sf->ep = NO_EP;
+	if (ptype_of(pc) == PAWN)
+	{
+		if ((m.from ^ m.to) == 16)
+		{
+			sf->ep = (m.from + m.to) / 2;
+
+			// TODO: skip if no one can take ep
+		}
+	}
+
 	sf->checkers = check ? attackers(p, king_square(p, them)) & p->by_color[p->stm] : 0;
 
-	p->sf = sf;
 	p->stm = them;
 	++p->ply;
 

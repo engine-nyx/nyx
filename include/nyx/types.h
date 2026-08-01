@@ -111,6 +111,9 @@ typedef struct
 static inline ptype
 promtype_of(move m) { return m.promotion + PAWN; }
 
+static inline bool
+is_null_move(move m) { return m.from == 0 && m.to == 0; }
+
 constexpr int oo = INT_MAX / 2;
 
 #endif // NYX_TYPES_H

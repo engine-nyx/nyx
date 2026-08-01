@@ -1,3 +1,4 @@
+#include <nyx/utils.h>
 #include <nyx/search.h>
 #include <nyx/selection.h>
 #include <nyx/evaluation.h>
@@ -20,14 +21,17 @@ alpha_beta(position *p, int alpha, int beta, unsigned depth, time_manager *tm)
 	while (!tm_hard_expired(tm))
 	{
 		m = select_move(&s, p);
-		if (m.from == 0 && m.to == 0) break;
+		if (is_null_move(m)) break;
 
 		do_move(p, m, &sf);
-
-		if (p->sf->material < -oo / 2 || p->sf->material > oo / 2)
-			return evaluate(p);
-
-		score = -alpha_beta(p, -beta, -alpha, depth - 1, tm);
+		if (sf.material < -oo / 2 || sf.material > oo / 2)
+		{
+			score = evaluate(p);
+		}
+		else
+		{
+			score = -alpha_beta(p, -beta, -alpha, depth - 1, tm);
+		}
 		undo_move(p, m);
 
 		if (score >= beta)
@@ -72,11 +76,14 @@ search(position *p, time_manager *tm)
 		if (m.from == 0 && m.to == 0) break;
 
 		do_move(p, m, &sf);
-		score = alpha_beta(p, alpha, beta, 6, tm);
+		score = -alpha_beta(p, -beta, -alpha, 4, tm);
 		undo_move(p, m);
+
+		score *= white_black(-1, +1, p->stm);
 
 		if (score > best_score)
 		{
+			best_score = score;
 			best_move = m;
 		}
 	}
