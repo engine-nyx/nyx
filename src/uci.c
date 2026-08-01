@@ -221,5 +221,6 @@ uci_loop(void)
 			uci_quit("");
 		else
 			uci_handle(line);
+		fflush(stdout);
 	}
 }

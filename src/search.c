@@ -22,6 +22,9 @@ alpha_beta(position *p, int alpha, int beta, unsigned depth, time_manager *tm)
 		m = select_move(&s, p);
 		if (m.from == 0 && m.to == 0) break;
 
+		if (p->sf->material < oo / 2 || p->sf->material > oo / 2)
+			return evaluate(p);
+
 		do_move(p, m, &sf);
 		score = -alpha_beta(p, -beta, -alpha, depth - 1, tm);
 		undo_move(p, m);
@@ -68,7 +71,7 @@ search(position *p, time_manager *tm)
 		if (m.from == 0 && m.to == 0) break;
 
 		do_move(p, m, &sf);
-		score = alpha_beta(p, alpha, beta, 4, tm);
+		score = alpha_beta(p, alpha, beta, 6, tm);
 		undo_move(p, m);
 
 		if (score > best_score)
