@@ -20,6 +20,7 @@ enum generation_type
 	NO_MOVES,
 	CAPTURES,
 	QUIETS,
+	EVASIONS,
 };
 
 size_t generate(enum generation_type gt, const position *p, move *ms);

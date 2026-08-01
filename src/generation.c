@@ -393,6 +393,7 @@ generate(enum generation_type gt, const position *p, move *ms)
 	case NO_MOVES: return 0;
 	case CAPTURES: return generate_captures(p, ms);
 	case QUIETS  : return generate_quiets  (p, ms);
+	case EVASIONS: return generate_evasions(p, ms);
 	}
 
 	assert(false);
