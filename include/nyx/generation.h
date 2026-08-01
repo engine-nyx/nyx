@@ -15,4 +15,13 @@ size_t generate_evasions     (const position *p, move *ms);
 size_t generate_non_evasions (const position *p, move *ms);
 size_t generate_legals       (const position *p, move *ms);
 
+enum generation_type
+{
+	NO_MOVES,
+	CAPTURES,
+	QUIETS,
+};
+
+size_t generate(enum generation_type gt, const position *p, move *ms);
+
 #endif // NYX_GENERATION_H
