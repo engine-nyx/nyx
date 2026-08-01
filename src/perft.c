@@ -52,5 +52,5 @@ perft(position *p, unsigned depth)
 
 	printf("\nTotal nodes: %lu\n", total);
 
-	return nodes;
+	return total;
 }
