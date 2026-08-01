@@ -22,7 +22,7 @@ alpha_beta(position *p, int alpha, int beta, unsigned depth, time_manager *tm)
 		m = select_move(&s, p);
 		if (m.from == 0 && m.to == 0) break;
 
-		if (p->sf->material < oo / 2 || p->sf->material > oo / 2)
+		if (p->sf->material < -oo / 2 || p->sf->material > oo / 2)
 			return evaluate(p);
 
 		do_move(p, m, &sf);
