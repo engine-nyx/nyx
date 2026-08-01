@@ -1,4 +1,5 @@
 #include <nyx/generation.h>
+#include <nyx/search.h>
 #include <assert.h>
 #include <nyx/perft.h>
 #include <nyx/uci.h>
@@ -11,7 +12,7 @@
 
 static struct
 {
-	struct time_manager tm;
+	time_manager tm;
 	atomic_bool stop;
 	position p;
 	state_frame sf;
@@ -124,6 +125,16 @@ uci_go(const char *args)
 	{
 		str_ltrim(&args);
 		perft(&UCI_state.p, atoi(args));
+	}
+
+	else
+	{
+		move best;
+
+		best = search(&UCI_state.p, &UCI_state.tm).best;
+		printf("bestmove ");
+		print_move(best);
+		printf("\n");
 	}
 }
 

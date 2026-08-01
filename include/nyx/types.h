@@ -2,6 +2,7 @@
 #define NYX_TYPES_H
 
 #include <stddef.h>
+#include <limits.h>
 #include <stdint.h>
 
 typedef uint8_t u8;
@@ -109,5 +110,7 @@ typedef struct
 
 static inline ptype
 promtype_of(move m) { return m.promotion + PAWN; }
+
+constexpr int oo = INT_MAX / 2;
 
 #endif // NYX_TYPES_H
