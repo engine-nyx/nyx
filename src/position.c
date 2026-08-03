@@ -208,7 +208,7 @@ do_move(position *p, move m, state_frame *sf)
 		}
 		else
 		{
-			remove_piece(p, m.to);
+			remove_piece(p, m.from);
 			put_piece(p, pc, m.to);
 		}
 		break;
