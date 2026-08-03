@@ -93,6 +93,18 @@ parse_board(const char *s, position *p)
 {
 	size_t i;
 	unsigned file, rank;
+	square sq;
+
+	for (sq = A1; sq < NUM_SQUARES; ++sq)
+		p->by_square[sq] = EMPTY;
+	p->by_color[WHITE] = p->by_color[BLACK] = EMPTYBB;
+	p->by_ptype[ALL] =
+		p->by_ptype[PAWN] =
+		p->by_ptype[KNIGHT] =
+		p->by_ptype[BISHOP] =
+		p->by_ptype[ROOK] =
+		p->by_ptype[QUEEN] =
+		p->by_ptype[KING] = EMPTYBB;
 
 	i = 0;
 	for (rank = 7; rank < 8; --rank)
@@ -101,30 +113,30 @@ parse_board(const char *s, position *p)
 		{
 			switch (s[i++])
 			{
-				case '8': file += 7; break;
-				case '7': file += 6; break;
-				case '6': file += 5; break;
-				case '5': file += 4; break;
-				case '4': file += 3; break;
-				case '3': file += 2; break;
-				case '2': file += 1; break;
-				case '1': file += 0; break;
+			case '8': file += 7; break;
+			case '7': file += 6; break;
+			case '6': file += 5; break;
+			case '5': file += 4; break;
+			case '4': file += 3; break;
+			case '3': file += 2; break;
+			case '2': file += 1; break;
+			case '1': file += 0; break;
 
-				case 'P': put_piece(p, WHITE_PAWN  , square_of(file, rank)); break;
-				case 'N': put_piece(p, WHITE_KNIGHT, square_of(file, rank)); break;
-				case 'B': put_piece(p, WHITE_BISHOP, square_of(file, rank)); break;
-				case 'R': put_piece(p, WHITE_ROOK  , square_of(file, rank)); break;
-				case 'Q': put_piece(p, WHITE_QUEEN , square_of(file, rank)); break;
-				case 'K': put_piece(p, WHITE_KING  , square_of(file, rank)); break;
+			case 'P': put_piece(p, WHITE_PAWN  , square_of(file, rank)); break;
+			case 'N': put_piece(p, WHITE_KNIGHT, square_of(file, rank)); break;
+			case 'B': put_piece(p, WHITE_BISHOP, square_of(file, rank)); break;
+			case 'R': put_piece(p, WHITE_ROOK  , square_of(file, rank)); break;
+			case 'Q': put_piece(p, WHITE_QUEEN , square_of(file, rank)); break;
+			case 'K': put_piece(p, WHITE_KING  , square_of(file, rank)); break;
 
-				case 'p': put_piece(p, BLACK_PAWN  , square_of(file, rank)); break;
-				case 'n': put_piece(p, BLACK_KNIGHT, square_of(file, rank)); break;
-				case 'b': put_piece(p, BLACK_BISHOP, square_of(file, rank)); break;
-				case 'r': put_piece(p, BLACK_ROOK  , square_of(file, rank)); break;
-				case 'q': put_piece(p, BLACK_QUEEN , square_of(file, rank)); break;
-				case 'k': put_piece(p, BLACK_KING  , square_of(file, rank)); break;
+			case 'p': put_piece(p, BLACK_PAWN  , square_of(file, rank)); break;
+			case 'n': put_piece(p, BLACK_KNIGHT, square_of(file, rank)); break;
+			case 'b': put_piece(p, BLACK_BISHOP, square_of(file, rank)); break;
+			case 'r': put_piece(p, BLACK_ROOK  , square_of(file, rank)); break;
+			case 'q': put_piece(p, BLACK_QUEEN , square_of(file, rank)); break;
+			case 'k': put_piece(p, BLACK_KING  , square_of(file, rank)); break;
 
-				default: assert(false && "Invalid symbol");
+			default: assert(false && "Invalid symbol");
 			}
 		}
 
