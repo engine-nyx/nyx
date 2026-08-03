@@ -1,7 +1,7 @@
 #include <nyx/selection.h>
 
 move
-select_move(selector *s, const position *p)
+select_move(selector *s)
 {
 	while (s->current == s->num_moves)
 	{
@@ -9,7 +9,7 @@ select_move(selector *s, const position *p)
 
 		s->stage = EVASIONS;
 
-		s->num_moves = generate_legals(p, s->ms);
+		s->num_moves = generate_legals(s->p, s->ms);
 		s->current = 0;
 	}
 

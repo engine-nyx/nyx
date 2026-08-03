@@ -7,11 +7,12 @@
 
 typedef struct
 {
+	const position *p;
 	move ms[MAX_MOVES];
 	enum generation_type stage;
 	size_t num_moves, current;
 } selector;
 
-move select_move(selector *s, const position *p);
+move select_move(selector *s);
 
 #endif // NYX_SELECTION_H

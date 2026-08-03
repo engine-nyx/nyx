@@ -1,56 +1,40 @@
+#include <nyx/position.h>
+#include <nyx/types.h>
 #include <nyx/utils.h>
 #include <nyx/search.h>
 #include <nyx/selection.h>
 #include <nyx/evaluation.h>
 
 static int
-alpha_beta(position *p, int alpha, int beta, unsigned depth, time_manager *tm)
+search_rec(position *p, unsigned depth)
 {
-	state_frame sf;
 	selector s;
-	move m, best_move;
+	move m;
 	int score, best_score;
-
-	(void) best_move;
+	state_frame sf;
 
 	if (!depth) return evaluate(p);
 
+	s = (selector) { .p=p };
 	best_score = -oo;
-	s = (selector) {};
 
-	while (!tm_hard_expired(tm))
+	while (!is_null_move(m = select_move(&s)))
 	{
-		m = select_move(&s, p);
-		if (is_null_move(m)) break;
-
 		do_move(p, m, &sf);
+
 		if (sf.material < -oo / 2 || sf.material > oo / 2)
 		{
-			score = evaluate(p);
+			score = -evaluate(p);
 		}
 		else
 		{
-			score = -alpha_beta(p, -beta, -alpha, depth - 1, tm);
+			score = -search_rec(p, depth - 1);
 		}
+
 		undo_move(p, m);
 
-		if (score >= beta)
-		{
-			best_score = score;
-			best_move = m;
-			break;
-		}
-
 		if (score > best_score)
-		{
 			best_score = score;
-			best_move = m;
-
-			if (score > alpha)
-			{
-				alpha = score;
-			}
-		}
 	}
 
 	return best_score;
@@ -63,20 +47,14 @@ search(position *p, time_manager *tm)
 	selector s;
 	move m, best_move;
 	int score, best_score;
-	int alpha, beta;
 
-	s = (selector) {};
+	s = (selector) { .p=p };
 	best_score = -oo;
-	alpha = -5;
-	beta  = +5;
 
-	while (!tm_soft_expired(tm))
+	while (!tm_soft_expired(tm) && !is_null_move(m = select_move(&s)))
 	{
-		m = select_move(&s, p);
-		if (m.from == 0 && m.to == 0) break;
-
 		do_move(p, m, &sf);
-		score = -alpha_beta(p, -beta, -alpha, 4, tm);
+		score = -search_rec(p, 4);
 		undo_move(p, m);
 
 		score *= white_black(-1, +1, p->stm);
