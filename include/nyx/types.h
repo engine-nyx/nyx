@@ -53,7 +53,7 @@ ptype_of(pctype pc) { return pc & 7; }
 static inline pctype
 pctype_of(ptype pt, color c) { return pt + (c << 3); }
 static inline u16
-to_promtype(ptype pt) { return pt - PAWN; }
+to_promtype(ptype pt) { return pt - KNIGHT; }
 
 typedef enum : u8
 {
@@ -109,7 +109,7 @@ typedef struct
 } move;
 
 static inline ptype
-promtype_of(move m) { return m.promotion + PAWN; }
+promtype_of(move m) { return m.promotion + KNIGHT; }
 
 static inline bool
 is_null_move(move m) { return m.from == 0 && m.to == 0; }
