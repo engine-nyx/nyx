@@ -199,7 +199,7 @@ do_move(position *p, move m, state_frame *sf)
 		move_piece(p, m.from + (m.from < m.to ? +3 : -4), (m.from + m.to) / 2);
 		break;
 	case PROMOTION:
-		pc = pctype_of(m.promotion, p->stm);
+		pc = pctype_of(promtype_of(m), p->stm);
 
 		if (sf->capture)
 		{
