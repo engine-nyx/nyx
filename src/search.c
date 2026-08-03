@@ -54,7 +54,7 @@ search(position *p, time_manager *tm)
 	while (!tm_soft_expired(tm) && !is_null_move(m = select_move(&s)))
 	{
 		do_move(p, m, &sf);
-		score = -search_rec(p, 4);
+		score = -search_rec(p, 3);
 		undo_move(p, m);
 
 		score *= white_black(-1, +1, p->stm);
