@@ -263,8 +263,12 @@ generate_evasions(const position *p, move *ms)
 	size_t num_moves;
 	bitboard target, flee;
 
+	flee = ~p->by_color[p->stm];
+
+	if (popcnt(p->sf->checkers) > 1)
+		return generate_piece_moves(p, KING, flee, ms);
+
 	target = between_lut[lsb(p->sf->checkers)][king_square(p, p->stm)];
-	flee   = ~p->by_color[p->stm];
 
 	num_moves = 0;
 	num_moves += generate_piece_moves(p, KNIGHT, target, ms + num_moves);
