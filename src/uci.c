@@ -121,21 +121,59 @@ uci_position(const char *args)
 static void
 uci_go(const char *args)
 {
+	limits l;
+
 	if (str_consume(&args, "perft"))
 	{
 		str_ltrim(&args);
 		perft(&UCI_state.p, atoi(args));
+		return;
+	}
+
+	else if (str_consume(&args, "depth"))
+	{
+		str_ltrim(&args);
+		unsigned depth = atoi(args);
+		l = (limits)
+		{
+			.type=DEPTH,
+			.depth=depth,
+		};
+	}
+
+	else if (str_consume(&args, "movetime"))
+	{
+		str_ltrim(&args);
+		millis ms = atoll(args);
+		l = (limits)
+		{
+			.type=MOVETIME,
+			.movetime=ms,
+		};
+	}
+
+	else if (str_consume(&args, "nodes"))
+	{
+		str_ltrim(&args);
+		node_count nodes = atoll(args);
+		l = (limits)
+		{
+			.type=NODES,
+			.nodes=nodes,
+		};
 	}
 
 	else
 	{
-		move best;
-
-		best = search(&UCI_state.p, &UCI_state.tm).best;
-		printf("bestmove ");
-		print_move(best);
-		printf("\n");
+		l = (limits) { .type=CLOCK };
 	}
+
+	move best;
+
+	best = search(&UCI_state.p, l).best;
+	printf("bestmove ");
+	print_move(best);
+	printf("\n");
 }
 
 static void

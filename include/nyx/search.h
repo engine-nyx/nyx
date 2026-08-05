@@ -4,7 +4,41 @@
 #include <nyx/types.h>
 #include <nyx/perft.h>
 #include <nyx/position.h>
-#include <nyx/time.h>
+
+enum limit_type
+{
+	MOVETIME,
+	NODES,
+	DEPTH,
+	INFINITE,
+	MATE,
+
+	CLOCK,
+};
+
+typedef struct
+{
+	enum limit_type type;
+
+	union
+	{
+		unsigned movetime;
+		node_count nodes;
+		unsigned depth;
+		unsigned mate;
+		struct
+		{
+			unsigned time[NUM_COLORS];
+			unsigned inc[NUM_COLORS];
+		};
+	};
+} limits;
+
+struct search_state
+{
+	node_count nodes;
+	unsigned depth;
+};
 
 struct search_result
 {
@@ -13,6 +47,6 @@ struct search_result
 	node_count nodes;
 };
 
-struct search_result search(position *p, time_manager *tm);
+struct search_result search(position *p, limits l);
 
 #endif // NYX_SEARCH_H
