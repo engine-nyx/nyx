@@ -1,5 +1,3 @@
 #!/bin/sh
 
-ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-
-install -m 0755 "${ROOT_DIR}/build/release/nyx" /usr/local/bin/nyx
+[ -x /usr/local/bin/nyx-releases ] && /usr/local/bin/nyx-releases
