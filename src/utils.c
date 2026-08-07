@@ -390,6 +390,6 @@ promotion_move(square from, square to, ptype pt)
 		.from=from,
 		.to  =to,
 		.type=PROMOTION,
-		.promotion=(pt - KNIGHT) & 0x03,
+		.prom=(pt - KNIGHT) & BITMASK(2),
 	};
 }

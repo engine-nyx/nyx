@@ -100,14 +100,14 @@ typedef enum
 typedef struct
 {
 	u16
-		to        : 6,
-		from      : 6,
-		promotion : 2,
-		type      : 2;
+		to   : 6,
+		from : 6,
+		prom : 2,
+		type : 2;
 } move;
 
 static inline ptype
-promtype_of(move m) { return m.promotion + KNIGHT; }
+promtype_of(move m) { return m.prom + KNIGHT; }
 
 static inline bool
 is_null_move(move m) { return m.from == 0 && m.to == 0; }
