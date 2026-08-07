@@ -22,7 +22,7 @@ typedef struct
 
 	union
 	{
-		unsigned movetime;
+		millis movetime;
 		node_count nodes;
 		unsigned depth;
 		unsigned mate;

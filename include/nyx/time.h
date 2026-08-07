@@ -2,10 +2,8 @@
 #define NYX_TIME_H
 
 #include <stdatomic.h>
-#include <stdint.h>
 #include <nyx/search.h>
-
-typedef uint_fast64_t millis;
+#include <nyx/types.h>
 
 typedef struct
 {

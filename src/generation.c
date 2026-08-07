@@ -65,13 +65,7 @@ generate_pawn_quiet_promotion_moves(const position *p, bitboard target, ptype pr
 	{
 		to = pop_lsb(&promotions);
 		from = to + white_black(-8, +8, p->stm);
-		ms[num_moves] = (move)
-		{
-			.from=from,
-			.to  =to,
-			.type=PROMOTION,
-			.promotion=to_promtype(promtype),
-		};
+		ms[num_moves] = promotion_move(from, to, promtype);
 	}
 
 	return num_moves;
@@ -120,10 +114,10 @@ generate_quiet_pawn_moves(const position *p, bitboard target, move *ms)
 static size_t
 pawn_all_promotions(square from, square to, move *ms)
 {
-	ms[0] = (move) { .from=from, .to=to, .type=PROMOTION, .promotion=to_promtype(QUEEN ) };
-	ms[1] = (move) { .from=from, .to=to, .type=PROMOTION, .promotion=to_promtype(KNIGHT) };
-	ms[2] = (move) { .from=from, .to=to, .type=PROMOTION, .promotion=to_promtype(ROOK  ) };
-	ms[3] = (move) { .from=from, .to=to, .type=PROMOTION, .promotion=to_promtype(BISHOP) };
+	ms[0] = promotion_move(from, to, QUEEN);
+	ms[1] = promotion_move(from, to, KNIGHT);
+	ms[2] = promotion_move(from, to, ROOK);
+	ms[3] = promotion_move(from, to, BISHOP);
 
 	return 4;
 }

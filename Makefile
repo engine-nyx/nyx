@@ -24,7 +24,7 @@ LUTS += knight_attacks
 LUTS += king_attacks
 LUTS := $(addprefix $(LUT_DIR)/,$(addsuffix .bin,$(LUTS)))
 
-CFLAGS := -Wall -Wextra -Wpedantic -Werror -Iinclude -MMD -MP
+CFLAGS := -Wall -Wextra -Wpedantic -Wconversion -Wshadow -Werror -Iinclude -MMD -MP
 CFLAGS += -march=native
 CFLAGS += -std=c2x
 

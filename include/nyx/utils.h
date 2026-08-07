@@ -5,7 +5,7 @@
 #include <nyx/position.h>
 
 #define BITMASK(bits) (bits >= sizeof(unsigned long long) * 8 ? ((unsigned long long) 0) - 1 : ((unsigned long long) 1 << (bits)) - 1)
-unsigned str_consume(const char **s, const char *pattern);
+size_t str_consume(const char **s, const char *pattern);
 unsigned str_ltrim(const char **s);
 void print_bitboard(bitboard bb);
 
@@ -24,5 +24,6 @@ square pop_lsb(bitboard *bb);
 unsigned popcnt(bitboard bb);
 
 size_t do_lan_move(position *p, const char *lan, state_frame *sf);
+move promotion_move(square from, square to, ptype prom);
 
 #endif // NYX_UTILS_H

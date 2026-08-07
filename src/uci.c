@@ -126,14 +126,14 @@ uci_go(const char *args)
 	if (str_consume(&args, "perft"))
 	{
 		str_ltrim(&args);
-		perft(&UCI_state.p, atoi(args));
+		perft(&UCI_state.p, (unsigned) strtoul(args, nullptr, 10));
 		return;
 	}
 
 	else if (str_consume(&args, "depth"))
 	{
 		str_ltrim(&args);
-		unsigned depth = atoi(args);
+		unsigned depth = (unsigned) strtoul(args, nullptr, 10);
 		l = (limits)
 		{
 			.type=DEPTH,
@@ -144,7 +144,7 @@ uci_go(const char *args)
 	else if (str_consume(&args, "movetime"))
 	{
 		str_ltrim(&args);
-		millis ms = atoll(args);
+		millis ms = (millis) (strtoull(args, nullptr, 10));
 		l = (limits)
 		{
 			.type=MOVETIME,
@@ -155,7 +155,7 @@ uci_go(const char *args)
 	else if (str_consume(&args, "nodes"))
 	{
 		str_ltrim(&args);
-		node_count nodes = atoll(args);
+		node_count nodes = (node_count) (strtoull(args, nullptr, 10));
 		l = (limits)
 		{
 			.type=NODES,

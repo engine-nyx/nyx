@@ -1,5 +1,4 @@
 #include <nyx/time.h>
-#define _POSIX_C_SOURCE 199309L
 #include <time.h>
 #include <assert.h>
 
@@ -8,9 +7,9 @@ now(void)
 {
 	struct timespec ts;
 
-	clock_gettime(CLOCK_MONOTONIC, &ts);
+	timespec_get(&ts, TIME_UTC); /* TODO: change to monotonic clock */
 
-	return (ts.tv_sec * 1e3) + (ts.tv_nsec / 1e6);
+	return (millis) ((ts.tv_sec * 1000) + (ts.tv_nsec / 1000000));
 }
 
 void

@@ -7,7 +7,7 @@
 #include <nyx/position.h>
 #include <string.h>
 
-unsigned
+size_t
 str_consume(const char **s, const char *pattern)
 {
 	size_t len;
@@ -66,7 +66,7 @@ static char PIECE_CHAR[NUM_PIECE_COLORED_TYPES] =
 void
 print_board(position *p)
 {
-	size_t i, j;
+	unsigned i, j;
 	square sq;
 
 	printf("┌───┬───┬───┬───┬───┬───┬───┬───┐\n");
@@ -181,6 +181,27 @@ parse_castle(const char *s, state_frame *sf)
 	return i;
 }
 
+static unsigned
+get_file(char c)
+{
+	assert(c >= 'a' && c <= 'h');
+	return (unsigned) (c - 'a');
+}
+
+static unsigned
+get_rank(char c)
+{
+	assert(c >= '1' && c <= '8');
+	return (unsigned) (c - '1');
+}
+
+static unsigned char
+get_digit(char c)
+{
+	assert(isdigit(c));
+	return (unsigned char) (c - '0');
+}
+
 static size_t
 parse_ep(const char *s, state_frame *sf)
 {
@@ -192,10 +213,9 @@ parse_ep(const char *s, state_frame *sf)
 		return 1;
 	}
 
-	file = s[0] - 'a';
-	rank = s[1] - '1';
+	file = get_file(s[0]);
+	rank = get_rank(s[1]);
 
-	assert((file < 8)               && "Invalid ep file");
 	assert((rank == 2 || rank == 5) && "Invalid ep rank");
 
 	sf->ep = square_of(file, rank);
@@ -206,13 +226,11 @@ parse_ep(const char *s, state_frame *sf)
 static size_t
 parse_rule50(const char *s, state_frame *sf)
 {
-	assert(isdigit(s[0]) && "Invalid halfmove clock");
-
-	sf->rule50 = s[0] - '0';
+	sf->rule50 = get_digit(s[0]);
 	if (!sf->rule50 || !isdigit(s[1]))
 		return 1;
 
-	sf->rule50 = (10 * sf->rule50) + s[1] - '0';
+	sf->rule50 = (10 * sf->rule50) + get_digit(s[0]);
 	return 2;
 }
 
@@ -221,13 +239,11 @@ parse_ply(const char *s, position *p)
 {
 	size_t i;
 
-	assert(isdigit(s[0]) && "Invalid fullmove counter");
-
-	p->ply = s[0] - '0';
+	p->ply = get_digit(s[0]);
 	if (!p->ply) return 1;
 
 	for (i = 1; isdigit(s[i]); ++i)
-		p->ply = (p->ply * 10) + (s[i] - '0');
+		p->ply = (p->ply * 10) + get_digit(s[i]);
 
 	return i;
 }
@@ -319,8 +335,8 @@ do_lan_move(position *p, const char *lan, state_frame *sf)
 	move m;
 	ptype pt;
 
-	m.from = square_of(lan[0] - 'a', lan[1] - '1');
-	m.to   = square_of(lan[2] - 'a', lan[3] - '1');
+	m.from = square_of(get_file(lan[0]), get_rank(lan[1]));
+	m.to   = square_of(get_file(lan[2]), get_rank(lan[3]));
 
 	pt = ptype_of(p->by_square[m.from]);
 
@@ -330,12 +346,14 @@ do_lan_move(position *p, const char *lan, state_frame *sf)
 
 		switch (lan[4])
 		{
-		case 'n': m.promotion = to_promtype(KNIGHT); break;
-		case 'b': m.promotion = to_promtype(BISHOP); break;
-		case 'r': m.promotion = to_promtype(ROOK  ); break;
-		case 'q': m.promotion = to_promtype(QUEEN ); break;
+		case 'n': pt = KNIGHT; break;
+		case 'b': pt = BISHOP; break;
+		case 'r': pt = ROOK  ; break;
+		case 'q': pt = QUEEN ; break;
 		default: assert(false && "Invalid LAN promotion");
 		}
+
+		m = promotion_move(m.from, m.to, pt);
 	}
 
 	else if (pt == PAWN && file_of(m.from) != file_of(m.to) && p->by_square[m.to] == EMPTY)
@@ -362,4 +380,16 @@ unsigned
 popcnt(bitboard bb)
 {
 	return stdc_count_ones(bb);
+}
+
+move
+promotion_move(square from, square to, ptype pt)
+{
+	return (move)
+	{
+		.from=from,
+		.to  =to,
+		.type=PROMOTION,
+		.promotion=(pt - KNIGHT) & 0x03,
+	};
 }
