@@ -20,8 +20,8 @@ typedef struct state_frame
 
 typedef struct
 {
-	color stm;
-	unsigned ply;
+	color stm, root_stm;
+	unsigned ply, root_fullmove;
 
 	state_frame *sf;
 
