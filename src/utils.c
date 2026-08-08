@@ -156,8 +156,8 @@ parse_stm(const char *s, position *p)
 
 	switch (*s)
 	{
-	case 'w': p->stm = WHITE; break;
-	case 'b': p->stm = BLACK; break;
+	case 'w': p->root_stm = p->stm = WHITE; break;
+	case 'b': p->root_stm = p->stm = BLACK; break;
 	}
 
 	return 1;
@@ -240,11 +240,14 @@ parse_ply(const char *s, position *p)
 {
 	size_t i;
 
-	p->ply = get_digit(s[0]);
-	if (!p->ply) return 1;
+	p->root_fullmove = get_digit(s[0]);
+	if (!p->root_fullmove) return 1;
 
 	for (i = 1; isdigit(s[i]); ++i)
-		p->ply = (p->ply * 10) + get_digit(s[i]);
+		p->root_fullmove = (p->root_fullmove * 10) + get_digit(s[i]);
+
+	p->ply = 2 * p->root_fullmove;
+	p->ply += white_black(0, 1, p->stm);
 
 	return i;
 }
