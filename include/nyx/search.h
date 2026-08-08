@@ -38,6 +38,8 @@ struct search_state
 {
 	node_count nodes;
 	unsigned depth;
+
+	position *p;
 };
 
 struct search_result

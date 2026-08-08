@@ -166,6 +166,24 @@ uci_go(const char *args)
 	else
 	{
 		l = (limits) { .type=CLOCK };
+
+		if (!str_consume(&args, "wtime")) assert(false);
+		if (!str_ltrim(&args))            assert(false);
+		l.time[WHITE] = (unsigned) strtoul(args, (char **) &args, 10); // TODO: why does strtoul need a char instead of const char
+		if (!str_ltrim(&args))            assert(false);
+		if (!str_consume(&args, "btime")) assert(false);
+		if (!str_ltrim(&args))            assert(false);
+		l.time[BLACK] = (unsigned) strtoul(args, (char **) &args, 10);
+
+		if (str_ltrim(&args) && str_consume(&args, "winc"))
+		{
+			if (!str_ltrim(&args))           assert(false);
+			l.inc[WHITE] = (unsigned) strtoul(args, (char **) &args, 10);
+			if (!str_ltrim(&args))           assert(false);
+			if (!str_consume(&args, "binc")) assert(false);
+			if (!str_ltrim(&args))           assert(false);
+			l.inc[BLACK] = (unsigned) strtoul(args, nullptr, 10);
+		}
 	}
 
 	move best;

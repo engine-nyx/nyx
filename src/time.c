@@ -27,10 +27,10 @@ tm_hard_expired(const time_manager *tm, struct search_state *ss)
 
 	switch (tm->l.type)
 	{
-	case MOVETIME: return ms >= tm->start + tm->l.movetime;
+	case MOVETIME: return ms - tm->start >= tm->l.movetime;
 	case DEPTH   : return ss->depth >= tm->l.depth;
 	case NODES   : return ss->nodes >= tm->l.nodes;
-	case CLOCK   : return true;
+	case CLOCK   : return ms - tm->start >= tm->l.time[ss->p->stm] / (40 - ss->p->ply); /* TODO really bad approximator */
 	case INFINITE: return false;
 	case MATE    : return true;
 	}

@@ -56,7 +56,7 @@ search(position *p, limits l)
 	time_manager *tm;
 	struct search_state *ss;
 
-	ss = &(struct search_state) {};
+	ss = &(struct search_state) { .p=p };
 	tm = &(time_manager) { .l=l };
 	tm_start(tm);
 
