@@ -246,6 +246,7 @@ generate_quiets(const position *p, move *ms)
 	num_moves = 0;
 	num_moves += generate_all_piece_moves (p, target, ms + num_moves);
 	num_moves += generate_quiet_pawn_moves(p, FULLBB, ms + num_moves);
+	// TODO: add castling moves
 
 	return num_moves;
 }
@@ -289,6 +290,7 @@ generate_non_evasions(const position *p, move *ms)
 	num_moves += generate_all_piece_moves   (p, target, ms + num_moves);
 	num_moves += generate_quiet_pawn_moves  (p, FULLBB, ms + num_moves);
 	num_moves += generate_capture_pawn_moves(p, FULLBB, ms + num_moves);
+	// TODO: add castling moves
 
 	return num_moves;
 }
