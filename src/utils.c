@@ -5,6 +5,7 @@
 #include <nyx/utils.h>
 #include <stdio.h>
 #include <nyx/position.h>
+#include <nyx/attacks.h>
 #include <string.h>
 
 size_t
@@ -265,7 +266,7 @@ parse_fen(const char *fen, position *p, state_frame *sf)
 	i += parse_rule50(fen + i, sf); assert(fen[i] == ' ' && "Single space separator"); ++i;
 	i += parse_ply   (fen + i, p);
 
-	sf->checkers = EMPTYBB;
+	sf->checkers = attackers(p, king_square(p, p->stm)) & p->by_color[other_color(p->stm)];
 	sf->previous = nullptr;
 
 	finalize_position(p);
