@@ -100,7 +100,7 @@ uci_position(const char *args)
 	else if (str_consume(&args, "fen"))
 	{
 		assert(str_ltrim(&args) > 0 && "fen separator");
-		parse_fen(args, &UCI_state.p, &UCI_state.sf);
+		args += parse_fen(args, &UCI_state.p, &UCI_state.sf);
 	}
 
 	else
