@@ -80,6 +80,11 @@ typedef enum : u8
 	WHITE_OOO   = 2,
 	BLACK_OO    = 4,
 	BLACK_OOO   = 8,
+
+	KING_SIDE      = WHITE_OO  | BLACK_OO,
+	QUEEN_SIDE     = WHITE_OOO | BLACK_OOO,
+	WHITE_CASTLING = WHITE_OO  | WHITE_OOO,
+	BLACK_CASTLING = BLACK_OO  | BLACK_OOO,
 } castling_rights;
 
 
