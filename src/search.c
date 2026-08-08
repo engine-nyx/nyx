@@ -78,13 +78,11 @@ search(position *p, limits l)
 				break;
 			}
 
-			do_move(p, m, &sf);
-			score = -search_rec(p, -oo, oo, tm, ss);
-			undo_move(p, m);
-
 			if (tm_hard_expired(tm, ss)) break;
 
-			score *= white_black(-1, +1, p->stm);
+			do_move(p, m, &sf);
+			score = -search_rec(p, -oo, -best_score, tm, ss);
+			undo_move(p, m);
 
 			if (score > best_score)
 			{
