@@ -170,7 +170,7 @@ test_free(void)
 	memory_head = nullptr;
 }
 
-constexpr size_t BAR_WIDTH = 40;
+constexpr unsigned BAR_WIDTH = 40;
 
 void
 print_group_progress(group_node *group, size_t ran, size_t failures)
@@ -179,7 +179,7 @@ print_group_progress(group_node *group, size_t ran, size_t failures)
 
 	printf("> Test group %s%-*s %3zu test(s) ran; %3zu failed. ", group->name, (int) (longest_group_name - strlen(group->name) + 1), ":", ran, failures);
 	printf("[\x1b[32m\x1b[7m");
-	for (i = 0; i < (unsigned) (((ran - failures) / (float) group->test_count) * BAR_WIDTH); ++i)
+	for (i = 0; i < (unsigned) (((float) (ran - failures) / (float) group->test_count) * BAR_WIDTH); ++i)
 		printf("-");
 	printf("\x1b[31m");
 	for (; i < BAR_WIDTH; ++i)
@@ -246,5 +246,5 @@ main(void)
 	}
 
 	test_free();
-	return total_failures;
+	return (int) total_failures;
 }
