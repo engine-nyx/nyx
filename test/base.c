@@ -175,14 +175,25 @@ constexpr unsigned BAR_WIDTH = 40;
 void
 print_group_progress(group_node *group, size_t ran, size_t failures)
 {
-	size_t i;
+	unsigned i;
+	unsigned green, empty, red;
+
+	green = (unsigned) (((float) (ran - failures) / (float) group->test_count) * BAR_WIDTH);
+	empty = (unsigned) (((float) (group->test_count - ran) / (float) group->test_count) * BAR_WIDTH);
+	red   = BAR_WIDTH - green - empty;
 
 	printf("> Test group %s%-*s %3zu test(s) ran; %3zu failed. ", group->name, (int) (longest_group_name - strlen(group->name) + 1), ":", ran, failures);
 	printf("[\x1b[32m\x1b[7m");
-	for (i = 0; i < (unsigned) (((float) (ran - failures) / (float) group->test_count) * BAR_WIDTH); ++i)
+	for (i = 0; i < green; ++i)
 		printf("-");
+
+	printf("\x1b[0m");
+	for (; i < green + empty; ++i)
+		printf("-");
+	printf("\x1b[7m");
+
 	printf("\x1b[31m");
-	for (; i < BAR_WIDTH; ++i)
+	for (; i < green + empty + red; ++i)
 		printf("-");
 	printf("\x1b[27m\x1b[0m]\n");
 }
