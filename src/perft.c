@@ -4,7 +4,7 @@
 #include <nyx/generation.h>
 
 node_count
-perft_nodes(position *p, unsigned depth)
+perft(position *p, unsigned depth)
 {
 	if (!depth) return 1;
 
@@ -19,7 +19,7 @@ perft_nodes(position *p, unsigned depth)
 	for (i = 0; i < num_moves; ++i)
 	{
 		do_move(p, ms[i], &sf);
-		nodes += perft_nodes(p, depth - 1);
+		nodes += perft(p, depth - 1);
 		undo_move(p, ms[i]);
 	}
 
@@ -27,7 +27,7 @@ perft_nodes(position *p, unsigned depth)
 }
 
 node_count
-perft(position *p, unsigned depth)
+perft_verbose(position *p, unsigned depth)
 {
 	if (!depth) return 1;
 
@@ -42,7 +42,7 @@ perft(position *p, unsigned depth)
 	for (i = 0; i < num_moves; ++i)
 	{
 		do_move(p, ms[i], &sf);
-		nodes = perft_nodes(p, depth - 1);
+		nodes = perft(p, depth - 1);
 		undo_move(p, ms[i]);
 		total += nodes;
 

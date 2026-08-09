@@ -126,7 +126,7 @@ uci_go(const char *args)
 	if (str_consume(&args, "perft"))
 	{
 		str_ltrim(&args);
-		perft(&UCI_state.p, (unsigned) strtoul(args, nullptr, 10));
+		perft_verbose(&UCI_state.p, (unsigned) strtoul(args, nullptr, 10));
 		return;
 	}
 
