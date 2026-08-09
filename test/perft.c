@@ -21,7 +21,7 @@ check_perft(const char *fen, unsigned depth, node_count expected)
 	char *msg;
 
 	parse_fen(fen, &p, &sf);
-	n = perft_nodes(&p, depth);
+	n = perft(&p, depth);
 
 	if (n == expected)
 		return TEST_SUCCESS;
