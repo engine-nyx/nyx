@@ -188,12 +188,12 @@ print_group_progress(group_node *group, size_t ran, size_t failures)
 		printf("-");
 
 	printf("\x1b[0m");
-	for (; i < green + empty; ++i)
+	for (i = 0; i < empty; ++i)
 		printf("-");
 	printf("\x1b[7m");
 
 	printf("\x1b[31m");
-	for (; i < green + empty + red; ++i)
+	for (i = 0; i < red; ++i)
 		printf("-");
 	printf("\x1b[27m\x1b[0m]\n");
 }
