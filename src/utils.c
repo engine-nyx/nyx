@@ -95,17 +95,13 @@ parse_board(const char *s, position *p)
 	size_t i;
 	unsigned file, rank;
 	square sq;
+	ptype pt;
 
 	for (sq = A1; sq < NUM_SQUARES; ++sq)
 		p->by_square[sq] = EMPTY;
+	for (pt = 0; pt < NUM_PIECE_TYPES; ++pt)
+		p->by_ptype[pt] = EMPTYBB;
 	p->by_color[WHITE] = p->by_color[BLACK] = EMPTYBB;
-	p->by_ptype[ALL] =
-		p->by_ptype[PAWN] =
-		p->by_ptype[KNIGHT] =
-		p->by_ptype[BISHOP] =
-		p->by_ptype[ROOK] =
-		p->by_ptype[QUEEN] =
-		p->by_ptype[KING] = EMPTYBB;
 
 	i = 0;
 	for (rank = 7; rank < 8; --rank)
