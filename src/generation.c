@@ -303,9 +303,9 @@ generation_init(void)
 {
 	square sq1, sq2;
 
-	for (sq1 = A1; sq1 < NUM_SQUARES; ++sq1)
+	for (sq1 = 0; sq1 < NUM_SQUARES; ++sq1)
 	{
-		for (sq2 = A1; sq2 < NUM_SQUARES; ++sq2)
+		for (sq2 = 0; sq2 < NUM_SQUARES; ++sq2)
 		{
 			// needed for evasions to also include capturing the sniper
 			between_lut[sq1][sq2] = sqbb(sq1);
