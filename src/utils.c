@@ -97,7 +97,7 @@ parse_board(const char *s, position *p)
 	square sq;
 	ptype pt;
 
-	for (sq = A1; sq < NUM_SQUARES; ++sq)
+	for (sq = 0; sq < NUM_SQUARES; ++sq)
 		p->by_square[sq] = EMPTY;
 	for (pt = 0; pt < NUM_PIECE_TYPES; ++pt)
 		p->by_ptype[pt] = EMPTYBB;
