@@ -21,7 +21,7 @@ attacks_init(void)
 	square sq;
 	bitboard ray, bb;
 
-	for (sq = A1; sq < NUM_SQUARES; ++sq)
+	for (sq = 0; sq < NUM_SQUARES; ++sq)
 	{
 		for (ray = sqbb(sq); ray; ray = ea(ray)) rank_mask[sq] |= ray;
 		for (ray = sqbb(sq); ray; ray = we(ray)) rank_mask[sq] |= ray;
