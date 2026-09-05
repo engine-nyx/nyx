@@ -4,6 +4,7 @@
 #include <nyx/types.h>
 #include <nyx/perft.h>
 #include <nyx/position.h>
+#include <nyx/transposition.h>
 
 enum limit_type
 {
@@ -40,6 +41,7 @@ struct search_state
 	unsigned depth;
 
 	position *p;
+	transposition_table *tt;
 };
 
 struct search_result
@@ -49,6 +51,6 @@ struct search_result
 	node_count nodes;
 };
 
-struct search_result search(position *p, limits l);
+struct search_result search(position *p, limits l, transposition_table *tt);
 
 #endif // NYX_SEARCH_H

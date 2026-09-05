@@ -1,8 +1,57 @@
 #include <assert.h>
 #include <nyx/position.h>
 #include <nyx/types.h>
+#include <stdlib.h>
 #include <nyx/attacks.h>
 #include <nyx/utils.h>
+
+static u64 zobrist_piece_square[12][64];
+static u64 zobrist_stm;
+static u64 zobrist_ep[8];
+static u64 zobrist_castling[16];
+
+static inline u64
+zobrist_of(pctype pc, square sq)
+{
+	size_t pc_idx;
+
+	pc_idx = (ptype_of(pc) - 1) + (color_of(pc) * 6);
+
+	return zobrist_piece_square[pc_idx][sq];
+}
+
+static inline u64
+random_key(void)
+{
+	return (u64)
+		((rand() & BITMASK(16)) << 48) |
+		((rand() & BITMASK(16)) << 32) |
+		((rand() & BITMASK(16)) << 16) |
+		((rand() & BITMASK(16)) << 00) ;
+}
+
+void
+position_init(void)
+{
+	square sq;
+	unsigned piece, file, cr;
+
+	for (piece = 0; piece < 12; ++piece)
+	{
+		for (sq = 0; sq < NUM_SQUARES; ++sq)
+		{
+			zobrist_piece_square[piece][sq] = random_key();
+		}
+	}
+
+	zobrist_stm = random_key();
+
+	for (file = 0; file < 8; ++file)
+		zobrist_ep[file] = random_key();
+
+	for (cr = 0; cr < 16; ++cr)
+		zobrist_castling[cr] = random_key();
+}
 
 square
 king_square(const position *p, color c)
@@ -38,6 +87,7 @@ put_piece(position *p, pctype pc, square sq)
 	p->by_color[color_of(pc)] |= sqbb(sq);
 
 	p->sf->material += PIECE_VALUE[pc];
+	p->key ^= zobrist_of(pc, sq);
 }
 
 static void
@@ -53,6 +103,7 @@ remove_piece(position *p, square sq)
 	p->by_color[color_of(pc)] ^= sqbb(sq);
 
 	p->sf->material -= PIECE_VALUE[pc];
+	p->key ^= zobrist_of(pc, sq);
 }
 
 static void
@@ -69,6 +120,8 @@ move_piece(position *p, square from, square to)
 	p->by_ptype[ALL]          ^= from_to;
 	p->by_ptype[ptype_of(pc)] ^= from_to;
 	p->by_color[color_of(pc)] ^= from_to;
+
+	p->key ^= zobrist_of(pc, from) ^ zobrist_of(pc, to);
 }
 
 static void
@@ -223,12 +276,17 @@ do_move(position *p, move m, state_frame *sf)
 		break;
 	}
 
-	sf->ep = NO_EP;
+	if (sf->ep != NO_EP)
+	{
+		sf->ep = NO_EP;
+		p->key ^= zobrist_ep[file_of(sf->ep)];
+	}
 	if (ptype_of(pc) == PAWN)
 	{
 		if ((m.from ^ m.to) == 16)
 		{
 			sf->ep = (m.from + m.to) / 2;
+			p->key ^= zobrist_ep[file_of(sf->ep)];
 
 			// TODO: skip if no one can take ep
 		}
@@ -237,6 +295,7 @@ do_move(position *p, move m, state_frame *sf)
 	sf->checkers = check ? attackers(p, king_square(p, them)) & p->by_color[p->stm] : 0;
 
 	p->stm = them;
+	p->key ^= zobrist_stm;
 	++p->ply;
 
 	if (!(ptype_of(sf->capture) == KING)) // TODO outsource this check to prev ply in search
@@ -256,6 +315,7 @@ undo_move(position *p, move m)
 {
 	--p->ply;
 	p->stm = other_color(p->stm);
+	p->key ^= zobrist_stm;
 
 	switch (m.type)
 	{
@@ -282,5 +342,7 @@ undo_move(position *p, move m)
 		break;
 	}
 
+	if (p->sf->ep != NO_EP) p->key ^= zobrist_ep[file_of(p->sf->ep)];
 	p->sf = p->sf->previous;
+	if (p->sf->ep != NO_EP) p->key ^= zobrist_ep[file_of(p->sf->ep)];
 }
