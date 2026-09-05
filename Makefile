@@ -12,7 +12,7 @@ TESTS := $(wildcard $(TEST_DIR)/*.c)
 TOBJS := $(patsubst $(TEST_DIR)/%.c,$(TEST_BUILD_DIR)/%.o,$(TESTS))
 DEPS  := $(OBJS:.o=.d) $(TOBJS:.o=.d)
 
-CFLAGS := -Wall -Wextra -Wpedantic -Wconversion -Wshadow -Werror -Iinclude -MMD -MP
+CFLAGS := -Wall -Wextra -Wpedantic -Wconversion -Wshadow -Werror -Iinclude --embed-dir=. -MMD -MP
 CFLAGS += -march=native
 CFLAGS += -std=c2x
 
