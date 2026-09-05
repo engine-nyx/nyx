@@ -3,6 +3,8 @@
 #include <assert.h>
 #include <nyx/perft.h>
 #include <nyx/uci.h>
+#include <nyx/version.h>
+#include <nyx/transposition.h>
 #include <nyx/time.h>
 #include <nyx/utils.h>
 #include <stdatomic.h>
@@ -17,8 +19,18 @@ static struct
 	position p;
 	state_frame sf;
 
+	transposition_table tt;
+
 	bool quit;
 } UCI_state;
+
+static struct
+{
+	size_t transposition_table_capacity;
+} UCI_config =
+{
+	.transposition_table_capacity = 1,
+};
 
 // quit
 // uci: -> uciok
@@ -42,12 +54,41 @@ uci_quit(const char *args)
 	UCI_state.quit = true;
 }
 
+static const char AUTHORS[] =
+{
+	#embed "AUTHORS" suffix(, 0)
+};
+
+static void
+uci_id(void)
+{
+	const char *start, *end;
+
+	puts("id name Nyx v"NYX_VERSION);
+
+	for (start = end = AUTHORS; *start && end; start = end + 1)
+	{
+		end = strchr(start, '\n');
+
+		printf("id author %.*s\n", (int) (end ? end - start : (int) strlen(start)), start);
+	}
+}
+
+static void
+uci_options(void)
+{
+	puts("option name ttsz type spin default 200000 min 1 max 33554432");
+}
+
 static void
 uci_uci(const char *args)
 {
 	(void) args;
 
-	uci_position("startpos");
+	uci_id();
+	puts("");
+	uci_options();
+	puts("");
 	puts("uciok");
 }
 
@@ -65,15 +106,18 @@ uci_isready(const char *args)
 {
 	(void) args;
 
+	tt_resize(&UCI_state.tt, UCI_config.transposition_table_capacity);
 	puts("readyok");
 }
 
 static void
 uci_setoption(const char *args)
 {
-	(void) args;
-
-	// TODO
+	if (str_consume(&args, "ttsz"))
+	{
+		assert(str_ltrim(&args) && "setting separator");
+		UCI_config.transposition_table_capacity = strtoull(args, nullptr, 10);
+	}
 }
 
 static const char *startpos = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
@@ -122,6 +166,8 @@ static void
 uci_go(const char *args)
 {
 	limits l;
+
+	tt_clear(&UCI_state.tt);
 
 	if (str_consume(&args, "perft"))
 	{
@@ -188,7 +234,7 @@ uci_go(const char *args)
 
 	move best;
 
-	best = search(&UCI_state.p, l).best;
+	best = search(&UCI_state.p, l, &UCI_state.tt).best;
 	printf("bestmove ");
 	print_move(best);
 	printf("\n");
