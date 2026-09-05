@@ -1,4 +1,5 @@
 #include <nyx/generation.h>
+#include <nyx/position.h>
 #include <nyx/attacks.h>
 #include <nyx/uci.h>
 #include <nyx/types.h>
@@ -11,6 +12,7 @@ main(int argc, char **argv)
 
 	attacks_init();
 	generation_init();
+	position_init();
 
 	uci_loop();
 

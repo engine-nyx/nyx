@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <nyx/time.h>
 #include <nyx/position.h>
 #include <nyx/types.h>
@@ -5,14 +6,37 @@
 #include <nyx/search.h>
 #include <nyx/selection.h>
 #include <nyx/evaluation.h>
+#include <nyx/transposition.h>
+
+static inline bool
+tt_skip(tt_entry ent, int alpha, int beta, struct search_state ss)
+{
+	if (ent.depth >= ss.depth) return false; // TODO: fix when ready
+
+	switch (ent.type)
+	{
+	case EXACT    : return true;
+	case FAIL_LOW : return ent.score >= beta;
+	case FAIL_HIGH: return ent.score < alpha;
+	}
+
+	assert(false);
+}
 
 static int
 search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_state *ss)
 {
 	selector s;
-	move m;
+	move m, best_move;
 	int score, best_score;
 	state_frame sf;
+	tt_entry ent;
+	bool tt_probe_success;
+
+	tt_probe_success = tt_probe(ss->tt, p->key, &ent);
+
+	if (tt_probe_success && tt_skip(ent, alpha, beta, *ss))
+		return ent.score;
 
 	if (!ss->depth) return evaluate(p);
 	--ss->depth;
@@ -39,18 +63,35 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 		if (score > best_score)
 		{
 			best_score = score;
+			best_move = m;
 
 			if (score >= beta) break;
 		}
 	}
 
 	++ss->depth;
+	if (score >= beta)
+	{
+		tt_store(ss->tt, (tt_entry)
+		{
+			.depth=(u8)ss->depth,
+			.best_move=best_move,
+			.key=p->key,
+			.score=best_score,
+			.type=
+			(
+				score >= beta ? FAIL_HIGH :
+				score < alpha ? FAIL_LOW :
+				EXACT
+			),
+		});
+	}
 
 	return best_score;
 }
 
 struct search_result
-search(position *p, limits l)
+search(position *p, limits l, transposition_table *tt)
 {
 	state_frame sf;
 	selector s;
@@ -60,9 +101,10 @@ search(position *p, limits l)
 	time_manager *tm;
 	struct search_state *ss;
 
-	ss = &(struct search_state) { .p=p };
+	ss = &(struct search_state) { .p=p, .tt=tt };
 	tm = &(time_manager) { .l=l };
 	tm_start(tm);
+	tt_clear(tt);
 
 	for (depth = 0; !tm_soft_expired(tm, ss); ++depth)
 	{

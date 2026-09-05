@@ -28,6 +28,8 @@ typedef struct
 	bitboard by_color[NUM_COLORS];
 	bitboard by_ptype[NUM_PIECE_TYPES];
 	pctype by_square[NUM_SQUARES];
+
+	u64 key;
 } position;
 
 void put_piece(position *p, pctype pc, square sq);
@@ -38,5 +40,7 @@ void undo_move(position *p, move m);
 square king_square(const position *p, color c);
 
 void finalize_position(position *p);
+
+void position_init(void);
 
 #endif // NYX_POSITION_H
