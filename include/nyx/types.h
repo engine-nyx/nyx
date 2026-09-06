@@ -3,13 +3,9 @@
 
 #include <stddef.h>
 #include <limits.h>
-#include <stdint.h>
+#include <nyx/int.h>
 
-typedef uint8_t u8;
-typedef uint16_t u16;
-typedef uint64_t u64;
-
-typedef uint_fast64_t node_count;
+typedef u64f node_count;
 
 typedef enum
 {
@@ -121,6 +117,6 @@ is_null_move(move m) { return m.from == 0 && m.to == 0; }
 
 constexpr int oo = INT_MAX / 2;
 
-typedef uint_fast64_t millis;
+typedef u64f millis;
 
 #endif // NYX_TYPES_H
