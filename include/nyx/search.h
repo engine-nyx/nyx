@@ -2,7 +2,6 @@
 #define NYX_SEARCH_H
 
 #include <nyx/types.h>
-#include <nyx/perft.h>
 #include <nyx/position.h>
 #include <nyx/transposition.h>
 

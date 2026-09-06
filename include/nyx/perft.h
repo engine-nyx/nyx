@@ -4,8 +4,6 @@
 #include <nyx/position.h>
 #include <nyx/types.h>
 
-typedef uint_fast64_t node_count;
-
 node_count perft_verbose(position *p, unsigned depth);
 node_count perft(position *p, unsigned depth);
 
