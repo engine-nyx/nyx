@@ -205,6 +205,50 @@ generate_capture_pawn_moves(const position *p, bitboard target, move *ms)
 	return num_moves;
 }
 
+static bitboard castling_path[] =
+{
+	[WHITE_OO]  = 0x0000000000000060,
+	[WHITE_OOO] = 0x000000000000000E,
+	[BLACK_OO]  = 0x6000000000000000,
+	[BLACK_OOO] = 0x0E00000000000000,
+};
+
+static size_t
+generate_castling_moves(const position *p, move *ms)
+{
+	// TODO: who checks that the king isnt evading with castle
+	castling_rights cr;
+	square ksq;
+	size_t num_moves;
+	bitboard occ;
+
+	cr = p->sf->castle & white_black(WHITE_CASTLING, BLACK_CASTLING, p->stm);
+	ksq = king_square(p, p->stm);
+	occ = p->by_ptype[ALL];
+
+	num_moves = 0;
+	if ((cr & KING_SIDE) && !(castling_path[cr & KING_SIDE] & occ))
+	{
+		ms[num_moves++] = (move)
+		{
+			.from=ksq,
+			.to  =(ksq + 2) & BITMASK(6),
+			.type=CASTLING,
+		};
+	}
+	if ((cr & QUEEN_SIDE) && !(castling_path[cr & QUEEN_SIDE] & occ))
+	{
+		ms[num_moves++] = (move)
+		{
+			.from=ksq,
+			.to  =(ksq - 2) & BITMASK(6),
+			.type=CASTLING,
+		};
+	}
+
+	return num_moves;
+}
+
 static size_t
 generate_all_piece_moves(const position *p, bitboard target, move *ms)
 {
@@ -246,7 +290,7 @@ generate_quiets(const position *p, move *ms)
 	num_moves = 0;
 	num_moves += generate_all_piece_moves (p, target, ms + num_moves);
 	num_moves += generate_quiet_pawn_moves(p, FULLBB, ms + num_moves);
-	// TODO: add castling moves
+	num_moves += generate_castling_moves  (p,         ms + num_moves);
 
 	return num_moves;
 }
@@ -290,7 +334,7 @@ generate_non_evasions(const position *p, move *ms)
 	num_moves += generate_all_piece_moves   (p, target, ms + num_moves);
 	num_moves += generate_quiet_pawn_moves  (p, FULLBB, ms + num_moves);
 	num_moves += generate_capture_pawn_moves(p, FULLBB, ms + num_moves);
-	// TODO: add castling moves
+	num_moves += generate_castling_moves    (p,         ms + num_moves);
 
 	return num_moves;
 }

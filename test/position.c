@@ -47,14 +47,8 @@ check_all_legals(const char *fen)
 
 	for (i = 0; i < n; ++i)
 	{
-		struct test_result r = make_unmake_compare(&p, ms[i], &base);
-		if (r.failed)
-		{
-			printf("  (failed on move %zu/%zu: ", i + 1, n);
-			print_move(ms[i]);
-			printf(")\n");
-			return r;
-		}
+		struct test_result res = make_unmake_compare(&p, ms[i], &base);
+		if (res.failed) return res;
 	}
 
 	return TEST_SUCCESS;
