@@ -6,7 +6,9 @@ import sys
 FILES = "abcdefgh"
 RANKS = "87654321"
 
-BOARD_LINES = 20
+BOARD_LINES = 21
+PROMPT_LINES = 2
+PROMPT = "toggle square or reset bitboard: "
 
 def parse_square(s):
     s = s.strip().lower()
@@ -17,26 +19,35 @@ def parse_square(s):
     return (int(rank) - 1) * 8 + FILES.index(file)
 
 def print_bitboard(bb):
-    print("  ┌───┬───┬───┬───┬───┬───┬───┬───┐")
+    print("   ┌───┬───┬───┬───┬───┬───┬───┬───┐")
     for i in range(8):
-        print(f"{8 - i} │", end="")
+        print(f" {8 - i} │", end="")
         for j in range(8):
             mask = 1 << (((7 - i) * 8) + j)
             print(f" {'X' if bb & mask else ' '} │", end="")
         print()
         if i < 7:
-            print("  ├───┼───┼───┼───┼───┼───┼───┼───┤")
-    print("  └───┴───┴───┴───┴───┴───┴───┴───┘")
-    print("    " + "   ".join(FILES))
+            print("   ├───┼───┼───┼───┼───┼───┼───┼───┤")
+    print("   └───┴───┴───┴───┴───┴───┴───┴───┘")
+    print("     " + "   ".join(FILES))
     print()
     print(f"dec: {bb}")
     print(f"hex: 0x{bb:016X}")
 
-def redraw(bb):
-    sys.stdout.write(f"\033[{BOARD_LINES + 3}A\033[J")
+def render(bb, first=False):
+    if not first:
+        sys.stdout.write(f"\033[{BOARD_LINES + PROMPT_LINES}A\033[J")
     print_bitboard(bb)
-    sys.stdout.write("\n")
+    print()
+    print(PROMPT)
+    sys.stdout.write("\033[1A")
+    sys.stdout.write(PROMPT)
     sys.stdout.flush()
+
+def parse_value(arg):
+    if arg.startswith("0x") or arg.startswith("0X"):
+        return int(arg, 16)
+    return int(arg)
 
 def usage():
     print(f"Usage: {os.path.basename(sys.argv[0])} [value]")
@@ -50,33 +61,31 @@ def main():
         usage()
     bb = 0
     if len(sys.argv) > 1:
-        arg = sys.argv[1]
         try:
-            if arg.startswith("0x") or arg.startswith("0X"):
-                bb = int(arg, 16)
-            else:
-                bb = int(arg)
+            bb = parse_value(sys.argv[1])
         except ValueError:
             usage()
 
-    print_bitboard(bb)
-    sys.stdout.write("\n")
-    sys.stdout.flush()
+    render(bb, first=True)
 
     while True:
         try:
-            line = input("toggle square (e.g. e1, A8): ").strip()
+            line = input().strip()
         except (EOFError, KeyboardInterrupt):
             print()
             break
         if not line:
             break
         sq = parse_square(line)
-        if sq is None:
-            redraw(bb)
-            continue
-        bb ^= 1 << sq
-        redraw(bb)
+        if sq is not None:
+            bb ^= 1 << sq
+        else:
+            try:
+                bb = parse_value(line)
+            except ValueError:
+                pass
+        render(bb)
+        continue
 
 if __name__ == "__main__":
     main()
