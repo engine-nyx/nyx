@@ -133,6 +133,15 @@ swap_piece(position *p, pctype pc, square sq)
 
 extern bitboard between_lut[NUM_SQUARES][NUM_SQUARES];
 extern bitboard dia_straight_lut[NUM_SQUARES][NUM_SQUARES];
+castling_rights castling_rights_mask[NUM_SQUARES] =
+{
+	[A1] = WHITE_OOO,
+	[E1] = WHITE_CASTLING,
+	[H1] = WHITE_OO,
+	[A8] = BLACK_OOO,
+	[E8] = BLACK_CASTLING,
+	[H8] = BLACK_OO,
+};
 
 static void
 update_blockers(position *p, color c)
@@ -278,8 +287,8 @@ do_move(position *p, move m, state_frame *sf)
 
 	if (sf->ep != NO_EP)
 	{
-		sf->ep = NO_EP;
 		p->key ^= zobrist_ep[file_of(sf->ep)];
+		sf->ep = NO_EP;
 	}
 	if (ptype_of(pc) == PAWN)
 	{
@@ -291,6 +300,11 @@ do_move(position *p, move m, state_frame *sf)
 			// TODO: skip if no one can take ep
 		}
 	}
+
+	p->key ^= zobrist_castling[p->sf->castle];
+	p->sf->castle &= ~(castling_rights_mask[m.from] | castling_rights_mask[m.to]);
+	p->key ^= zobrist_castling[p->sf->castle];
+
 
 	sf->checkers = check ? attackers(p, king_square(p, them)) & p->by_color[p->stm] : 0;
 
@@ -342,7 +356,11 @@ undo_move(position *p, move m)
 		break;
 	}
 
+	p->key ^= zobrist_castling[p->sf->castle];
 	if (p->sf->ep != NO_EP) p->key ^= zobrist_ep[file_of(p->sf->ep)];
+
 	p->sf = p->sf->previous;
+
+	p->key ^= zobrist_castling[p->sf->castle];
 	if (p->sf->ep != NO_EP) p->key ^= zobrist_ep[file_of(p->sf->ep)];
 }
