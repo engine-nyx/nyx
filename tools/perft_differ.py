@@ -35,8 +35,9 @@ def run_perft(engine_path, fen, depth, moves):
 
 
 def main():
+    print("Perft Differ\n")
     if len(sys.argv) < 4:
-        print(f"Usage: {sys.argv[0]} <engine> <oracle> <depth> [fen]")
+        print(f"Usage: {os.path.basename(sys.argv[0])} <engine> <oracle> <depth> [fen]")
         sys.exit(1)
 
     engine_path = sys.argv[1]
