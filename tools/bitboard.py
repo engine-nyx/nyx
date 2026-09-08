@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2026 Kilian Chung
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: NLPL
 
 import os
 import re

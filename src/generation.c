@@ -1,5 +1,5 @@
 // Copyright (c) 2026 Kilian Chung
-// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-License-Identifier: NLPL
 
 #include <nyx/position.h>
 #include <nyx/utils.h>

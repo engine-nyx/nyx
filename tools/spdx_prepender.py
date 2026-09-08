@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2026 Kilian Chung
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: NLPL
 
 import os
 import re
@@ -8,7 +8,7 @@ import sys
 from datetime import date
 
 AUTHOR = "Kilian Chung"
-SPDX_ID = "GPL-3.0-or-later"
+SPDX_ID = "NLPL"
 
 COMMENT_STYLE = {
     ".c": "//", ".h": "//", ".cpp": "//", ".hpp": "//", ".cc": "//",
