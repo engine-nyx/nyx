@@ -179,8 +179,8 @@ print_group_progress(group_node *group, size_t ran, size_t failures)
 	unsigned green, empty, red;
 
 	green = (unsigned) (((float) (ran - failures) / (float) group->test_count) * BAR_WIDTH);
-	empty = (unsigned) (((float) (group->test_count - ran) / (float) group->test_count) * BAR_WIDTH);
-	red   = BAR_WIDTH - green - empty;
+	red   = (unsigned) (((float) (failures) / (float) group->test_count) * BAR_WIDTH);
+	empty = BAR_WIDTH - green - red;
 
 	printf("> Test group %s%-*s %3zu test(s) ran; %3zu failed. ", group->name, (int) (longest_group_name - strlen(group->name) + 1), ":", ran, failures);
 	printf("[\x1b[32m\x1b[7m");
