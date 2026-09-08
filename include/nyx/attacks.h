@@ -11,6 +11,7 @@ bitboard attacks_rook  (square sq, bitboard occ);
 bitboard attacks_queen (square sq, bitboard occ);
 bitboard attacks_knight(square sq);
 bitboard attacks_king  (square sq);
+bitboard attacks_pawn  (square sq, color c);
 bitboard attacks_piece (ptype pt, square sq, bitboard occ);
 
 bitboard attackers(const position *p, square sq);
