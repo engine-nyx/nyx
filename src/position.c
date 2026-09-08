@@ -234,6 +234,32 @@ gives_check(const position *p, move m)
 	assert(false);
 }
 
+static inline bool
+en_passant_capturable(const position *p, move m)
+{
+	color them;
+	square ep, ksq;
+	bitboard their_attacks, prev_blockers;
+	bool we_discover, they_cover;
+
+	them = other_color(p->stm);
+	ep = (m.from + m.to) / 2;
+	their_attacks =
+		attacks_pawn(ep, p->stm) &
+		p->by_ptype[PAWN] &
+		p->by_color[them];
+
+	if (!their_attacks) return false;
+
+	ksq = king_square(p, them);
+	prev_blockers = p->sf->previous->blockers[them];
+
+	we_discover = (prev_blockers & sqbb(m.from)) && file_of(m.from) != file_of(ksq);
+	they_cover = their_attacks & (~prev_blockers | dia_straight_lut[ksq][ep]);
+
+	return !we_discover && they_cover;
+}
+
 void
 do_move(position *p, move m, state_frame *sf)
 {
@@ -290,15 +316,10 @@ do_move(position *p, move m, state_frame *sf)
 		p->key ^= zobrist_ep[file_of(sf->ep)];
 		sf->ep = NO_EP;
 	}
-	if (ptype_of(pc) == PAWN)
+	if (ptype_of(pc) == PAWN && (m.from ^ m.to) == 16 && en_passant_capturable(p, m))
 	{
-		if ((m.from ^ m.to) == 16)
-		{
-			sf->ep = (m.from + m.to) / 2;
-			p->key ^= zobrist_ep[file_of(sf->ep)];
-
-			// TODO: skip if no one can take ep
-		}
+		sf->ep = (m.from + m.to) / 2;
+		p->key ^= zobrist_ep[file_of(sf->ep)];
 	}
 
 	p->key ^= zobrist_castling[p->sf->castle];
