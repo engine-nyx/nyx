@@ -12,10 +12,10 @@ Check out our [website](https://engine-nyx.xyz/) for source, releases, live play
 ## Quickstart
 
 ```bash
-$ # clone the repo
-$ git clone https://git.engine-nyx.xyz/nyx/engine.git
-$ # build and run the engine
-$ make -C engine run
+# clone the repo
+git clone https://git.engine-nyx.xyz/nyx/engine.git
+# build and run the engine
+make -C engine run
 ```
 
 ## Contact
