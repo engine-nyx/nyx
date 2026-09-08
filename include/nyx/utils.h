@@ -9,7 +9,7 @@ size_t str_consume(const char **s, const char *pattern);
 unsigned str_ltrim(const char **s);
 void print_bitboard(bitboard bb);
 
-void print_board(position *p);
+void print_board(const position *p);
 size_t parse_fen(const char *fen, position *p, state_frame *sf);
 
 void print_square(square sq);
