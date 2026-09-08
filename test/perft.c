@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Kilian Chung
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 #include <nyx/attacks.h>
 #include <nyx/generation.h>
 #include <nyx/perft.h>

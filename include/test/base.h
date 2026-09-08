@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Kilian Chung
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 #ifndef TEST_BASE_H
 #define TEST_BASE_H
 
