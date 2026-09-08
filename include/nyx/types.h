@@ -1,5 +1,5 @@
 // Copyright (c) 2026 Kilian Chung
-// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-License-Identifier: NLPL
 
 #ifndef NYX_TYPES_H
 #define NYX_TYPES_H
