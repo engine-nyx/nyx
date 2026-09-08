@@ -256,8 +256,9 @@ parse_fen(const char *fen, position *p, state_frame *sf)
 	i = 0;
 	str_ltrim(&fen);
 	p->sf = sf;
-	p->sf->material = 0;
 	p->key = 0;
+	sf->material = 0;
+	sf->capture = EMPTY;
 
 	i += parse_board (fen + i, p ); assert(fen[i] == ' ' && "Single space separator"); ++i;
 	i += parse_stm   (fen + i, p ); assert(fen[i] == ' ' && "Single space separator"); ++i;
