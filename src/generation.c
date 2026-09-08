@@ -388,7 +388,7 @@ is_legal(const position *p, move m)
 	enemy = p->by_color[other_color(p->stm)];
 
 	if (m.type == CASTLING)
-		return (attackers(p, m.to) | attackers(p, (m.from + m.to) / 2)) & enemy;
+		return !((attackers(p, m.to) | attackers(p, (m.from + m.to) / 2)) & enemy);
 
 	if (ptype_of(pc) == KING)
 		return !attackers_exist(p, m.to, p->by_ptype[ALL] ^ sqbb(m.from), other_color(p->stm));
