@@ -13,8 +13,7 @@ Check out our [website](https://engine-nyx.xyz/) for source, releases, live play
 
 ```bash
 $ # clone the repo
-$ git clone https://engine-nyx.xyz/nyx/engine.git
-$
+$ git clone https://git.engine-nyx.xyz/nyx/engine.git
 $ # build and run the engine
 $ make -C engine run
 ```
