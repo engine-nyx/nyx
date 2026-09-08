@@ -160,6 +160,7 @@ TEST(tt_store_probe_roundtrip)
 	if (tt_probe(&tt, 0x1234567890ABCDEF, &res))
 		return TEST_FAILURE("probe found an entry for a different key");
 
+	tt_free(&tt);
 	return TEST_SUCCESS;
 }
 
@@ -193,5 +194,6 @@ TEST(tt_replacement_rule)
 		return TEST_FAILURE("probe after stale store failed");
 	test_eq(res.score, 2, "stale generation does not replace");
 
+	tt_free(&tt);
 	return TEST_SUCCESS;
 }

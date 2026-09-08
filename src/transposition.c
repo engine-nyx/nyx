@@ -42,3 +42,10 @@ tt_clear(transposition_table *tt)
 {
 	memset(tt->entries, 0, tt->capacity * sizeof(tt_entry));
 }
+
+void
+tt_free(transposition_table *tt)
+{
+	if (tt->entries)
+		free(tt->entries);
+}
