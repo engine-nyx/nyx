@@ -1,3 +1,4 @@
+#include <nyx/utils.h>
 #include <assert.h>
 #include <nyx/attacks.h>
 #include <nyx/types.h>
@@ -119,6 +120,24 @@ attacks_king(square sq)
 	return lut_king_attacks[sq];
 }
 
+static bitboard
+attacks_white_pawn(square sq)
+{
+	return no(ea(sqbb(sq))) | no(we(sqbb(sq)));
+}
+
+static bitboard
+attacks_black_pawn(square sq)
+{
+	return so(ea(sqbb(sq))) | so(we(sqbb(sq)));
+}
+
+bitboard
+attacks_pawn(square sq, color c)
+{
+	return white_black(attacks_white_pawn(sq), attacks_black_pawn(sq), c);
+}
+
 bitboard
 attacks_piece(ptype pt, square sq, bitboard occ)
 {
@@ -129,7 +148,7 @@ attacks_piece(ptype pt, square sq, bitboard occ)
 	case BISHOP:   return attacks_bishop(sq, occ);
 	case KNIGHT:   return attacks_knight(sq);
 	case KING:     return attacks_king(sq);
-	case PAWN:     assert(false && "Pawn attacks not implemented");
+	case PAWN:     return attacks_pawn(sq, WHITE) | attacks_pawn(sq, BLACK);
 	case ALL:      return (bitboard) 0xFFFFFFFFFFFFFFFF;
 	case NONE:
 	default:       return (bitboard) 0;
@@ -148,8 +167,9 @@ attackers(const position *p, square sq)
 	attackers |= attacks_piece(BISHOP, sq, p->by_ptype[ALL]) & p->by_ptype[BISHOP];
 	attackers |= attacks_piece(BISHOP, sq, p->by_ptype[ALL]) & p->by_ptype[QUEEN];
 	attackers |= attacks_piece(KNIGHT, sq, p->by_ptype[ALL]) & p->by_ptype[KNIGHT];
-	attackers |= (sqbb(sq) >> 7 | sqbb(sq) >> 9) & (p->by_ptype[PAWN] & p->by_color[WHITE]);
-	attackers |= (sqbb(sq) << 7 | sqbb(sq) << 9) & (p->by_ptype[PAWN] & p->by_color[BLACK]);
+	attackers |= attacks_piece(KING  , sq, p->by_ptype[ALL]) & p->by_ptype[KING];
+	attackers |= attacks_pawn(sq, BLACK) & (p->by_ptype[PAWN] & p->by_color[WHITE]);
+	attackers |= attacks_pawn(sq, WHITE) & (p->by_ptype[PAWN] & p->by_color[BLACK]);
 
 	return attackers;
 }
@@ -163,6 +183,6 @@ attackers_exist(const position *p, square sq, bitboard occ, color c)
 		attacks_piece(BISHOP, sq, occ) & p->by_color[c] & p->by_ptype[BISHOP] ||
 		attacks_piece(BISHOP, sq, occ) & p->by_color[c] & p->by_ptype[QUEEN] ||
 		attacks_piece(KNIGHT, sq, occ) & p->by_color[c] & p->by_ptype[KNIGHT] ||
-		(c == WHITE && (sqbb(sq) >> 7 | sqbb(sq) >> 9) & (p->by_ptype[PAWN] & p->by_color[c])) ||
-		(c == BLACK && (sqbb(sq) << 7 | sqbb(sq) << 9) & (p->by_ptype[PAWN] & p->by_color[c]));
+		attacks_piece(KING  , sq, occ) & p->by_color[c] & p->by_ptype[KING] ||
+		attacks_pawn(sq, other_color(c)) & p->by_color[c] & p->by_ptype[PAWN];
 }
