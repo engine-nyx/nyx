@@ -172,9 +172,7 @@ generate_capture_pawn_moves(const position *p, bitboard target, move *ms)
 
 	if (p->sf->ep != NO_EP)
 	{
-		ep = sqbb(p->sf->ep) & target;
-		if (!ep) return num_moves;
-
+		ep = bbsq(p->sf->ep);
 		east = (ep << 1) & 0xFEFEFEFEFEFEFEFEull;
 		west = (ep >> 1) & 0x7F7F7F7F7F7F7F7Full;
 		to = p->sf->ep;
@@ -352,18 +350,18 @@ generation_init(void)
 		for (sq2 = 0; sq2 < NUM_SQUARES; ++sq2)
 		{
 			// needed for evasions to also include capturing the sniper
-			between_lut[sq1][sq2] = sqbb(sq1);
+			between_lut[sq1][sq2] = bbsq(sq1);
 
-			if (attacks_rook(sq1, 0) & sqbb(sq2))
+			if (attacks_rook(sq1, 0) & bbsq(sq2))
 			{
 				dia_straight_lut[sq1][sq2] = attacks_rook(sq1, 0) & attacks_rook(sq2, 0);
-				between_lut[sq1][sq2] |= attacks_rook(sq1, sqbb(sq2)) & attacks_rook(sq2, sqbb(sq1));
+				between_lut[sq1][sq2] |= attacks_rook(sq1, bbsq(sq2)) & attacks_rook(sq2, bbsq(sq1));
 			}
 
-			else if (attacks_bishop(sq1, 0) & sqbb(sq2))
+			else if (attacks_bishop(sq1, 0) & bbsq(sq2))
 			{
 				dia_straight_lut[sq1][sq2] = attacks_bishop(sq1, 0) & attacks_bishop(sq2, 0);
-				between_lut[sq1][sq2] |= attacks_bishop(sq1, sqbb(sq2)) & attacks_bishop(sq2, sqbb(sq1));
+				between_lut[sq1][sq2] |= attacks_bishop(sq1, bbsq(sq2)) & attacks_bishop(sq2, bbsq(sq1));
 			}
 
 			else
@@ -371,8 +369,8 @@ generation_init(void)
 				continue;
 			}
 
-			dia_straight_lut[sq1][sq2] |= sqbb(sq1);
-			dia_straight_lut[sq1][sq2] |= sqbb(sq2);
+			dia_straight_lut[sq1][sq2] |= bbsq(sq1);
+			dia_straight_lut[sq1][sq2] |= bbsq(sq2);
 		}
 	}
 }
@@ -391,12 +389,12 @@ is_legal(const position *p, move m)
 		return !((attackers(p, m.to) | attackers(p, (m.from + m.to) / 2)) & enemy);
 
 	if (ptype_of(pc) == KING)
-		return !attackers_exist(p, m.to, p->by_ptype[ALL] ^ sqbb(m.from), other_color(p->stm));
+		return !attackers_exist(p, m.to, p->by_ptype[ALL] ^ bbsq(m.from), other_color(p->stm));
 
-	if (!(p->sf->blockers[p->stm] & sqbb(m.from)))
+	if (!(p->sf->blockers[p->stm] & bbsq(m.from)))
 		return true;
 
-	return dia_straight_lut[m.from][m.to] & sqbb(king_square(p, p->stm));
+	return dia_straight_lut[m.from][m.to] & bbsq(king_square(p, p->stm));
 }
 
 size_t
@@ -418,7 +416,7 @@ generate_legals(const position *p, move *ms)
 		m = ms[i];
 
 		check_legal =
-			(sqbb(m.from) & pinned) ||
+			(bbsq(m.from) & pinned) ||
 			m.from == king_square(p, p->stm) ||
 			m.type == EN_PASSANT;
 

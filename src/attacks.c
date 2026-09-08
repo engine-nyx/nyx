@@ -24,19 +24,19 @@ attacks_init(void)
 
 	for (sq = 0; sq < NUM_SQUARES; ++sq)
 	{
-		for (ray = sqbb(sq); ray; ray = ea(ray)) rank_mask[sq] |= ray;
-		for (ray = sqbb(sq); ray; ray = we(ray)) rank_mask[sq] |= ray;
+		for (ray = bbsq(sq); ray; ray = ea(ray)) rank_mask[sq] |= ray;
+		for (ray = bbsq(sq); ray; ray = we(ray)) rank_mask[sq] |= ray;
 
-		for (ray = sqbb(sq); ray; ray = no(ray)) file_mask[sq] |= ray;
-		for (ray = sqbb(sq); ray; ray = so(ray)) file_mask[sq] |= ray;
+		for (ray = bbsq(sq); ray; ray = no(ray)) file_mask[sq] |= ray;
+		for (ray = bbsq(sq); ray; ray = so(ray)) file_mask[sq] |= ray;
 
-		for (ray = sqbb(sq); ray; ray = no(ea(ray))) diag_mask[sq] |= ray;
-		for (ray = sqbb(sq); ray; ray = so(we(ray))) diag_mask[sq] |= ray;
+		for (ray = bbsq(sq); ray; ray = no(ea(ray))) diag_mask[sq] |= ray;
+		for (ray = bbsq(sq); ray; ray = so(we(ray))) diag_mask[sq] |= ray;
 
-		for (ray = sqbb(sq); ray; ray = no(we(ray))) anti_mask[sq] |= ray;
-		for (ray = sqbb(sq); ray; ray = so(ea(ray))) anti_mask[sq] |= ray;
+		for (ray = bbsq(sq); ray; ray = no(we(ray))) anti_mask[sq] |= ray;
+		for (ray = bbsq(sq); ray; ray = so(ea(ray))) anti_mask[sq] |= ray;
 
-		bb = sqbb(sq);
+		bb = bbsq(sq);
 
 		lut_knight_attacks[sq] |= no(no(ea(bb)));
 		lut_knight_attacks[sq] |= no(ea(ea(bb)));
@@ -78,8 +78,8 @@ hyperbola(square sq, bitboard occ, bitboard mask)
 	occ  = occ & mask;
 	occr = reverse(occ);
 
-	fwd = occ  - (2 * sqbb(sq));
-	rev = occr - (2 * reverse(sqbb(sq)));
+	fwd = occ  - (2 * bbsq(sq));
+	rev = occr - (2 * reverse(bbsq(sq)));
 
 	return ((fwd ^ reverse(rev)) & mask);
 }
@@ -123,13 +123,13 @@ attacks_king(square sq)
 static bitboard
 attacks_white_pawn(square sq)
 {
-	return no(ea(sqbb(sq))) | no(we(sqbb(sq)));
+	return no(ea(bbsq(sq))) | no(we(bbsq(sq)));
 }
 
 static bitboard
 attacks_black_pawn(square sq)
 {
-	return so(ea(sqbb(sq))) | so(we(sqbb(sq)));
+	return so(ea(bbsq(sq))) | so(we(bbsq(sq)));
 }
 
 bitboard

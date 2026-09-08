@@ -257,6 +257,7 @@ parse_fen(const char *fen, position *p, state_frame *sf)
 	str_ltrim(&fen);
 	p->sf = sf;
 	p->sf->material = 0;
+	p->key = 0;
 
 	i += parse_board (fen + i, p ); assert(fen[i] == ' ' && "Single space separator"); ++i;
 	i += parse_stm   (fen + i, p ); assert(fen[i] == ' ' && "Single space separator"); ++i;
@@ -317,7 +318,7 @@ strbb(const char *s)
 			{
 			case '\0': return res;
 			case ' ' : break;
-			default  : res |= sqbb(square_of(file, rank));
+			default  : res |= bbsq(square_of(file, rank));
 			}
 		}
 	}

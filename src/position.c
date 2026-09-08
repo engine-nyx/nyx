@@ -82,9 +82,9 @@ void
 put_piece(position *p, pctype pc, square sq)
 {
 	p->by_square[sq] = pc;
-	p->by_ptype[ALL]          |= sqbb(sq);
-	p->by_ptype[ptype_of(pc)] |= sqbb(sq);
-	p->by_color[color_of(pc)] |= sqbb(sq);
+	p->by_ptype[ALL]          |= bbsq(sq);
+	p->by_ptype[ptype_of(pc)] |= bbsq(sq);
+	p->by_color[color_of(pc)] |= bbsq(sq);
 
 	p->sf->material += PIECE_VALUE[pc];
 	p->key ^= zobrist_of(pc, sq);
@@ -98,9 +98,9 @@ remove_piece(position *p, square sq)
 	pc = p->by_square[sq];
 
 	p->by_square[sq] = EMPTY;
-	p->by_ptype[ALL]          ^= sqbb(sq);
-	p->by_ptype[ptype_of(pc)] ^= sqbb(sq);
-	p->by_color[color_of(pc)] ^= sqbb(sq);
+	p->by_ptype[ALL]          ^= bbsq(sq);
+	p->by_ptype[ptype_of(pc)] ^= bbsq(sq);
+	p->by_color[color_of(pc)] ^= bbsq(sq);
 
 	p->sf->material -= PIECE_VALUE[pc];
 	p->key ^= zobrist_of(pc, sq);
@@ -113,7 +113,7 @@ move_piece(position *p, square from, square to)
 	bitboard from_to;
 
 	pc = p->by_square[from];
-	from_to = sqbb(from) | sqbb(to);
+	from_to = bbsq(from) | bbsq(to);
 
 	p->by_square[from] = EMPTY;
 	p->by_square[to]   = pc;
@@ -184,8 +184,8 @@ update_check_squares(position *p)
 	p->sf->check_squares[QUEEN]  = attacks_queen (ksq, occ);
 	p->sf->check_squares[KING]   = EMPTYBB;
 	p->sf->check_squares[PAWN]   =
-		sqbb(ksq + white_black(-7, +7, p->stm)) |
-		sqbb(ksq + white_black(-9, +9, p->stm));
+		bbsq(ksq + white_black(-7, +7, p->stm)) |
+		bbsq(ksq + white_black(-9, +9, p->stm));
 }
 
 static bool
@@ -198,12 +198,12 @@ gives_check(const position *p, move m)
 	ksq = king_square(p, them);
 
 	// direct check
-	if (p->sf->check_squares[ptype_of(p->by_square[m.from])] & sqbb(m.to))
+	if (p->sf->check_squares[ptype_of(p->by_square[m.from])] & bbsq(m.to))
 		return true;
 
 	// discovered check
-	if (p->sf->blockers[them] & sqbb(m.from))
-		return !(dia_straight_lut[m.from][m.to] & ksq) || m.type == CASTLING;
+	if (p->sf->blockers[them] & bbsq(m.from))
+		return !(dia_straight_lut[m.from][m.to] & bbsq(ksq)) || m.type == CASTLING;
 
 	switch (m.type)
 	{
@@ -211,14 +211,14 @@ gives_check(const position *p, move m)
 		return false;
 
 	case PROMOTION:
-		attacks = attacks_piece(promtype_of(m), m.to, p->by_ptype[ALL] ^ sqbb(m.from));
-		return attacks & king_square(p, them);
+		attacks = attacks_piece(promtype_of(m), m.to, p->by_ptype[ALL] ^ bbsq(m.from));
+		return attacks & bbsq(king_square(p, them));
 
 	case EN_PASSANT:
 		occ = p->by_ptype[ALL];
-		occ ^= sqbb(square_of(file_of(m.to), rank_of(m.from)));
-		occ ^= sqbb(m.from);
-		occ |= sqbb(m.to);
+		occ ^= bbsq(square_of(file_of(m.to), rank_of(m.from)));
+		occ ^= bbsq(m.from);
+		occ |= bbsq(m.to);
 
 		attacks = EMPTYBB;
 		attacks |= attacks_rook  (ksq, occ) & (p->by_ptype[QUEEN] | p->by_ptype[ROOK]);
@@ -228,7 +228,7 @@ gives_check(const position *p, move m)
 
 	case CASTLING:
 		return p->sf->check_squares[ROOK] &
-			sqbb(square_of(m.from < m.to ? F1 : D1, rank_of(m.from)));
+			bbsq(square_of(m.from < m.to ? F1 : D1, rank_of(m.from)));
 	}
 
 	assert(false);
@@ -254,7 +254,7 @@ en_passant_capturable(const position *p, move m)
 	ksq = king_square(p, them);
 	prev_blockers = p->sf->previous->blockers[them];
 
-	we_discover = (prev_blockers & sqbb(m.from)) && file_of(m.from) != file_of(ksq);
+	we_discover = (prev_blockers & bbsq(m.from)) && file_of(m.from) != file_of(ksq);
 	they_cover = their_attacks & (~prev_blockers | dia_straight_lut[ksq][ep]);
 
 	return !we_discover && they_cover;
