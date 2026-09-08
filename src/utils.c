@@ -65,7 +65,7 @@ static char PIECE_CHAR[NUM_PIECE_COLORED_TYPES] =
 };
 
 void
-print_board(position *p)
+print_board(const position *p)
 {
 	unsigned i, j;
 	square sq;
@@ -284,6 +284,21 @@ print_move(move m)
 {
 	print_square(m.from);
 	print_square(m.to);
+
+	if (m.type == PROMOTION)
+	{
+		switch (promtype_of(m))
+		{
+		case KNIGHT: printf("%c", 'n'); break;
+		case BISHOP: printf("%c", 'b'); break;
+		case ROOK  : printf("%c", 'r'); break;
+		case QUEEN : printf("%c", 'q'); break;
+		case PAWN  : assert(false);
+		case KING  : assert(false);
+		case NONE  : assert(false);
+		case ALL   : assert(false);
+		}
+	}
 }
 
 bitboard
