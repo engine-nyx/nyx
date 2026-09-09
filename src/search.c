@@ -27,7 +27,7 @@ tt_skip(tt_entry ent, int alpha, int beta, struct search_state ss)
 }
 
 static int
-quiescence_rec(position *p, int alpha, int beta, time_manager *tm, struct search_state *ss)
+qsearch_rec(position *p, int alpha, int beta, time_manager *tm, struct search_state *ss)
 {
 	selector s;
 	move m, best_move;
@@ -47,7 +47,7 @@ quiescence_rec(position *p, int alpha, int beta, time_manager *tm, struct search
 	s = (selector) { .p=p };
 	best_score = alpha;
 
-	while (!tm_hard_expired(tm, ss) && !is_null_move(m = select_move(&s)))
+	while (!tm_hard_expired(tm, ss) && !is_null_move(m = select(&s)))
 	{
 		do_move(p, m, &sf);
 
@@ -57,7 +57,7 @@ quiescence_rec(position *p, int alpha, int beta, time_manager *tm, struct search
 		}
 		else
 		{
-			score = -quiescence_rec(p, alpha, beta, tm, ss);
+			score = -qsearch_rec(p, alpha, beta, tm, ss);
 		}
 
 		undo_move(p, m);
@@ -108,7 +108,7 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 		return ent.score;
 
 	if (!ss->depth)
-		return -quiescence_rec(p, -beta, -alpha, tm, ss);
+		return -qsearch_rec(p, -beta, -alpha, tm, ss);
 
 	--ss->depth;
 	++ss->nodes;
@@ -116,7 +116,7 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 	s = (selector) { .p=p };
 	best_score = alpha;
 
-	while (!tm_hard_expired(tm, ss) && !is_null_move(m = select_move(&s)))
+	while (!tm_hard_expired(tm, ss) && !is_null_move(m = select(&s)))
 	{
 		do_move(p, m, &sf);
 
@@ -185,7 +185,7 @@ search(position *p, limits l, transposition_table *tt)
 
 		while (true)
 		{
-			if (is_null_move(m = select_move(&s)))
+			if (is_null_move(m = select(&s)))
 			{
 				best_best_move = best_move;
 				break;
