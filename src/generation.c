@@ -435,10 +435,11 @@ generate(enum generation_type gt, const position *p, move *ms)
 {
 	switch (gt)
 	{
-	case NO_MOVES: return 0;
-	case CAPTURES: return generate_captures(p, ms);
-	case QUIETS  : return generate_quiets  (p, ms);
-	case EVASIONS: return generate_evasions(p, ms);
+	case CAPTURES     : return generate_captures(p, ms);
+	case QUIETS       : return generate_quiets  (p, ms);
+	case EVASIONS     : return generate_evasions(p, ms);
+	case NON_EVASIONS : return generate_non_evasions(p, ms);
+	case LEGALS       : return generate_legals(p, ms);
 	}
 
 	assert(false);

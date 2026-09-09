@@ -20,10 +20,11 @@ size_t generate_legals       (const position *p, move *ms);
 
 enum generation_type
 {
-	NO_MOVES,
 	CAPTURES,
 	QUIETS,
 	EVASIONS,
+	NON_EVASIONS,
+	LEGALS,
 };
 
 size_t generate(enum generation_type gt, const position *p, move *ms);
