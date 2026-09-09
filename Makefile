@@ -14,17 +14,7 @@ TESTS := $(wildcard $(TEST_DIR)/*.c)
 TOBJS := $(patsubst $(TEST_DIR)/%.c,$(TEST_BUILD_DIR)/%.o,$(TESTS))
 DEPS  := $(OBJS:.o=.d) $(TOBJS:.o=.d)
 
-LUTS += bishop_mask
-LUTS += bishop_offset
-LUTS += bishop_attacks
-LUTS += rook_mask
-LUTS += rook_offset
-LUTS += rook_attacks
-LUTS += knight_attacks
-LUTS += king_attacks
-LUTS := $(addprefix $(LUT_DIR)/,$(addsuffix .bin,$(LUTS)))
-
-CFLAGS := -Wall -Wextra -Wpedantic -Wconversion -Wshadow -Werror -Iinclude -MMD -MP
+CFLAGS := -Wall -Wextra -Wpedantic -Wshadow -Werror -Iinclude --embed-dir=. -MMD -MP
 CFLAGS += -march=native
 CFLAGS += -std=c2x
 
