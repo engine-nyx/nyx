@@ -8,21 +8,21 @@
 
 enum stage
 {
-	TT_MAIN,
-	INIT_CAPTURES,
-	GOOD_CAPTURES,
-	INIT_QUIETS,
-	GOOD_QUIETS,
-	BAD_CAPTURES,
-	BAD_QUIETS,
+	STAGE_TT_MAIN,
+	STAGE_INIT_CAPTURES,
+	STAGE_GOOD_CAPTURES,
+	STAGE_INIT_QUIETS,
+	STAGE_GOOD_QUIETS,
+	STAGE_BAD_CAPTURES,
+	STAGE_BAD_QUIETS,
 
-	TT_EVASIONS,
-	INIT_EVASIONS,
-	EVASIONS_,
+	STAGE_TT_EVASIONS,
+	STAGE_INIT_EVASIONS,
+	STAGE_EVASIONS,
 
-	TT_QSEARCH,
-	INIT_QCAPTURE,
-	QCAPTURE,
+	STAGE_TT_QSEARCH,
+	STAGE_INIT_QCAPTURE,
+	STAGE_QCAPTURE,
 };
 
 static void
@@ -42,39 +42,40 @@ select(selector *s)
 {
 	switch (s->stage)
 	{
-	case TT_MAIN:
-	case TT_EVASIONS:
-	case TT_QSEARCH:
+	case STAGE_TT_MAIN:
+	case STAGE_TT_EVASIONS:
+	case STAGE_TT_QSEARCH:
 		++s->stage;
 		return s->tt_move;
 
-	case INIT_CAPTURES:
-	case INIT_QCAPTURE:
+	case STAGE_INIT_CAPTURES:
+	case STAGE_INIT_QCAPTURE:
 		s->current = 0;
 		s->num_moves = generate(CAPTURES, s->p, s->ms);
 		partial_insertion_sort();
 		++s->stage;
 		return select(s);
 
-	case GOOD_CAPTURES:
+	case STAGE_GOOD_CAPTURES:
 		// TODO
-	case INIT_QUIETS:
+	case STAGE_INIT_QUIETS:
 		// TODO
-	case GOOD_QUIETS:
+	case STAGE_GOOD_QUIETS:
 		// TODO
-	case BAD_CAPTURES:
+	case STAGE_BAD_CAPTURES:
 		// TODO
-	case BAD_QUIETS:
+	case STAGE_BAD_QUIETS:
 		// TODO
 
-	case INIT_EVASIONS:
+	case STAGE_INIT_EVASIONS:
 		s->current = 0;
 		s->num_moves = generate(EVASIONS, s->p, s->ms);
 		partial_insertion_sort();
 		++s->stage;
+		[[fallthrough]];
 
-	case EVASIONS_:
-	case QCAPTURE:
+	case STAGE_EVASIONS:
+	case STAGE_QCAPTURE:
 		return next_move(s);
 	}
 
