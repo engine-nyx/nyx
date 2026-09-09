@@ -151,7 +151,7 @@ attacks_piece(ptype pt, square sq, bitboard occ)
 	case BISHOP:   return attacks_bishop(sq, occ);
 	case KNIGHT:   return attacks_knight(sq);
 	case KING:     return attacks_king(sq);
-	case PAWN:     return attacks_pawn(sq, WHITE) | attacks_pawn(sq, BLACK);
+	case PAWN:     assert(false && "Pawn attacks not implemented here");
 	case ALL:      return (bitboard) 0xFFFFFFFFFFFFFFFF;
 	case NONE:
 	default:       return (bitboard) 0;
