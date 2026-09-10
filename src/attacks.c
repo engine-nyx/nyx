@@ -171,8 +171,8 @@ attackers(const position *p, square sq)
 	attackers |= attacks_piece(BISHOP, sq, p->by_ptype[ALL]) & p->by_ptype[QUEEN];
 	attackers |= attacks_piece(KNIGHT, sq, p->by_ptype[ALL]) & p->by_ptype[KNIGHT];
 	attackers |= attacks_piece(KING  , sq, p->by_ptype[ALL]) & p->by_ptype[KING];
-	attackers |= attacks_pawn(sq, BLACK) & (p->by_ptype[PAWN] & p->by_color[WHITE]);
-	attackers |= attacks_pawn(sq, WHITE) & (p->by_ptype[PAWN] & p->by_color[BLACK]);
+	attackers |= attacks_pawn(sq, BLACK) & p->by_ptype[PAWN] & p->by_color[WHITE];
+	attackers |= attacks_pawn(sq, WHITE) & p->by_ptype[PAWN] & p->by_color[BLACK];
 
 	return attackers;
 }
