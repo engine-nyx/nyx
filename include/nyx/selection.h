@@ -8,10 +8,16 @@
 #include <nyx/position.h>
 #include <nyx/generation.h>
 
+struct scored_move
+{
+	move m;
+	int score;
+};
+
 typedef struct
 {
 	const position *p;
-	move ms[MAX_MOVES];
+	struct scored_move sms[MAX_MOVES];
 	int stage;
 	move tt_move;
 	size_t num_moves, current;
