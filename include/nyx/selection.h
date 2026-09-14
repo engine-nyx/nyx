@@ -16,13 +16,22 @@ struct scored_move
 
 typedef struct
 {
-	const position *p;
-	struct scored_move sms[MAX_MOVES];
+	const position *pos;
 	int stage;
-	move tt_move;
+	move tt;
+
+	struct scored_move sms[MAX_MOVES];
 	size_t num_moves, current;
+	size_t num_captures, num_good_captures;
 } selector;
 
+enum search_stage
+{
+	MAIN,
+	QUIESCENCE,
+};
+
+selector selector_of(const position *p, move tt, enum search_stage stage);
 move select(selector *s);
 
 #endif // NYX_SELECTION_H
