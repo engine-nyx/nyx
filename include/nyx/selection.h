@@ -22,7 +22,7 @@ typedef struct
 
 	struct scored_move sms[MAX_MOVES];
 	size_t num_moves, current;
-	size_t num_captures, num_good_captures;
+	size_t num_captures, num_good_captures, num_good_quiets;
 } selector;
 
 enum search_stage

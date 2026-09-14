@@ -388,3 +388,25 @@ undo_move(position *p, move m)
 	p->key ^= zobrist_castling[p->sf->castle];
 	if (p->sf->ep != NO_EP) p->key ^= zobrist_ep[file_of(p->sf->ep)];
 }
+
+// we assume no check
+bool
+is_legal(const position *p, move m)
+{
+	pctype pc;
+	bitboard enemy; // TODO: check if should use attackers or attackers_exist
+
+	pc = p->by_square[m.from];
+	enemy = p->by_color[other_color(p->stm)];
+
+	if (m.type == CASTLING)
+		return !((attackers(p, m.to) | attackers(p, (m.from + m.to) / 2)) & enemy);
+
+	if (ptype_of(pc) == KING)
+		return !attackers_exist(p, m.to, p->by_ptype[ALL] ^ bbsq(m.from), other_color(p->stm));
+
+	if (!(p->sf->blockers[p->stm] & bbsq(m.from)))
+		return true;
+
+	return dia_straight_lut[m.from][m.to] & bbsq(king_square(p, p->stm));
+}
