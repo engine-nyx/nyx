@@ -47,10 +47,14 @@ def render(bb, first=False):
     sys.stdout.write(PROMPT)
     sys.stdout.flush()
 
+BB_MASK = (1 << 64) - 1
+
 def parse_value(arg):
     if arg.startswith("0x") or arg.startswith("0X"):
-        return int(arg, 16)
-    return int(arg)
+        v = int(arg, 16)
+    else:
+        v = int(arg)
+    return v & BB_MASK
 
 def usage():
     print(f"Usage: {os.path.basename(sys.argv[0])} [value]")
