@@ -44,7 +44,7 @@ qsearch_rec(position *p, int alpha, int beta, time_manager *tm, struct search_st
 	--ss->depth;
 	++ss->nodes;
 
-	s = (selector) { .p=p };
+	s = selector_of(p, ent.best_move, QUIESCENCE);
 	best_score = alpha;
 
 	while (!tm_hard_expired(tm, ss) && !is_null_move(m = select(&s)))
@@ -113,7 +113,7 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 	--ss->depth;
 	++ss->nodes;
 
-	s = (selector) { .p=p };
+	s = selector_of(p, ent.best_move, MAIN);
 	best_score = alpha;
 
 	while (!tm_hard_expired(tm, ss) && !is_null_move(m = select(&s)))
@@ -181,7 +181,7 @@ search(position *p, limits l, transposition_table *tt)
 	{
 		ss->depth = depth;
 		best_score = -oo;
-		s = (selector) { .p=p };
+		s = selector_of(p, NULL_MOVE, MAIN);
 
 		while (true)
 		{
