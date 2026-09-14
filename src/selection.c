@@ -8,20 +8,20 @@
 
 enum stage
 {
-	STAGE_TT_MAIN,       // TODO
-	STAGE_INIT_CAPTURES, // TODO
+	STAGE_TT_MAIN,
+	STAGE_INIT_CAPTURES,
 	STAGE_GOOD_CAPTURES,
 	STAGE_INIT_QUIETS,
 	STAGE_GOOD_QUIETS,
 	STAGE_BAD_CAPTURES,
 	STAGE_BAD_QUIETS,
 
-	STAGE_TT_EVASIONS,   // TODO
-	STAGE_INIT_EVASIONS, // TODO
+	STAGE_TT_EVASIONS,
+	STAGE_INIT_EVASIONS,
 	STAGE_EVASIONS,
 
-	STAGE_TT_QUIESCE,    // TODO
-	STAGE_INIT_QUIESCE, // TODO
+	STAGE_TT_QUIESCE,
+	STAGE_INIT_QUIESCE,
 	STAGE_QUIESCE,
 };
 
@@ -196,7 +196,7 @@ selector_of(const position *p, move tt, enum search_stage stage)
 	}
 	else switch (stage)
 	{
-	case MAIN       : s.stage = STAGE_TT_MAIN; break;
+	case MAIN       : s.stage = STAGE_TT_MAIN;    break;
 	case QUIESCENCE : s.stage = STAGE_TT_QUIESCE; break;
 	}
 
