@@ -1,6 +1,7 @@
 // Copyright (c) 2026 Kilian Chung
 // SPDX-License-Identifier: NLPL
 
+#include <nyx/position.h>
 #include <assert.h>
 #include <nyx/generation.h>
 #include <nyx/selection.h>
@@ -108,8 +109,8 @@ has_good_quiets(const selector *s)
 	return s->current < s->num_moves && s->sms[s->current].score >= GOOD_QUIET_THRESHOLD;
 }
 
-move
-select(selector *s)
+static move
+pseudo_select(selector *s)
 {
 	move ms[MAX_MOVES];
 	size_t generated;
@@ -133,7 +134,7 @@ select(selector *s)
 
 	case STAGE_GOOD_CAPTURES:
 		if (has_good_captures(s))
-			return select(s);
+			return next_move(s);
 		s->num_captures = s->num_moves;
 		s->num_good_captures = s->current;
 		++s->stage;
@@ -151,19 +152,21 @@ select(selector *s)
 
 	case STAGE_GOOD_QUIETS:
 		if (has_good_quiets(s))
-			return select(s);
+			return next_move(s);
+		s->num_good_quiets = s->current - s->num_captures;
 		s->current = s->num_good_captures;
 		++s->stage;
 		[[fallthrough]];
 
 	case STAGE_BAD_CAPTURES:
 		if (s->current < s->num_captures)
-			return select(s);
+			return next_move(s);
+		s->current = s->num_captures + s->num_good_quiets;
 		++s->stage;
 		[[fallthrough]];
 
 	case STAGE_BAD_QUIETS:
-		return select(s);
+		return next_move(s);
 
 	case STAGE_INIT_EVASIONS:
 		s->current = 0;
@@ -179,6 +182,17 @@ select(selector *s)
 	}
 
 	assert(false);
+}
+
+move
+select(selector *s)
+{
+	move m;
+
+	m = pseudo_select(s);
+	if (is_null_move(m) || is_legal(s->pos, m))
+		return m;
+	return select(s);
 }
 
 selector
@@ -200,7 +214,7 @@ selector_of(const position *p, move tt, enum search_stage stage)
 	case QUIESCENCE : s.stage = STAGE_TT_QUIESCE; break;
 	}
 
-	if (is_null_move(tt)) ++stage;
+	if (is_null_move(tt)) ++s.stage;
 
 	return s;
 }

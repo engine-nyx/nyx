@@ -42,6 +42,8 @@ void undo_move(position *p, move m);
 
 square king_square(const position *p, color c);
 
+bool is_legal(const position *p, move m);
+
 void finalize_position(position *p);
 
 void position_init(void);
