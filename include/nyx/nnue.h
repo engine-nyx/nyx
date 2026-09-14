@@ -8,7 +8,7 @@
 
 typedef struct
 {
-	i16 accumulator_weights[];
+	i16 *accumulator_weights;
 } network;
 
 #endif // NYX_NNUE_H
