@@ -47,7 +47,7 @@ qsearch_rec(position *p, int alpha, int beta, time_manager *tm, struct search_st
 	s = selector_of(p, ent.best_move, QUIESCENCE);
 	best_score = alpha;
 
-	while (!tm_hard_expired(tm, ss) && !is_null_move(m = select(&s)))
+	while (!is_null_move(m = select(&s)))
 	{
 		do_move(p, m, &sf);
 

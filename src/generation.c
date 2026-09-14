@@ -378,28 +378,6 @@ generation_init(void)
 	}
 }
 
-// we assume no check
-static bool
-is_legal(const position *p, move m)
-{
-	pctype pc;
-	bitboard enemy; // TODO: check if should use attackers or attackers_exist
-
-	pc = p->by_square[m.from];
-	enemy = p->by_color[other_color(p->stm)];
-
-	if (m.type == CASTLING)
-		return !((attackers(p, m.to) | attackers(p, (m.from + m.to) / 2)) & enemy);
-
-	if (ptype_of(pc) == KING)
-		return !attackers_exist(p, m.to, p->by_ptype[ALL] ^ bbsq(m.from), other_color(p->stm));
-
-	if (!(p->sf->blockers[p->stm] & bbsq(m.from)))
-		return true;
-
-	return dia_straight_lut[m.from][m.to] & bbsq(king_square(p, p->stm));
-}
-
 size_t
 generate_legals(const position *p, move *ms)
 {
