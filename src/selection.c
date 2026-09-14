@@ -46,8 +46,19 @@ score_quiets(const move *ms, size_t num_moves, struct scored_move *sms)
 	}
 }
 
+static const int PIECE_VALUE[NUM_PIECE_TYPES] =
+{
+	[NONE]   = 0,
+	[PAWN]   = 100,
+	[KNIGHT] = 320,
+	[BISHOP] = 330,
+	[ROOK]   = 500,
+	[QUEEN]  = 900,
+	[KING]   = oo,
+};
+
 static void
-score_moves(const move *ms, size_t num_moves, struct scored_move *sms)
+score_moves(const selector *s, const move *ms, size_t num_moves, struct scored_move *sms)
 {
 	size_t i;
 	move m;
@@ -57,6 +68,10 @@ score_moves(const move *ms, size_t num_moves, struct scored_move *sms)
 	{
 		m = ms[i];
 		score = 0;
+
+		// MVV-LVA
+		score += PIECE_VALUE[ptype_of(s->pos->by_square[m.to])];
+		score -= PIECE_VALUE[ptype_of(s->pos->by_square[m.from])];
 
 		sms[i] = (struct scored_move)
 		{
@@ -127,7 +142,7 @@ pseudo_select(selector *s)
 	case STAGE_INIT_QUIESCE:
 		s->current = 0;
 		s->num_moves = generate(CAPTURES, s->pos, ms);
-		score_moves(ms, s->num_moves, s->sms);
+		score_moves(s, ms, s->num_moves, s->sms);
 		insertion_sort(s->sms, s->num_moves);
 		++s->stage;
 		return select(s);
@@ -171,7 +186,7 @@ pseudo_select(selector *s)
 	case STAGE_INIT_EVASIONS:
 		s->current = 0;
 		s->num_moves = generate(EVASIONS, s->pos, ms);
-		score_moves(ms, s->num_moves, s->sms);
+		score_moves(s, ms, s->num_moves, s->sms);
 		insertion_sort(s->sms, s->num_moves);
 		++s->stage;
 		[[fallthrough]];
