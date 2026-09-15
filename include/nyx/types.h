@@ -103,13 +103,18 @@ typedef enum
 	CASTLING,
 } mtype;
 
-typedef struct
+typedef union
 {
-	u16
-		to   : 6,
-		from : 6,
-		prom : 2,
-		type : 2;
+	u16 raw;
+
+	struct
+	{
+		u16
+			to   : 6,
+			from : 6,
+			prom : 2,
+			type : 2;
+	};
 } move;
 
 static inline ptype
