@@ -117,7 +117,7 @@ promtype_of(move m) { return m.prom + KNIGHT; }
 
 constexpr move NULL_MOVE = {};
 static inline bool
-is_null_move(move m) { return !(m.from || m.to); }
+is_null(move m) { return !(m.from || m.to); }
 
 constexpr int oo = INT_MAX / 2;
 

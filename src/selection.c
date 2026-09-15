@@ -205,7 +205,7 @@ select(selector *s)
 	move m;
 
 	m = pseudo_select(s);
-	if (is_null_move(m) || is_legal(s->pos, m))
+	if (is_null(m) || is_legal(s->pos, m))
 		return m;
 	return select(s);
 }
@@ -229,7 +229,7 @@ selector_of(const position *p, move tt, enum search_stage stage)
 	case QUIESCENCE : s.stage = STAGE_TT_QUIESCE; break;
 	}
 
-	if (is_null_move(tt)) ++s.stage;
+	if (is_null(tt)) ++s.stage;
 
 	return s;
 }

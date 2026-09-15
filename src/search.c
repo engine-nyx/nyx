@@ -53,7 +53,7 @@ qsearch_rec(position *p, int alpha, int beta, time_manager *tm, struct search_st
 
 	s = selector_of(p, ent.best_move, QUIESCENCE);
 
-	while (!is_null_move(m = select(&s)))
+	while (!is_null(m = select(&s)))
 	{
 		do_move(p, m, &sf);
 
@@ -122,7 +122,7 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 	s = selector_of(p, ent.best_move, MAIN);
 	best_score = alpha;
 
-	while (!tm_hard_expired(tm, ss) && !is_null_move(m = select(&s)))
+	while (!tm_hard_expired(tm, ss) && !is_null(m = select(&s)))
 	{
 		do_move(p, m, &sf);
 
@@ -191,7 +191,7 @@ search(position *p, limits l, transposition_table *tt)
 
 		while (true)
 		{
-			if (is_null_move(m = select(&s)))
+			if (is_null(m = select(&s)))
 			{
 				best_best_move = best_move;
 				break;
