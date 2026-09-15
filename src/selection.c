@@ -229,7 +229,7 @@ selector_of(const position *p, move tt, enum search_stage stage)
 	case QUIESCENCE : s.stage = STAGE_TT_QUIESCE; break;
 	}
 
-	if (is_null(tt)) ++s.stage;
+	if (is_null(tt) || !is_pseudo_legal(s.pos, tt)) ++s.stage;
 
 	return s;
 }

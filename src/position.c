@@ -3,6 +3,7 @@
 
 #include <assert.h>
 #include <nyx/position.h>
+#include <nyx/generation.h>
 #include <nyx/types.h>
 #include <stdlib.h>
 #include <nyx/attacks.h>
@@ -409,4 +410,64 @@ is_legal(const position *p, move m)
 		return true;
 
 	return dia_straight_lut[m.from][m.to] & bbsq(king_square(p, p->stm));
+}
+
+bool
+is_pseudo_legal(const position *p, move m)
+{
+	move ms[MAX_MOVES];
+	size_t generated, i;
+	pctype pc;
+	ptype pt;
+	bool is_capture_pawn, is_single_pawn, is_double_pawn;
+
+	if (m.type != NORMAL)
+	{
+		generated = generate(p->sf->checkers ? EVASIONS : NON_EVASIONS, p, ms);
+
+		for (i = 0; i < generated; ++i)
+			if (ms[i].raw == m.raw)
+				return true;
+		return false;
+	}
+
+	assert(!m.prom && "Prom field of normal move should be empty");
+
+	pc = p->by_square[m.from];
+	pt = ptype_of(pc);
+
+	if (pc == EMPTY || color_of(pc) != p->stm)
+		return false;
+
+	if (p->by_color[p->stm] & bbsq(m.to))
+		return false;
+
+	if (pt == PAWN)
+	{
+		if (rank_of(m.to) == 0 || rank_of(m.to) == 7)
+			return false;
+
+		is_capture_pawn = attacks_pawn(m.from, p->stm) & p->by_color[other_color(p->stm)] & bbsq(m.to);
+		is_single_pawn = m.to == m.from + white_black(+8, -8, p->stm) && p->by_square[m.to] == EMPTY;
+		is_double_pawn = m.to == m.from + white_black(+16, -16, p->stm) && p->by_square[m.to] == EMPTY &&
+			rank_of(m.from) == white_black(1, 6, p->stm) && p->by_square[m.from + white_black(+8, -8, p->stm)] == EMPTY;
+
+		if (!(is_capture_pawn || is_single_pawn || is_double_pawn))
+			return false;
+	}
+	else if (!(attacks_piece(pt, m.from, p->by_ptype[ALL]) & bbsq(m.to)))
+		return false;
+
+	if (p->sf->checkers && pt != KING)
+	{
+		// in double check, it's the king that has to move
+		if (popcnt(p->sf->checkers) > 1)
+			return false;
+
+		// blocking piece
+		if (!(between_lut[king_square(p, p->stm)][lsb(p->sf->checkers)] & bbsq(m.to)))
+			return false;
+	}
+
+	return true;
 }
