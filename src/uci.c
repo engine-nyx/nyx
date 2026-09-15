@@ -32,7 +32,7 @@ static struct
 	size_t transposition_table_capacity;
 } UCI_config =
 {
-	.transposition_table_capacity = 1,
+	.transposition_table_capacity = 100000,
 };
 
 // quit
