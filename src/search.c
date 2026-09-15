@@ -11,6 +11,8 @@
 #include <nyx/evaluation.h>
 #include <nyx/transposition.h>
 
+#define MAX(a, b) ((a) >= (b) ? (a) : (b))
+
 static inline bool
 tt_skip(tt_entry ent, int alpha, int beta, struct search_state ss)
 {
@@ -18,9 +20,9 @@ tt_skip(tt_entry ent, int alpha, int beta, struct search_state ss)
 
 	switch (ent.type)
 	{
-	case EXACT    : return true;
-	case FAIL_LOW : return ent.score >= beta;
-	case FAIL_HIGH: return ent.score < alpha;
+	case EXACT     : return true;
+	case FAIL_LOW  : return ent.score >= beta;
+	case FAIL_HIGH : return ent.score < alpha;
 	}
 
 	assert(false);
@@ -36,6 +38,11 @@ qsearch_rec(position *p, int alpha, int beta, time_manager *tm, struct search_st
 	tt_entry ent;
 	bool tt_probe_success;
 
+	best_score = evaluate(p);
+	if (best_score >= beta)
+		return best_score;
+	best_score = MAX(best_score, alpha);
+
 	tt_probe_success = tt_probe(ss->tt, p->key, &ent);
 
 	if (tt_probe_success && tt_skip(ent, alpha, beta, *ss))
@@ -45,7 +52,6 @@ qsearch_rec(position *p, int alpha, int beta, time_manager *tm, struct search_st
 	++ss->nodes;
 
 	s = selector_of(p, ent.best_move, QUIESCENCE);
-	best_score = alpha;
 
 	while (!is_null_move(m = select(&s)))
 	{
@@ -57,7 +63,7 @@ qsearch_rec(position *p, int alpha, int beta, time_manager *tm, struct search_st
 		}
 		else
 		{
-			score = -qsearch_rec(p, alpha, beta, tm, ss);
+			score = -qsearch_rec(p, -beta, -best_score, tm, ss);
 		}
 
 		undo_move(p, m);
