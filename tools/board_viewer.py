@@ -389,7 +389,7 @@ def render(st, moves, cursor, msg=None, up=0):
     if msg:
         print(msg)
         nlines += 1
-    print("arrow-keys navigation | r reset | q quit | else UCI move (e.g. e2e4, e7e8q)")
+    print("arrow-keys navigation | r reset | q quit | UCI move (e.g. e2e4, e7e8q)")
     nlines += 1
     if sys.stdout.isatty():
         sys.stdout.write("\n\033[1A> ")
