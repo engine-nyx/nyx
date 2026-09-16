@@ -17,6 +17,7 @@ DEPS  := $(OBJS:.o=.d) $(TOBJS:.o=.d)
 
 CFLAGS := -Wall -Wextra -Wpedantic -Wshadow -Werror -Iinclude --embed-dir=. -MMD -MP
 CFLAGS += -march=native
+CFLAGS += -Ofast
 CFLAGS += -std=c2x
 
 all: $(TARGET_RELEASE) $(TARGET_TEST)
@@ -36,13 +37,16 @@ $(TEST_BUILD_DIR)/%.o: $(TEST_DIR)/%.c | $(TEST_BUILD_DIR)
 $(BUILD_DIR) $(RELEASE_BUILD_DIR) $(TEST_BUILD_DIR):
 	mkdir -p $@
 
-.PHONY: all clean run
+.PHONY: all clean run debug
 
 clean:
 	rm -rf $(BUILD_DIR) $(RELEASE_BUILD_DIR) $(TEST_BUILD_DIR)
 
 run: $(TARGET_RELEASE)
 	./$(TARGET_RELEASE)
+
+debug: $(TARGET_RELEASE)
+	gdb ./$(TARGET_RELEASE)
 
 test: $(TARGET_TEST)
 	./$(TARGET_TEST)
