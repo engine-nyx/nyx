@@ -22,7 +22,7 @@ tt_skip(tt_entry ent, int alpha, int beta, struct search_state ss)
 	{
 	case EXACT     : return true;
 	case FAIL_LOW  : return ent.score >= beta;
-	case FAIL_HIGH : return ent.score < alpha;
+	case FAIL_HIGH : return ent.score <= alpha;
 	}
 
 	assert(false);
@@ -51,7 +51,7 @@ qsearch_rec(position *p, int alpha, int beta, time_manager *tm, struct search_st
 	--ss->depth;
 	++ss->nodes;
 
-	s = selector_of(p, ent.best_move, QUIESCENCE);
+	s = selector_of(p, tt_probe_success ? ent.best_move : NULL_MOVE, QUIESCENCE);
 
 	while (!is_null(m = select(&s)))
 	{
@@ -78,22 +78,19 @@ qsearch_rec(position *p, int alpha, int beta, time_manager *tm, struct search_st
 	}
 
 	++ss->depth;
-	if (score >= beta)
+	tt_store(ss->tt, (tt_entry)
 	{
-		tt_store(ss->tt, (tt_entry)
-		{
-			.depth=(u8)ss->depth,
-			.best_move=best_move,
-			.key=p->key,
-			.score=best_score,
-			.type=
-			(
-				score >= beta ? FAIL_HIGH :
-				score < alpha ? FAIL_LOW :
-				EXACT
-			),
-		});
-	}
+		.depth=(u8)ss->depth,
+		.best_move=best_move,
+		.key=p->key,
+		.score=best_score,
+		.type=
+		(
+			best_score >= beta ? FAIL_HIGH :
+			best_score <= alpha ? FAIL_LOW :
+			EXACT
+		),
+	});
 
 	return best_score;
 }
@@ -119,7 +116,7 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 	--ss->depth;
 	++ss->nodes;
 
-	s = selector_of(p, ent.best_move, MAIN);
+	s = selector_of(p, tt_probe_success ? ent.best_move : NULL_MOVE, MAIN);
 	best_score = alpha;
 
 	while (!tm_hard_expired(tm, ss) && !is_null(m = select(&s)))
@@ -147,22 +144,19 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 	}
 
 	++ss->depth;
-	if (score >= beta)
+	tt_store(ss->tt, (tt_entry)
 	{
-		tt_store(ss->tt, (tt_entry)
-		{
-			.depth=(u8)ss->depth,
-			.best_move=best_move,
-			.key=p->key,
-			.score=best_score,
-			.type=
-			(
-				score >= beta ? FAIL_HIGH :
-				score < alpha ? FAIL_LOW :
-				EXACT
-			),
-		});
-	}
+		.depth=(u8)ss->depth,
+		.best_move=best_move,
+		.key=p->key,
+		.score=best_score,
+		.type=
+		(
+			best_score >= beta ? FAIL_HIGH :
+			best_score <= alpha ? FAIL_LOW :
+			EXACT
+		),
+	});
 
 	return best_score;
 }
