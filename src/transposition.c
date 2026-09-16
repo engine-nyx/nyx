@@ -34,10 +34,9 @@ void
 tt_resize(transposition_table *tt, size_t capacity)
 {
 	tt->capacity = capacity;
-
-	if (tt->entries) free(tt->entries);
-	tt->entries = calloc(tt->capacity, sizeof(tt_entry));
-	assert(tt && "Not enough memory for transposition table");
+	tt->entries = realloc(tt->entries, tt->capacity * sizeof(tt_entry));
+	assert(tt->entries && "Not enough memory for transposition table");
+	tt_clear(tt);
 }
 
 void
