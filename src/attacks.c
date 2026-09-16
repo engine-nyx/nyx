@@ -146,16 +146,17 @@ attacks_piece(ptype pt, square sq, bitboard occ)
 {
 	switch (pt)
 	{
-	case QUEEN:    return attacks_queen(sq, occ);
-	case ROOK:     return attacks_rook(sq, occ);
-	case BISHOP:   return attacks_bishop(sq, occ);
-	case KNIGHT:   return attacks_knight(sq);
-	case KING:     return attacks_king(sq);
-	case PAWN:     assert(false && "Pawn attacks not implemented here");
-	case ALL:      return (bitboard) 0xFFFFFFFFFFFFFFFF;
-	case NONE:
-	default:       return (bitboard) 0;
+	case QUEEN:  return attacks_queen(sq, occ);
+	case ROOK:   return attacks_rook(sq, occ);
+	case BISHOP: return attacks_bishop(sq, occ);
+	case KNIGHT: return attacks_knight(sq);
+	case KING:   return attacks_king(sq);
+	case PAWN:   assert(false && "Pawn attacks not implemented here");
+	case ALL:    return FULLBB;
+	case NONE:   return EMPTYBB;
 	}
+
+	assert(false);
 }
 
 bitboard
