@@ -111,7 +111,7 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 		return ent.score;
 
 	if (!ss->depth)
-		return -qsearch_rec(p, -beta, -alpha, tm, ss);
+		return qsearch_rec(p, alpha, beta, tm, ss);
 
 	--ss->depth;
 	++ss->nodes;
@@ -162,7 +162,7 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 }
 
 struct search_result
-search(position *p, limits l, transposition_table *tt)
+search(position *p, limits l, transposition_table *tt, atomic_bool *stop)
 {
 	state_frame sf;
 	selector s;
@@ -173,7 +173,7 @@ search(position *p, limits l, transposition_table *tt)
 	struct search_state *ss;
 
 	ss = &(struct search_state) { .p=p, .tt=tt };
-	tm = &(time_manager) { .l=l };
+	tm = &(time_manager) { .l=l, .stop=stop };
 	tm_start(tm);
 	tt_clear(tt);
 
@@ -191,7 +191,11 @@ search(position *p, limits l, transposition_table *tt)
 				break;
 			}
 
-			if (tm_hard_expired(tm, ss)) break;
+			if (tm_hard_expired(tm, ss))
+			{
+				--depth;
+				break;
+			}
 
 			do_move(p, m, &sf);
 			score = -search_rec(p, -oo, -best_score, tm, ss);
@@ -208,5 +212,7 @@ search(position *p, limits l, transposition_table *tt)
 	return (struct search_result)
 	{
 		.best=best_best_move,
+		.depth=depth,
+		.nodes=ss->nodes,
 	};
 }

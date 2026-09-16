@@ -6,6 +6,7 @@
 
 #include <nyx/types.h>
 #include <nyx/position.h>
+#include <stdatomic.h>
 #include <nyx/transposition.h>
 
 enum limit_type
@@ -53,6 +54,6 @@ struct search_result
 	node_count nodes;
 };
 
-struct search_result search(position *p, limits l, transposition_table *tt);
+struct search_result search(position *p, limits l, transposition_table *tt, atomic_bool *stop);
 
 #endif // NYX_SEARCH_H
