@@ -21,8 +21,8 @@ tt_skip(tt_entry ent, int alpha, int beta, struct search_state ss)
 	switch (ent.type)
 	{
 	case EXACT     : return true;
-	case FAIL_LOW  : return ent.score >= beta;
-	case FAIL_HIGH : return ent.score <= alpha;
+	case FAIL_HIGH : return ent.score >= beta;
+	case FAIL_LOW  : return ent.score <= alpha;
 	}
 
 	assert(false);
