@@ -217,7 +217,6 @@ static bitboard castling_path[] =
 static size_t
 generate_castling_moves(const position *p, move *ms)
 {
-	// TODO: who checks that the king isnt evading with castle
 	castling_rights cr;
 	square ksq;
 	size_t num_moves;
