@@ -1,23 +1,76 @@
 // Copyright (c) 2026 Kilian Chung
 // SPDX-License-Identifier: NLPL
 
+#include <nyx/transposition.h>
 #include <nyx/generation.h>
 #include <nyx/position.h>
+#include <nyx/search.h>
 #include <nyx/attacks.h>
 #include <nyx/uci.h>
+#include <nyx/utils.h>
 #include <nyx/types.h>
 #include <stdlib.h>
+#include <stdatomic.h>
+
+#include <signal.h>
+#include <string.h>
+#include <stdio.h>
+
+static atomic_bool stop = false;
+
+static void
+sig_handler(int signum)
+{
+	if (signum == SIGINT) stop = true;
+}
+
+static char fen_arg_buffer[1024];
+
+static void
+concat_args(int argc, char **argv, char *dest)
+{
+	size_t i;
+
+	dest[0] = '\0';
+
+	for (i = 0; i < (unsigned) argc; ++i) strcat(dest, argv[i]);
+}
 
 int
 main(int argc, char **argv)
 {
-	(void) argc, (void) argv;
-
 	attacks_init();
 	generation_init();
 	position_init();
 
-	uci_loop();
+	if (argc == 1)
+	{
+		uci_loop();
+	}
+	else
+	{
+		signal(SIGINT, sig_handler);
+
+		position p;
+		state_frame sf;
+		transposition_table tt = {};
+
+		concat_args(argc - 1, argv + 1, fen_arg_buffer);
+
+		parse_fen(fen_arg_buffer, &p, &sf);
+		tt_resize(&tt, 100000);
+
+		print_board(&p);
+		printf("Press Ctrl+C to stop search...");
+		fflush(stdout);
+
+		struct search_result res = search(&p, (limits) {.type=INFINITE}, &tt, &stop);
+
+		printf("\nBest move: ");
+		print_move(res.best);
+		printf("\nAt depth: %u (%lu nodes)\n", res.depth, res.nodes);
+
+	}
 
 	return EXIT_SUCCESS;
 }
