@@ -16,7 +16,7 @@ VERSION_FILE="$ROOT_DIR/include/nyx/version.h"
 echo "#define NYX_VERSION \"$VERSION\"" > "$VERSION_FILE"
 
 git add "$VERSION_FILE"
-git commit -am "Bump version to $VERSION" || true
+git commit -am "Bump version to $VERSION" 2>/dev/null || true
 
 git tag -a "v$VERSION"
 
