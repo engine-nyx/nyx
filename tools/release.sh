@@ -13,7 +13,15 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 VERSION="$1"
 VERSION_FILE="$ROOT_DIR/include/nyx/version.h"
 
-echo "#define NYX_VERSION \"$VERSION\"" > "$VERSION_FILE"
+echo "\
+/* CODE GENERATED AUTOMATICALLY. DO NOT EDIT. */
+
+#ifndef NYX_VERSION_H
+#define NYX_VERSION_H
+
+#define NYX_VERSION \"$VERSION\"
+
+#endif // NYX_VERSION_H" > "$VERSION_FILE"
 
 git commit -m "Bump version to $VERSION" -- "$VERSION_FILE" 2>/dev/null || true
 
