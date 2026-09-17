@@ -16,7 +16,8 @@
 static inline bool
 tt_skip(tt_entry ent, int alpha, int beta, struct search_state ss)
 {
-	if (ent.depth >= ss.depth) return false; // TODO: fix when ready
+	if (ent.depth < ss.depth)
+		return false;
 
 	switch (ent.type)
 	{
@@ -41,7 +42,6 @@ qsearch_rec(position *p, int alpha, int beta, time_manager *tm, struct search_st
 	best_score = evaluate(p);
 	if (best_score >= beta)
 		return best_score;
-	best_score = MAX(best_score, alpha);
 
 	tt_probe_success = tt_probe(ss->tt, p->key, &ent);
 
@@ -63,7 +63,7 @@ qsearch_rec(position *p, int alpha, int beta, time_manager *tm, struct search_st
 		}
 		else
 		{
-			score = -qsearch_rec(p, -beta, -best_score, tm, ss);
+			score = -qsearch_rec(p, -beta, -MAX(best_score, alpha), tm, ss);
 		}
 
 		undo_move(p, m);
@@ -117,7 +117,7 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 	++ss->nodes;
 
 	s = selector_of(p, tt_probe_success ? ent.best_move : NULL_MOVE, MAIN);
-	best_score = alpha;
+	best_score = -oo;
 
 	while (!tm_hard_expired(tm, ss) && !is_null(m = select(&s)))
 	{
@@ -129,7 +129,7 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 		}
 		else
 		{
-			score = -search_rec(p, -beta, -best_score, tm, ss);
+			score = -search_rec(p, -beta, -MAX(best_score, alpha), tm, ss);
 		}
 
 		undo_move(p, m);
