@@ -27,13 +27,21 @@ sig_handler(int signum)
 static char fen_arg_buffer[1024];
 
 static void
-concat_args(int argc, char **argv, char *dest)
+str_join(int argc, char **argv, char sep_char, char *dest)
 {
 	size_t i;
+	char sep[2];
 
 	dest[0] = '\0';
+	sep[0] = sep_char;
+	sep[1] = '\0';
 
-	for (i = 0; i < (unsigned) argc; ++i) strcat(dest, argv[i]);
+	for (i = 0; i < (unsigned) argc; ++i)
+	{
+		strcat(dest, argv[i]);
+		if (argc - 1 - i)
+			strcat(dest, sep);
+	}
 }
 
 int
@@ -55,7 +63,7 @@ main(int argc, char **argv)
 		state_frame sf;
 		transposition_table tt = {};
 
-		concat_args(argc - 1, argv + 1, fen_arg_buffer);
+		str_join(argc - 1, argv + 1, ' ', fen_arg_buffer);
 
 		parse_fen(fen_arg_buffer, &p, &sf);
 		tt_resize(&tt, 100000);
