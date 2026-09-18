@@ -10,6 +10,14 @@
 #include <nyx/selection.h>
 #include <nyx/evaluation.h>
 #include <nyx/transposition.h>
+#include <string.h>
+
+constexpr int VALUE_DRAW = 0;
+static int
+VALUE_MATE(unsigned ply)
+{
+	return (oo / 2) - ply;
+}
 
 #define MAX(a, b) ((a) >= (b) ? (a) : (b))
 
@@ -21,9 +29,9 @@ tt_skip(tt_entry ent, int alpha, int beta, struct search_state ss)
 
 	switch (ent.type)
 	{
-	case EXACT     : return true;
-	case FAIL_HIGH : return ent.score >= beta;
-	case FAIL_LOW  : return ent.score <= alpha;
+	case EXACT : return true;
+	case LOWER : return ent.score >= beta;
+	case UPPER : return ent.score <= alpha;
 	}
 
 	assert(false);
@@ -38,6 +46,7 @@ qsearch_rec(position *p, int alpha, int beta, time_manager *tm, struct search_st
 	state_frame sf;
 	tt_entry ent;
 	bool tt_probe_success;
+	unsigned move_count;
 
 	best_score = evaluate(p);
 	if (best_score >= beta)
@@ -48,23 +57,18 @@ qsearch_rec(position *p, int alpha, int beta, time_manager *tm, struct search_st
 	if (tt_probe_success && tt_skip(ent, alpha, beta, *ss))
 		return ent.score;
 
-	--ss->depth;
+	--ss->depth, ++ss->ply;
 	++ss->nodes;
 
 	s = selector_of(p, tt_probe_success ? ent.best_move : NULL_MOVE, QUIESCENCE);
 
+	move_count = 0;
 	while (!is_null(m = select(&s)))
 	{
+		++move_count;
 		do_move(p, m, &sf);
 
-		if (sf.material < -oo / 2 || sf.material > oo / 2)
-		{
-			score = -evaluate(p);
-		}
-		else
-		{
-			score = -qsearch_rec(p, -beta, -MAX(best_score, alpha), tm, ss);
-		}
+		score = -qsearch_rec(p, -beta, -MAX(best_score, alpha), tm, ss);
 
 		undo_move(p, m);
 
@@ -77,7 +81,12 @@ qsearch_rec(position *p, int alpha, int beta, time_manager *tm, struct search_st
 		}
 	}
 
-	++ss->depth;
+	++ss->depth, --ss->ply;
+	if (!move_count)
+	{
+		best_move = NULL_MOVE;
+		best_score = p->sf->checkers ? -VALUE_MATE(ss->ply) : VALUE_DRAW;
+	}
 	tt_store(ss->tt, (tt_entry)
 	{
 		.depth=(u8)ss->depth,
@@ -86,8 +95,8 @@ qsearch_rec(position *p, int alpha, int beta, time_manager *tm, struct search_st
 		.score=best_score,
 		.type=
 		(
-			best_score >= beta ? FAIL_HIGH :
-			best_score <= alpha ? FAIL_LOW :
+			best_score >= beta ? LOWER :
+			best_score <= alpha ? UPPER :
 			EXACT
 		),
 	});
@@ -96,14 +105,15 @@ qsearch_rec(position *p, int alpha, int beta, time_manager *tm, struct search_st
 }
 
 static int
-search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_state *ss)
+search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_state *ss, bool pv)
 {
 	selector s;
 	move m, best_move;
 	int score, best_score;
 	state_frame sf;
 	tt_entry ent;
-	bool tt_probe_success;
+	bool tt_probe_success, first_move;
+	unsigned move_count;
 
 	tt_probe_success = tt_probe(ss->tt, p->key, &ent);
 
@@ -113,23 +123,32 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 	if (!ss->depth)
 		return qsearch_rec(p, alpha, beta, tm, ss);
 
-	--ss->depth;
+	--ss->depth, ++ss->ply;
 	++ss->nodes;
 
 	s = selector_of(p, tt_probe_success ? ent.best_move : NULL_MOVE, MAIN);
 	best_score = -oo;
+	first_move = true;
+	move_count = 0;
 
 	while (!tm_hard_expired(tm, ss) && !is_null(m = select(&s)))
 	{
+		++move_count;
 		do_move(p, m, &sf);
 
-		if (sf.material < -oo / 2 || sf.material > oo / 2)
+		if (first_move)
 		{
-			score = -evaluate(p);
+			score = -search_rec(p, -beta, -alpha, tm, ss, pv);
+
+			first_move = false;
 		}
 		else
 		{
-			score = -search_rec(p, -beta, -MAX(best_score, alpha), tm, ss);
+			score = -search_rec(p, -(best_score + 1), -best_score, tm, ss, false);
+
+			// re-search fail-high nodes
+			if (score > best_score && pv)
+				score = -search_rec(p, -beta, -MAX(alpha, best_score), tm, ss, true);
 		}
 
 		undo_move(p, m);
@@ -143,7 +162,13 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 		}
 	}
 
-	++ss->depth;
+	++ss->depth, --ss->ply;
+	if (!move_count)
+	{
+		best_move = NULL_MOVE;
+		best_score = p->sf->checkers ? -VALUE_MATE(ss->ply) : VALUE_DRAW;
+	}
+
 	tt_store(ss->tt, (tt_entry)
 	{
 		.depth=(u8)ss->depth,
@@ -152,11 +177,16 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 		.score=best_score,
 		.type=
 		(
-			best_score >= beta ? FAIL_HIGH :
-			best_score <= alpha ? FAIL_LOW :
+			best_score >= beta  ? LOWER :
+			best_score <= alpha ? UPPER :
 			EXACT
 		),
 	});
+	if (pv)
+	{
+		ss->pv[ss->ply] = best_move;
+		ss->score[ss->ply] = best_score;
+	}
 
 	return best_score;
 }
@@ -164,10 +194,6 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 struct search_result
 search(position *p, limits l, transposition_table *tt, atomic_bool *stop)
 {
-	state_frame sf;
-	selector s;
-	move m, best_move, best_best_move;
-	int score, best_score;
 	unsigned depth;
 	time_manager *tm;
 	struct search_state *ss;
@@ -180,39 +206,19 @@ search(position *p, limits l, transposition_table *tt, atomic_bool *stop)
 	for (depth = 0; !tm_soft_expired(tm, ss); ++depth)
 	{
 		ss->depth = depth;
-		best_score = -oo;
-		s = selector_of(p, NULL_MOVE, MAIN);
 
-		while (true)
-		{
-			if (is_null(m = select(&s)))
-			{
-				best_best_move = best_move;
-				break;
-			}
-
-			if (tm_hard_expired(tm, ss))
-			{
-				--depth;
-				break;
-			}
-
-			do_move(p, m, &sf);
-			score = -search_rec(p, -oo, -best_score, tm, ss);
-			undo_move(p, m);
-
-			if (score > best_score)
-			{
-				best_score = score;
-				best_move = m;
-			}
-		}
+		search_rec(p, -oo, oo, tm, ss, true);
 	}
 
-	return (struct search_result)
+	struct search_result res =
 	{
-		.best=best_best_move,
+		.best=ss->pv[0],
+		.score=ss->score[0],
 		.depth=depth,
 		.nodes=ss->nodes,
 	};
+
+	memcpy(&res.pv, &ss->pv, depth * sizeof(move));
+
+	return res;
 }
