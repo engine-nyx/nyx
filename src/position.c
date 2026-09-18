@@ -178,18 +178,18 @@ update_check_squares(position *p)
 {
 	square ksq;
 	bitboard occ;
+	color us;
 
-	ksq = king_square(p, other_color(p->stm));
+	us = other_color(p->stm);
+	ksq = king_square(p, us);
 	occ = p->by_ptype[ALL];
 
+	p->sf->check_squares[PAWN]   = attacks_pawn  (ksq, us);
 	p->sf->check_squares[KNIGHT] = attacks_knight(ksq);
 	p->sf->check_squares[BISHOP] = attacks_bishop(ksq, occ);
 	p->sf->check_squares[ROOK]   = attacks_rook  (ksq, occ);
 	p->sf->check_squares[QUEEN]  = attacks_queen (ksq, occ);
 	p->sf->check_squares[KING]   = EMPTYBB;
-	p->sf->check_squares[PAWN]   =
-		bbsq(ksq + white_black(-7, +7, p->stm)) |
-		bbsq(ksq + white_black(-9, +9, p->stm));
 }
 
 static bool
@@ -330,15 +330,13 @@ do_move(position *p, move m, state_frame *sf)
 	p->sf->castle &= ~(castling_rights_mask[m.from] | castling_rights_mask[m.to]);
 	p->key ^= zobrist_castling[p->sf->castle];
 
-
 	sf->checkers = check ? attackers(p, king_square(p, them)) & p->by_color[p->stm] : 0;
 
 	p->stm = them;
 	p->key ^= zobrist_stm;
 	++p->ply;
 
-	if (!(ptype_of(sf->capture) == KING)) // TODO outsource this check to prev ply in search
-		finalize_position(p);
+	finalize_position(p);
 }
 
 void
