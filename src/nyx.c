@@ -77,8 +77,8 @@ main(int argc, char **argv)
 
 		printf("\nBest move: ");
 		print_move(res.best);
-		printf("\nAt depth: %u (%" PRIuFAST64 " nodes)\n", res.depth, res.nodes);
-
+		printf(" (%d)\nAt depth: %u (%" PRIuFAST64 " nodes)\n", res.score, res.depth, res.nodes);
+		print_line(res.pv, res.depth);
 	}
 
 	return EXIT_SUCCESS;
