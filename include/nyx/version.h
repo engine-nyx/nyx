@@ -1,1 +1,8 @@
-#define NYX_VERSION "0.2.2"
+/* CODE GENERATED AUTOMATICALLY. DO NOT EDIT. */
+
+#ifndef NYX_VERSION_H
+#define NYX_VERSION_H
+
+#define NYX_VERSION "0.2.3"
+
+#endif // NYX_VERSION_H
