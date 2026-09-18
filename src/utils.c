@@ -306,6 +306,24 @@ print_move(move m)
 	}
 }
 
+void
+print_line(move *ms, size_t len)
+{
+	size_t i;
+
+	for (i = 0; i < len; ++i)
+	{
+		if (is_null(ms[i])) break;
+
+		if (!i) (void) 0;
+		else if (i % 2) printf(" ");
+		else printf("\n");
+
+		print_move(ms[i]);
+	}
+	printf("\n");
+}
+
 bitboard
 strbb(const char *s)
 {

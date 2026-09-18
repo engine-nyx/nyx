@@ -17,6 +17,7 @@ size_t parse_fen(const char *fen, position *p, state_frame *sf);
 
 void print_square(square sq);
 void print_move(move m);
+void print_line(move *ms, size_t len);
 
 bitboard strbb(const char *s);
 
