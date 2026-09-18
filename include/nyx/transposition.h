@@ -6,16 +6,16 @@
 
 #include <nyx/types.h>
 
-enum tt_entry_type
+typedef enum
 {
 	EXACT,
-	FAIL_HIGH,
-	FAIL_LOW,
-};
+	UPPER,
+	LOWER,
+} bound;
 
 typedef struct
 {
-	enum tt_entry_type type;
+	bound type;
 
 	int score;
 	move best_move;
