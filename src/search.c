@@ -40,6 +40,7 @@ qsearch_rec(position *p, int alpha, int beta, time_manager *tm, struct search_st
 	bool tt_probe_success;
 
 	best_score = evaluate(p);
+	best_move = NULL_MOVE;
 	if (best_score >= beta)
 		return best_score;
 
