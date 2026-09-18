@@ -76,8 +76,8 @@ main(int argc, char **argv)
 
 		printf("\nBest move: ");
 		print_move(res.best);
-		printf("\nAt depth: %u (%lu nodes)\n", res.depth, res.nodes);
-
+		printf(" (%d)\nAt depth: %u (%lu nodes)\n\nPV:\n", res.score, res.depth, res.nodes);
+		print_line(res.pv, res.depth);
 	}
 
 	return EXIT_SUCCESS;
