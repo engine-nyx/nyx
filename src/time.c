@@ -26,7 +26,7 @@ tm_hard_expired(const time_manager *tm, struct search_state *ss)
 {
 	millis ms;
 
-	if (*tm->stop) return true;
+	if (*tm->stop || ss->depth >= MAX_PLY) return true;
 
 	ms = now();
 
