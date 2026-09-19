@@ -337,6 +337,8 @@ do_move(position *p, move m, state_frame *sf)
 	++p->ply;
 
 	finalize_position(p);
+
+	assert(popcnt(p->by_ptype[KING]) == 2 && "There should always be two kings on the board");
 }
 
 void
