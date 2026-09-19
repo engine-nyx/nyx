@@ -192,34 +192,40 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 	return best_score;
 }
 
+static bool
+is_mate_score(int score)
+{
+	return score < -oo / 3 || score > oo / 3;
+}
+
 struct search_result
 search(position *p, limits l, transposition_table *tt, atomic_bool *stop)
 {
 	unsigned depth;
 	time_manager *tm;
 	struct search_state *ss;
+	struct search_result res;
 
 	ss = &(struct search_state) { .p=p, .tt=tt };
 	tm = &(time_manager) { .l=l, .stop=stop };
 	tm_start(tm);
 	tt_clear(tt);
 
-	for (depth = 0; !tm_soft_expired(tm, ss); ++depth)
+	for (depth = 0; !tm_soft_expired(tm, ss) && !is_mate_score(ss->score[0]); ++depth)
 	{
 		ss->depth = depth;
 
 		search_rec(p, -oo, oo, tm, ss, true);
+
+		res = (struct search_result)
+		{
+			.best=ss->pv[0],
+			.score=ss->score[0],
+			.depth=depth,
+			.nodes=ss->nodes,
+		};
+		memcpy(&res.pv, &ss->pv, depth * sizeof(move));
 	}
-
-	struct search_result res =
-	{
-		.best=ss->pv[0],
-		.score=ss->score[0],
-		.depth=depth,
-		.nodes=ss->nodes,
-	};
-
-	memcpy(&res.pv, &ss->pv, depth * sizeof(move));
 
 	return res;
 }
