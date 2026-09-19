@@ -70,7 +70,8 @@ main(int argc, char **argv)
 
 		parsed = parse_fen(fen_arg_buffer, &p, &sf);
 		unsigned long arg_depth = strtoul(fen_arg_buffer + parsed, nullptr, 10);
-		lim = arg_depth == ULONG_MAX ? (limits) { .type=INFINITE } : (limits) { .type=DEPTH, .depth=arg_depth};
+		lim = arg_depth ? (limits) { .type=DEPTH, .depth=arg_depth} : (limits) { .type=INFINITE };
+
 		tt_resize(&tt, 100000);
 
 		print_board(&p);
