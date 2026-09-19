@@ -63,17 +63,21 @@ main(int argc, char **argv)
 		position p;
 		state_frame sf;
 		transposition_table tt = {};
+		limits lim;
+		size_t parsed;
 
 		str_join(argc - 1, argv + 1, ' ', fen_arg_buffer);
 
-		parse_fen(fen_arg_buffer, &p, &sf);
+		parsed = parse_fen(fen_arg_buffer, &p, &sf);
+		unsigned long arg_depth = strtoul(fen_arg_buffer + parsed, nullptr, 10);
+		lim = arg_depth == ULONG_MAX ? (limits) { .type=INFINITE } : (limits) { .type=DEPTH, .depth=arg_depth};
 		tt_resize(&tt, 100000);
 
 		print_board(&p);
 		printf("Press Ctrl+C to stop search...");
 		fflush(stdout);
 
-		struct search_result res = search(&p, (limits) {.type=INFINITE}, &tt, &stop);
+		struct search_result res = search(&p, lim, &tt, &stop);
 
 		printf("\nBest move: ");
 		print_move(res.best);
