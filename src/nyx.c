@@ -15,6 +15,7 @@
 #include <signal.h>
 #include <string.h>
 #include <stdio.h>
+#include <inttypes.h>
 
 static atomic_bool stop = false;
 
@@ -68,7 +69,7 @@ main(int argc, char **argv)
 
 		printf("\nBest move: ");
 		print_move(res.best);
-		printf("\nAt depth: %u (%lu nodes)\n", res.depth, res.nodes);
+		printf("\nAt depth: %u (%" PRIuFAST64 " nodes)\n", res.depth, res.nodes);
 
 	}
 
