@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <nyx/utils.h>
 #include <nyx/generation.h>
+#include <inttypes.h>
 
 static node_count
 perft_rec(position *p, unsigned depth)
@@ -47,10 +48,10 @@ perft(position *p, unsigned depth)
 		total += nodes;
 
 		print_move(ms[i]);
-		printf(": %lu\n", nodes);
+		printf(": %" PRIuFAST64 "\n", nodes);
 	}
 
-	printf("\nTotal nodes: %lu\n", total);
+	printf("\nTotal nodes: %" PRIuFAST64 "\n", total);
 
 	return total;
 }
