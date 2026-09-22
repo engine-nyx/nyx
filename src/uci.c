@@ -67,7 +67,7 @@ uci_id(void)
 {
 	const char *start, *end;
 
-	puts("id name Nyx v"NYX_VERSION);
+	puts("id name Nyx v" NYX_VERSION);
 
 	for (start = end = AUTHORS; *start && end; start = end + 1)
 	{
