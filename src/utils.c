@@ -311,7 +311,7 @@ strbb(const char *s)
 	return res;
 }
 
-inline square
+square
 lsb(bitboard bb)
 {
 	assert(bb && "No lsb of empty bitboard");
@@ -319,7 +319,7 @@ lsb(bitboard bb)
 	return stdc_first_trailing_one(bb) - 1;
 }
 
-inline square
+square
 pop_lsb(bitboard* bb)
 {
 	square sq;
