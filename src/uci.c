@@ -102,6 +102,7 @@ uci_ucinewgame(const char *args)
 
 	uci_stop("");
 	uci_position("startpos");
+	tt_resize(&UCI_state.tt, UCI_config.transposition_table_capacity);
 }
 
 static void
