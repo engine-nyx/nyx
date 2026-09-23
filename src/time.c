@@ -30,6 +30,8 @@ tm_hard_expired(const time_manager *tm, struct search_state *ss)
 
 	ms = now();
 
+	if (tm->l.type == MOVETIME) assert(ms >= tm->start);
+
 	switch (tm->l.type)
 	{
 	case MOVETIME: return ms - tm->start >= tm->l.movetime;
