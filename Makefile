@@ -15,16 +15,16 @@ TOBJS := $(patsubst $(TEST_DIR)/%.c,$(TEST_BUILD_DIR)/%.o,$(TESTS))
 DEPS  := $(OBJS:.o=.d) $(TOBJS:.o=.d)
 
 CFLAGS := -Wall -Wextra -Wpedantic -Wshadow -Werror -Iinclude --embed-dir=. -MMD -MP
-CFLAGS += -march=native
 CFLAGS += -std=c2x
 
+LD := $(CC)
 all: $(TARGET_RELEASE) $(TARGET_TEST)
 
 $(TARGET_RELEASE): $(OBJS) | $(RELEASE_BUILD_DIR)
-	$(CC) $(CFLAGS) $^ -o $@
+	$(LD) $(LDFLAGS) $^ -o $@
 
 $(TARGET_TEST): $(filter-out $(RELEASE_BUILD_DIR)/nyx.o,$(OBJS)) $(TOBJS) | $(TEST_BUILD_DIR)
-	$(CC) $(CFLAGS) $^ -o $@
+	$(LD) $(LDFLAGS) $^ -o $@
 
 $(RELEASE_BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(RELEASE_BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
