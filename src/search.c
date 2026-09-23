@@ -208,6 +208,7 @@ search(position *p, limits l, transposition_table *tt, atomic_bool *stop)
 
 	ss = &(struct search_state) { .p=p, .tt=tt };
 	tm = &(time_manager) { .l=l, .stop=stop };
+	res = (struct search_result) {};
 	tm_start(tm);
 	tt_clear(tt);
 
