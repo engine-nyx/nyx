@@ -2,4 +2,4 @@
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
-make -C "$ROOT_DIR" clean all
+make -C "$ROOT_DIR" clean build/release/nyx
