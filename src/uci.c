@@ -313,7 +313,7 @@ uci_handle(const char *cmd)
 	puts("Invalid command!");
 }
 
-static constexpr size_t UCI_BUF_SIZE = 400;
+static constexpr size_t UCI_BUF_SIZE = 4096;
 
 void
 uci_loop(void)
