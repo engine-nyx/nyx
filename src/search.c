@@ -219,6 +219,9 @@ search(position *p, limits l, transposition_table *tt, atomic_bool *stop)
 
 		search_rec(p, -oo, oo, tm, ss, true);
 
+		// do not use partial search results
+		if (tm_hard_expired(tm, ss)) break;
+
 		res = (struct search_result)
 		{
 			.best=ss->pv[0],
