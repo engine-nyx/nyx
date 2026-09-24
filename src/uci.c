@@ -170,6 +170,7 @@ static void
 uci_go(const char *args)
 {
 	limits l;
+	struct search_result res;
 
 	tt_clear(&UCI_state.tt);
 
@@ -236,12 +237,10 @@ uci_go(const char *args)
 		}
 	}
 
-	move best;
-
 	UCI_state.stop = false;
-	best = search(&UCI_state.p, l, &UCI_state.tt, &UCI_state.stop).best;
+	res = search(&UCI_state.p, l, &UCI_state.tt, &UCI_state.stop);
 	printf("bestmove ");
-	print_move(best);
+	print_move(res.best);
 	printf("\n");
 }
 
