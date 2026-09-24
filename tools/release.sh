@@ -25,7 +25,7 @@ echo "\
 
 git commit -m "Bump version to $VERSION" -- "$VERSION_FILE" 2>/dev/null || true
 
-git tag -a "v$VERSION"
+git tag -a "v$VERSION" -e -m $'\n\n# Latest commits:\n'"$(git log --oneline $(git describe --tags --abbrev=0)..HEAD | sed 's/^/# /')"
 
 git push
 git push origin "v$VERSION"
