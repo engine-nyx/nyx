@@ -145,7 +145,7 @@ pseudo_select(selector *s)
 		score_moves(s, ms, s->num_moves, s->sms);
 		insertion_sort(s->sms, s->num_moves);
 		++s->stage;
-		return select(s);
+		return pseudo_select(s);
 
 	case STAGE_GOOD_CAPTURES:
 		if (has_good_captures(s))
