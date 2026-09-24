@@ -86,11 +86,12 @@ qsearch_rec(position *p, int alpha, int beta, time_manager *tm, struct search_st
 	if (!move_count)
 	{
 		best_move = NULL_MOVE;
-		best_score = p->sf->checkers ? -VALUE_MATE(ss->ply) : VALUE_DRAW;
+		if (p->sf->checkers)
+			best_score = -VALUE_MATE(ss->ply);
 	}
 	tt_store(ss->tt, (tt_entry)
 	{
-		.depth=(u8)ss->depth,
+		.depth=0,
 		.best_move=best_move,
 		.key=p->key,
 		.score=best_score,
