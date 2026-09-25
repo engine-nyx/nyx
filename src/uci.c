@@ -264,14 +264,6 @@ uci_d(const char *args)
 	(void) args;
 
 	print_board(&UCI_state.p);
-
-	move ms[MAX_MOVES];
-	size_t num_moves = generate_legals(&UCI_state.p, ms);
-	for (size_t i = 0; i < num_moves; ++i)
-	{
-		print_move(ms[i]);
-		printf("\n");
-	}
 }
 
 const struct
