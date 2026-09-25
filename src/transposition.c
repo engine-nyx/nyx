@@ -55,7 +55,7 @@ tt_store(transposition_table *tt, u64 key, tt_entry data)
 	{
 		if (ent[i].key != (key & BITMASK(16))) continue;
 
-		if (data.depth > ent[i].depth)
+		if (data.depth >= ent[i].depth)
 			ent[i] = data;
 
 		return;
@@ -67,6 +67,12 @@ tt_store(transposition_table *tt, u64 key, tt_entry data)
 		if (ent[i].depth - (8 * age(tt, ent[i].generation)) < dest->depth - (8 * age(tt, dest->generation)))
 			dest = ent;
 	*dest = data;
+}
+
+void
+tt_new_search(transposition_table *tt)
+{
+	++tt->generation;
 }
 
 void
