@@ -6,35 +6,38 @@
 
 #include <nyx/types.h>
 
-typedef enum
+enum bound_type
 {
 	EXACT,
 	UPPER,
 	LOWER,
-} bound;
+};
 
 typedef struct
 {
-	bound type;
+	i16 score;
+	u16 key;
 
-	int score;
 	move best_move;
-	u8 depth;
-	u64 key;
 
-	u8 generation;
+	u8 depth;
+	u8
+		bound      : 2,
+		pv         : 1,
+		generation : 5;
 } tt_entry;
 
 typedef struct
 {
 	size_t capacity;
 	tt_entry *entries;
+	u8 generation;
 } transposition_table;
 
 void tt_resize(transposition_table *tt, size_t capacity);
 void tt_clear(transposition_table *tt);
 bool tt_probe(const transposition_table *tt, u64 key, tt_entry *res);
-void tt_store(transposition_table *tt, tt_entry ent);
+void tt_store(transposition_table *tt, u64 key, tt_entry data);
 void tt_free(transposition_table *tt);
 
 #endif // NYX_TRANSPOSITION_H

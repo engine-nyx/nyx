@@ -83,10 +83,14 @@ uci_options(void)
 	puts("option name ttsz type spin default 200000 min 1 max 33554432");
 }
 
+static void uci_ucinewgame(const char *args);
+
 static void
 uci_uci(const char *args)
 {
 	(void) args;
+
+	uci_ucinewgame("");
 
 	uci_id();
 	puts("");
@@ -110,7 +114,6 @@ uci_isready(const char *args)
 {
 	(void) args;
 
-	tt_resize(&UCI_state.tt, UCI_config.transposition_table_capacity);
 	puts("readyok");
 }
 
@@ -171,8 +174,6 @@ uci_go(const char *args)
 {
 	limits l;
 	struct search_result res;
-
-	tt_clear(&UCI_state.tt);
 
 	if (str_consume(&args, "perft"))
 	{
@@ -321,4 +322,6 @@ uci_loop(void)
 			uci_handle(line);
 		fflush(stdout);
 	}
+
+	tt_free(&UCI_state.tt);
 }
