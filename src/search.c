@@ -118,7 +118,7 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 
 	tt_probe_success = tt_probe(ss->tt, p->key, &ent);
 
-	if (tt_probe_success && tt_skip(ent, alpha, beta, *ss))
+	if (!pv && tt_probe_success && tt_skip(ent, alpha, beta, *ss))
 		return ent.score;
 
 	if (!ss->depth)
