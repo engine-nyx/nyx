@@ -27,7 +27,7 @@ tt_skip(tt_entry ent, int alpha, int beta, struct search_state ss)
 	if (ent.depth < ss.depth)
 		return false;
 
-	switch (ent.type)
+	switch (ent.bound)
 	{
 	case EXACT : return true;
 	case LOWER : return ent.score >= beta;
@@ -89,18 +89,17 @@ qsearch_rec(position *p, int alpha, int beta, time_manager *tm, struct search_st
 		if (p->sf->checkers)
 			best_score = -VALUE_MATE(ss->ply);
 	}
-	tt_store(ss->tt, (tt_entry)
+	tt_store(ss->tt, p->key, (tt_entry)
 	{
 		.depth=0,
 		.best_move=best_move,
-		.key=p->key,
 		.score=best_score,
-		.type=
+		.bound=
 		(
 			best_score >= beta ? LOWER :
 			best_score <= alpha ? UPPER :
 			EXACT
-		),
+		)
 	});
 
 	return best_score;
@@ -171,18 +170,18 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 		best_score = p->sf->checkers ? -VALUE_MATE(ss->ply) : VALUE_DRAW;
 	}
 
-	tt_store(ss->tt, (tt_entry)
+	tt_store(ss->tt, p->key, (tt_entry)
 	{
 		.depth=(u8)ss->depth,
 		.best_move=best_move,
-		.key=p->key,
 		.score=best_score,
-		.type=
+		.bound=
 		(
 			best_score >= beta  ? LOWER :
 			best_score <= alpha ? UPPER :
 			EXACT
 		),
+		.pv=pv
 	});
 	if (pv)
 	{
@@ -211,7 +210,6 @@ search(position *p, limits l, transposition_table *tt, atomic_bool *stop)
 	tm = &(time_manager) { .l=l, .stop=stop };
 	res = (struct search_result) {};
 	tm_start(tm);
-	tt_clear(tt);
 
 	for (depth = 0; !tm_soft_expired(tm, ss) && !is_mate_score(ss->score[0]); ++depth)
 	{
