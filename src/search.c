@@ -223,10 +223,11 @@ search(position *p, limits l, transposition_table *tt, atomic_bool *stop)
 			.best=ss->pv[0],
 			.score=ss->score[0],
 			.depth=ss->depth,
-			.nodes=ss->nodes,
 		};
 		memcpy(&res.pv, &ss->pv, ss->depth * sizeof(move));
 	}
+
+	res.nodes = ss->nodes;
 
 	return res;
 }
