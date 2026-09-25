@@ -15,8 +15,7 @@ TESTS := $(wildcard $(TEST_DIR)/*.c)
 TOBJS := $(patsubst $(TEST_DIR)/%.c,$(TEST_BUILD_DIR)/%.o,$(TESTS))
 DEPS  := $(OBJS:.o=.d) $(TOBJS:.o=.d)
 
-CFLAGS := -Wall -Wextra -Wpedantic -Wshadow -Werror -Iinclude --embed-dir=. -MMD -MP
-CFLAGS += -std=c2x
+CFLAGS := -std=c23 -Wall -Wextra -Wpedantic -Wshadow -Werror -Iinclude --embed-dir=. -MMD -MP
 
 LD := $(CC)
 all: $(TARGET_RELEASE) $(TARGET_TEST)
