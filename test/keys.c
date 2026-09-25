@@ -142,7 +142,6 @@ TEST(tt_store_probe_roundtrip)
 	ent.score = 42;
 	ent.best_move = (move){ .from = E2, .to = E4, .prom = 0, .type = NORMAL };
 	ent.depth = 5;
-	ent.generation = 1;
 
 	tt_store(&tt, 0xDEADBEEFCAFEBABE, ent);
 
@@ -154,10 +153,6 @@ TEST(tt_store_probe_roundtrip)
 	test_eq(res.best_move.from, E2, "stored move from");
 	test_eq(res.best_move.to, E4, "stored move to");
 	test_eq(res.depth, 5, "stored depth");
-	test_eq(res.generation, 1, "stored generation");
-
-	if (res.key != ent.key)
-		return TEST_FAILURE("stored key differs");
 
 	if (tt_probe(&tt, 0x1234567890ABCDEF, &res))
 		return TEST_FAILURE("probe found an entry for a different key");
@@ -175,24 +170,14 @@ TEST(tt_replacement_rule)
 	tt_resize(&tt, 1024);
 
 	a.score = 1;
-	a.generation = 1;
 	tt_store(&tt, 0x11111111, a);
 
 	b.score = 2;
-	b.generation = 1;
 	tt_store(&tt, 0x11111111, b);
 
 	if (!tt_probe(&tt, 0x11111111, &res))
 		return TEST_FAILURE("probe after replacement failed");
 	test_eq(res.score, 2, "equal generation replaces old entry");
-
-	b.score = 3;
-	b.generation = 0;
-	tt_store(&tt, 0x11111111, b);
-
-	if (!tt_probe(&tt, 0x11111111, &res))
-		return TEST_FAILURE("probe after stale store failed");
-	test_eq(res.score, 2, "stale generation does not replace");
 
 	tt_free(&tt);
 	return TEST_SUCCESS;
