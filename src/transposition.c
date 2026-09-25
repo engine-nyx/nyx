@@ -65,7 +65,8 @@ tt_store(transposition_table *tt, u64 key, tt_entry data)
 	dest = ent = cluster_of(tt, key);
 	for (i = 1; i < cluster_size; ++i)
 		if (ent[i].depth - (8 * age(tt, ent[i].generation)) < dest->depth - (8 * age(tt, dest->generation)))
-			dest = ent;
+			dest = &ent[i];
+
 	*dest = data;
 }
 
