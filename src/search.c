@@ -210,6 +210,7 @@ search(position *p, limits l, transposition_table *tt, atomic_bool *stop)
 	tm = &(time_manager) { .l=l, .stop=stop };
 	res = (struct search_result) {};
 	tm_start(tm);
+	tt_new_search(tt);
 
 	for (depth = 0; !tm_soft_expired(tm, ss) && !is_mate_score(ss->score[0]); ++depth)
 	{
