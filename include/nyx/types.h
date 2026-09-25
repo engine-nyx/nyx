@@ -128,4 +128,6 @@ constexpr int oo = INT_MAX;
 
 typedef u64f millis;
 
+#define PARAMETER
+
 #endif // NYX_TYPES_H
