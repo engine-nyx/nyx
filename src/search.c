@@ -201,7 +201,6 @@ is_mate_score(int score)
 struct search_result
 search(position *p, limits l, transposition_table *tt, atomic_bool *stop)
 {
-	unsigned depth;
 	time_manager *tm;
 	struct search_state *ss;
 	struct search_result res;
@@ -212,10 +211,8 @@ search(position *p, limits l, transposition_table *tt, atomic_bool *stop)
 	tm_start(tm);
 	tt_new_search(tt);
 
-	for (depth = 0; !tm_soft_expired(tm, ss) && !is_mate_score(ss->score[0]); ++depth)
+	for (ss->depth = 0; !tm_soft_expired(tm, ss) && !is_mate_score(ss->score[0]); ++ss->depth)
 	{
-		ss->depth = depth;
-
 		search_rec(p, -oo, oo, tm, ss, true);
 
 		// do not use partial search results
@@ -225,10 +222,10 @@ search(position *p, limits l, transposition_table *tt, atomic_bool *stop)
 		{
 			.best=ss->pv[0],
 			.score=ss->score[0],
-			.depth=depth,
+			.depth=ss->depth,
 			.nodes=ss->nodes,
 		};
-		memcpy(&res.pv, &ss->pv, depth * sizeof(move));
+		memcpy(&res.pv, &ss->pv, ss->depth * sizeof(move));
 	}
 
 	return res;
