@@ -7,6 +7,7 @@
 #include <nyx/search.h>
 #include <nyx/attacks.h>
 #include <nyx/uci.h>
+#include <nyx/evaluation.h>
 #include <nyx/utils.h>
 #include <nyx/types.h>
 #include <stdlib.h>
@@ -51,6 +52,7 @@ main(int argc, char **argv)
 	attacks_init();
 	generation_init();
 	position_init();
+	evaluation_init();
 
 	if (argc == 1)
 	{
