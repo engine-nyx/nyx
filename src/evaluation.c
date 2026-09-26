@@ -5,6 +5,9 @@
 #include <nyx/utils.h>
 #include <nyx/evaluation.h>
 
+// Notice, these tables are from black's perspective
+// since A1 is defined to be 0, aka the top left entry.
+// The piece_square_value function inverts the ranks for white.
 static int piece_square_tables[NUM_PIECE_TYPES][NUM_SQUARES] =
 {
 	[PAWN] =
@@ -95,7 +98,7 @@ piece_square_value(position *p)
 			while (bb)
 			{
 				sq = pop_lsb(&bb);
-				sq = square_of(file_of(sq), white_black(rank_of(sq), 7 - rank_of(sq), c));
+				sq = square_of(file_of(sq), white_black(7 - rank_of(sq), rank_of(sq), c));
 				value += piece_square_tables[pt][sq] * white_black(+1, -1, c);
 			}
 		}
