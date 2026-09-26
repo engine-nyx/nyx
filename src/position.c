@@ -67,18 +67,18 @@ static int PIECE_VALUE[NUM_PIECE_COLORED_TYPES] =
 {
 	[EMPTY] = 0,
 
-	[WHITE_PAWN]   = 10,
-	[WHITE_KNIGHT] = 30,
-	[WHITE_BISHOP] = 32,
-	[WHITE_ROOK]   = 50,
-	[WHITE_QUEEN]  = 90,
+	[WHITE_PAWN]   = 100,
+	[WHITE_KNIGHT] = 320,
+	[WHITE_BISHOP] = 330,
+	[WHITE_ROOK]   = 500,
+	[WHITE_QUEEN]  = 900,
 	[WHITE_KING]   = oo,
 
-	[BLACK_PAWN]   = -10,
-	[BLACK_KNIGHT] = -30,
-	[BLACK_BISHOP] = -32,
-	[BLACK_ROOK]   = -50,
-	[BLACK_QUEEN]  = -90,
+	[BLACK_PAWN]   = -100,
+	[BLACK_KNIGHT] = -320,
+	[BLACK_BISHOP] = -330,
+	[BLACK_ROOK]   = -500,
+	[BLACK_QUEEN]  = -900,
 	[BLACK_KING]   = -oo,
 };
 
