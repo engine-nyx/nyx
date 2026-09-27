@@ -16,6 +16,7 @@ TOBJS := $(patsubst $(TEST_DIR)/%.c,$(TEST_BUILD_DIR)/%.o,$(TESTS))
 DEPS  := $(OBJS:.o=.d) $(TOBJS:.o=.d)
 
 CFLAGS := -std=c23 -Wall -Wextra -Wpedantic -Wshadow -Werror -Iinclude --embed-dir=. -MMD -MP
+CFLAGS += -O3
 
 LD := $(CC)
 all: $(TARGET_RELEASE) $(TARGET_TEST)
