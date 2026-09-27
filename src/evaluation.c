@@ -194,8 +194,8 @@ static unsigned game_phase_increment[NUM_PIECE_TYPES] =
 int
 evaluate(const position *p)
 {
-	int      mid_game_value, end_game_value, final_value;
-	unsigned mid_game_phase, end_game_phase;
+	int mid_game_value, end_game_value, final_value;
+	int mid_game_phase, end_game_phase;
 	color c;
 	ptype pt;
 	bitboard bb;
