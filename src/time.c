@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: NLPL
 
 #include <nyx/time.h>
-#include <nyx/utils.h>
 #include <time.h>
 #include <assert.h>
 
@@ -22,8 +21,6 @@ tm_start(time_manager *tm)
 	tm->start = now();
 }
 
-constexpr PARAMETER unsigned movetime_check_period_bits = 10;
-
 bool
 tm_hard_expired(const time_manager *tm, struct search_state *ss)
 {
@@ -37,7 +34,7 @@ tm_hard_expired(const time_manager *tm, struct search_state *ss)
 
 	switch (tm->l.type)
 	{
-	case MOVETIME : return !(ss->nodes & BITMASK(movetime_check_period_bits)) && ms - tm->start > tm->l.movetime;
+	case MOVETIME : return ms - tm->start > tm->l.movetime;
 	case DEPTH    : return ss->depth > tm->l.depth;
 	case NODES    : return ss->nodes > tm->l.nodes;
 	case CLOCK    : return ms - tm->start > tm->l.time[ss->p->root_stm] / (40 - ss->p->root_fullmove); /* TODO really bad approximator */
