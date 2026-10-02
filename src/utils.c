@@ -287,6 +287,12 @@ print_square(square sq)
 void
 print_move(move m)
 {
+	if (is_null(m))
+	{
+		printf("0000");
+		return;
+	}
+
 	print_square(m.from);
 	print_square(m.to);
 
