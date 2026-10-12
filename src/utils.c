@@ -258,13 +258,19 @@ parse_fen(const char *fen, position *p, state_frame *sf)
 	str_ltrim(&fen);
 	p->sf = sf;
 	p->sf->material = 0;
+	sf->rule50 = 0;
+	p->ply = 0;
 
 	i += parse_board (fen + i, p ); assert(fen[i] == ' ' && "Single space separator"); ++i;
 	i += parse_stm   (fen + i, p ); assert(fen[i] == ' ' && "Single space separator"); ++i;
 	i += parse_castle(fen + i, sf); assert(fen[i] == ' ' && "Single space separator"); ++i;
-	i += parse_ep    (fen + i, sf); assert(fen[i] == ' ' && "Single space separator"); ++i;
-	i += parse_rule50(fen + i, sf); assert(fen[i] == ' ' && "Single space separator"); ++i;
-	i += parse_ply   (fen + i, p);
+	i += parse_ep    (fen + i, sf);
+	if (fen[i] == ' ' && isdigit(fen[++i]))
+	{
+		i += parse_rule50(fen + i, sf);
+		if (fen[i] == ' ' && isdigit(fen[++i]))
+			i += parse_ply(fen + i, p);
+	}
 
 	sf->checkers = attackers(p, king_square(p, p->stm)) & p->by_color[other_color(p->stm)];
 	sf->previous = nullptr;
