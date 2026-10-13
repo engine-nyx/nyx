@@ -17,6 +17,8 @@ trap 'rm -f "$TAG_FILE"' EXIT INT TERM
 LAST_TAG="$(git describe --tags --abbrev=0)"
 
 {
+    echo
+    echo
     echo "# Type your message for v${VERSION} above the comments."
     echo "# Lines starting with # will be ignored."
     echo
