@@ -3,6 +3,6 @@
 #ifndef NYX_VERSION_H
 #define NYX_VERSION_H
 
-#define NYX_VERSION "0.3.0"
+#define NYX_VERSION "0.3.1"
 
 #endif // NYX_VERSION_H
