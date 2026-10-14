@@ -10,8 +10,6 @@
 node_count
 perft(position *p, unsigned depth)
 {
-	if (!depth) return 1;
-
 	node_count nodes;
 	move ms[MAX_MOVES];
 	size_t num_moves, i;
@@ -19,6 +17,7 @@ perft(position *p, unsigned depth)
 
 	nodes = 0;
 	num_moves = generate_legals(p, ms);
+	if (depth == 1) return num_moves;
 
 	for (i = 0; i < num_moves; ++i)
 	{
@@ -45,9 +44,16 @@ perft_verbose(position *p, unsigned depth)
 
 	for (i = 0; i < num_moves; ++i)
 	{
-		do_move(p, ms[i], &sf);
-		nodes = perft(p, depth - 1);
-		undo_move(p, ms[i]);
+		if (depth == 1)
+		{
+			nodes = 1;
+		}
+		else
+		{
+			do_move(p, ms[i], &sf);
+			nodes = perft(p, depth - 1);
+			undo_move(p, ms[i]);
+		}
 		total += nodes;
 
 		print_move(ms[i]);
