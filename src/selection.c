@@ -1,11 +1,12 @@
 // Copyright (c) 2026 Kilian Chung
 // SPDX-License-Identifier: NLPL
 
-#include <nyx/position.h>
 #include <assert.h>
 #include <nyx/generation.h>
+#include <nyx/position.h>
 #include <nyx/selection.h>
 #include <nyx/types.h>
+#include <stddef.h>
 
 enum stage
 {

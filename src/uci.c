@@ -1,16 +1,19 @@
 // Copyright (c) 2026 Kilian Chung
 // SPDX-License-Identifier: NLPL
 
-#include <nyx/generation.h>
-#include <nyx/search.h>
 #include <assert.h>
+#include <nyx/generation.h>
 #include <nyx/perft.h>
-#include <nyx/uci.h>
-#include <nyx/version.h>
-#include <nyx/transposition.h>
+#include <nyx/position.h>
+#include <nyx/search.h>
 #include <nyx/time.h>
+#include <nyx/transposition.h>
+#include <nyx/types.h>
+#include <nyx/uci.h>
 #include <nyx/utils.h>
+#include <nyx/version.h>
 #include <stdatomic.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

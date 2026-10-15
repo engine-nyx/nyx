@@ -1,12 +1,13 @@
 // Copyright (c) 2026 Kilian Chung
 // SPDX-License-Identifier: NLPL
 
-#include <nyx/position.h>
-#include <nyx/utils.h>
 #include <assert.h>
 #include <nyx/attacks.h>
 #include <nyx/generation.h>
+#include <nyx/position.h>
 #include <nyx/types.h>
+#include <nyx/utils.h>
+#include <stddef.h>
 
 static size_t
 splat_moves(square from, bitboard target, move *ms)

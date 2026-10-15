@@ -4,6 +4,7 @@
 #ifndef NYX_POSITION_H
 #define NYX_POSITION_H
 
+#include <nyx/int.h>
 #include <nyx/types.h>
 
 typedef struct state_frame

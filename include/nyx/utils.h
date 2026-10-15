@@ -4,8 +4,9 @@
 #ifndef NYX_UTILS_H
 #define NYX_UTILS_H
 
-#include <nyx/types.h>
 #include <nyx/position.h>
+#include <nyx/types.h>
+#include <stddef.h>
 
 #define BITMASK(bits) (bits >= sizeof(unsigned long long) * 8 ? ((unsigned long long) 0) - 1 : ((unsigned long long) 1 << (bits)) - 1)
 size_t str_consume(const char **s, const char *pattern);

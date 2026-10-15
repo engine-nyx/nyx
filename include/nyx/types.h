@@ -4,9 +4,9 @@
 #ifndef NYX_TYPES_H
 #define NYX_TYPES_H
 
-#include <stddef.h>
 #include <limits.h>
 #include <nyx/int.h>
+#include <stddef.h>
 
 typedef u64f node_count;
 

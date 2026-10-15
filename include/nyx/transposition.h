@@ -4,7 +4,9 @@
 #ifndef NYX_TRANSPOSITION_H
 #define NYX_TRANSPOSITION_H
 
+#include <nyx/int.h>
 #include <nyx/types.h>
+#include <stddef.h>
 
 enum bound_type
 {

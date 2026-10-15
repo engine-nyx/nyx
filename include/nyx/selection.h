@@ -4,9 +4,10 @@
 #ifndef NYX_SELECTION_H
 #define NYX_SELECTION_H
 
-#include <nyx/types.h>
-#include <nyx/position.h>
 #include <nyx/generation.h>
+#include <nyx/position.h>
+#include <nyx/types.h>
+#include <stddef.h>
 
 struct scored_move
 {

@@ -1,10 +1,10 @@
 // Copyright (c) 2026 Kilian Chung
 // SPDX-License-Identifier: NLPL
 
-#include <nyx/utils.h>
 #include <assert.h>
 #include <nyx/attacks.h>
 #include <nyx/types.h>
+#include <nyx/utils.h>
 
 static bitboard rank_mask[NUM_SQUARES];
 static bitboard file_mask[NUM_SQUARES];

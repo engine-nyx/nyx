@@ -1,9 +1,9 @@
 // Copyright (c) 2026 Kilian Chung
 // SPDX-License-Identifier: NLPL
 
+#include <nyx/evaluation.h>
 #include <nyx/types.h>
 #include <nyx/utils.h>
-#include <nyx/evaluation.h>
 
 static int mid_game_piece_values[NUM_PIECE_TYPES] =
 {

@@ -7,6 +7,7 @@
 #include <nyx/position.h>
 
 void evaluation_init(void);
+
 int evaluate(const position *p);
 
 #endif // NYX_EVALUATION_H

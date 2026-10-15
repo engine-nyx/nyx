@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: NLPL
 
 #include <assert.h>
-#include <stdbit.h>
 #include <ctype.h>
+#include <nyx/attacks.h>
+#include <nyx/position.h>
 #include <nyx/types.h>
 #include <nyx/utils.h>
+#include <stdbit.h>
+#include <stddef.h>
 #include <stdio.h>
-#include <nyx/position.h>
-#include <nyx/attacks.h>
 #include <string.h>
 
 size_t

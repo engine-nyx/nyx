@@ -1,22 +1,23 @@
 // Copyright (c) 2026 Kilian Chung
 // SPDX-License-Identifier: NLPL
 
-#include <nyx/transposition.h>
+#include <nyx/attacks.h>
+#include <nyx/evaluation.h>
 #include <nyx/generation.h>
 #include <nyx/position.h>
 #include <nyx/search.h>
-#include <nyx/attacks.h>
-#include <nyx/uci.h>
-#include <nyx/evaluation.h>
-#include <nyx/utils.h>
+#include <nyx/transposition.h>
 #include <nyx/types.h>
-#include <stdlib.h>
+#include <nyx/uci.h>
+#include <nyx/utils.h>
 #include <stdatomic.h>
+#include <stddef.h>
+#include <stdlib.h>
 
-#include <signal.h>
-#include <string.h>
-#include <stdio.h>
 #include <inttypes.h>
+#include <signal.h>
+#include <stdio.h>
+#include <string.h>
 
 static atomic_bool stop = false;
 

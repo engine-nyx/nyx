@@ -1,9 +1,11 @@
 // Copyright (c) 2026 Kilian Chung
 // SPDX-License-Identifier: NLPL
 
-#include <nyx/transposition.h>
-#include <nyx/utils.h>
 #include <assert.h>
+#include <nyx/transposition.h>
+#include <nyx/types.h>
+#include <nyx/utils.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 

@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: NLPL
 
 #include <assert.h>
-#include <nyx/time.h>
+#include <nyx/evaluation.h>
 #include <nyx/position.h>
-#include <nyx/types.h>
-#include <nyx/utils.h>
 #include <nyx/search.h>
 #include <nyx/selection.h>
-#include <nyx/evaluation.h>
+#include <nyx/time.h>
 #include <nyx/transposition.h>
+#include <nyx/types.h>
+#include <nyx/utils.h>
 #include <string.h>
 
 constexpr int VALUE_DRAW = 0;

@@ -2,12 +2,14 @@
 // SPDX-License-Identifier: NLPL
 
 #include <assert.h>
-#include <nyx/position.h>
-#include <nyx/generation.h>
-#include <nyx/types.h>
-#include <stdlib.h>
 #include <nyx/attacks.h>
+#include <nyx/generation.h>
+#include <nyx/int.h>
+#include <nyx/position.h>
+#include <nyx/types.h>
 #include <nyx/utils.h>
+#include <stddef.h>
+#include <stdlib.h>
 
 static u64 zobrist_piece_square[12][64];
 static u64 zobrist_stm;

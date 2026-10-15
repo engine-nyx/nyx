@@ -1,11 +1,13 @@
 // Copyright (c) 2026 Kilian Chung
 // SPDX-License-Identifier: NLPL
 
-#include <nyx/perft.h>
-#include <stdio.h>
-#include <nyx/utils.h>
-#include <nyx/generation.h>
 #include <inttypes.h>
+#include <nyx/generation.h>
+#include <nyx/perft.h>
+#include <nyx/position.h>
+#include <nyx/types.h>
+#include <nyx/utils.h>
+#include <stdio.h>
 
 node_count
 perft(position *p, unsigned depth)

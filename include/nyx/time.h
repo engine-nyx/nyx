@@ -4,9 +4,9 @@
 #ifndef NYX_TIME_H
 #define NYX_TIME_H
 
-#include <stdatomic.h>
 #include <nyx/search.h>
 #include <nyx/types.h>
+#include <stdatomic.h>
 
 typedef struct
 {

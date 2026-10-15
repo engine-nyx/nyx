@@ -1,9 +1,9 @@
 // Copyright (c) 2026 Kilian Chung
 // SPDX-License-Identifier: NLPL
 
+#include <assert.h>
 #include <nyx/time.h>
 #include <time.h>
-#include <assert.h>
 
 static millis
 now(void)

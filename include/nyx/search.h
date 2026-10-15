@@ -4,10 +4,10 @@
 #ifndef NYX_SEARCH_H
 #define NYX_SEARCH_H
 
-#include <nyx/types.h>
 #include <nyx/position.h>
-#include <stdatomic.h>
 #include <nyx/transposition.h>
+#include <nyx/types.h>
+#include <stdatomic.h>
 
 enum limit_type
 {
