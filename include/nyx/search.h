@@ -42,7 +42,7 @@ constexpr size_t MAX_PLY = 100;
 
 struct search_state
 {
-	node_count nodes;
+	node_count nodes, qnodes;
 	unsigned depth, ply;
 
 	position *p;
@@ -56,7 +56,7 @@ struct search_result
 {
 	move best, pv[MAX_PLY];
 	unsigned depth;
-	node_count nodes;
+	node_count nodes, qnodes;
 	int score;
 };
 

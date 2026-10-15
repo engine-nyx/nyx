@@ -22,11 +22,8 @@ VALUE_MATE(unsigned ply)
 #define MAX(a, b) ((a) >= (b) ? (a) : (b))
 
 static inline bool
-tt_skip(tt_entry ent, int alpha, int beta, struct search_state ss)
+tt_qskip(tt_entry ent, int alpha, int beta)
 {
-	if (ent.depth < ss.depth)
-		return false;
-
 	switch (ent.bound)
 	{
 	case EXACT : return true;
@@ -35,6 +32,15 @@ tt_skip(tt_entry ent, int alpha, int beta, struct search_state ss)
 	}
 
 	assert(false);
+}
+
+static inline bool
+tt_skip(tt_entry ent, int alpha, int beta, struct search_state ss)
+{
+	if (ent.depth < ss.depth)
+		return false;
+
+	return tt_qskip(ent, alpha, beta);
 }
 
 static int
@@ -48,18 +54,19 @@ qsearch_rec(position *p, int alpha, int beta, time_manager *tm, struct search_st
 	bool tt_probe_success;
 	unsigned move_count;
 
-	best_score = evaluate(p);
+	best_score = p->sf->checkers ? -oo : evaluate(p);
 	best_move = NULL_MOVE;
 	if (best_score >= beta)
 		return best_score;
 
 	tt_probe_success = tt_probe(ss->tt, p->key, &ent);
 
-	if (tt_probe_success && tt_skip(ent, alpha, beta, *ss))
+	if (tt_probe_success && tt_qskip(ent, alpha, beta))
 		return ent.score;
 
 	--ss->depth, ++ss->ply;
 	++ss->nodes;
+	++ss->qnodes;
 
 	s = selector_of(p, tt_probe_success ? ent.best_move : NULL_MOVE, QUIESCENCE);
 
@@ -228,6 +235,7 @@ search(position *p, limits l, transposition_table *tt, atomic_bool *stop)
 	}
 
 	res.nodes = ss->nodes;
+	res.qnodes = ss->qnodes;
 
 	return res;
 }
