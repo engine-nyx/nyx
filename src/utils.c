@@ -231,7 +231,7 @@ parse_rule50(const char *s, state_frame *sf)
 	if (!sf->rule50 || !isdigit(s[1]))
 		return 1;
 
-	sf->rule50 = (10 * sf->rule50) + get_digit(s[0]);
+	sf->rule50 = (10 * sf->rule50) + get_digit(s[1]);
 	return 2;
 }
 
