@@ -35,7 +35,7 @@ static struct
 	size_t transposition_table_capacity;
 } UCI_config =
 {
-	.transposition_table_capacity = 100000,
+	.transposition_table_capacity = 10000000,
 };
 
 // quit
@@ -83,7 +83,7 @@ uci_id(void)
 static void
 uci_options(void)
 {
-	puts("option name ttsz type spin default 200000 min 1 max 33554432");
+	puts("option name ttsz type spin default 10000000 min 1 max 33554432");
 }
 
 static void uci_ucinewgame(const char *args);
