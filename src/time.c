@@ -5,7 +5,7 @@
 #include <nyx/time.h>
 #include <time.h>
 
-static millis
+millis
 now(void)
 {
 	struct timespec ts;

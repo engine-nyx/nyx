@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: NLPL
 
 #include <assert.h>
+#include <inttypes.h>
 #include <nyx/evaluation.h>
 #include <nyx/position.h>
 #include <nyx/search.h>
@@ -10,6 +11,7 @@
 #include <nyx/transposition.h>
 #include <nyx/types.h>
 #include <nyx/utils.h>
+#include <stdio.h>
 #include <string.h>
 
 constexpr int VALUE_DRAW = 0;
@@ -205,6 +207,43 @@ is_mate_score(int score)
 	return score < -oo / 3 || score > oo / 3;
 }
 
+static void
+uci_info(struct search_state *ss, time_manager *tm)
+{
+	millis spent;
+	size_t i;
+
+	spent = now() - tm->start;
+
+	printf
+	(
+		"info "
+		"depth %u "
+		"seldepth %u "
+		"score cp %d "
+		"nodes %" PRIuFAST64 " "
+		"nps %" PRIuFAST64 " "
+		"hashfull %u "
+		"time %" PRIuFAST64 " "
+		"pv",
+		ss->depth,
+		ss->depth,
+		ss->score[0],
+		ss->nodes,
+		spent ? (ss->nodes * 1000) / spent : 0,
+		0,
+		spent
+	);
+
+	for (i = 0; i < ss->depth; ++i)
+	{
+		printf(" ");
+		print_move(ss->pv[i]);
+	}
+	printf("\n");
+	fflush(stdout);
+}
+
 struct search_result
 search(position *p, limits l, transposition_table *tt, atomic_bool *stop)
 {
@@ -232,6 +271,8 @@ search(position *p, limits l, transposition_table *tt, atomic_bool *stop)
 			.depth=ss->depth,
 		};
 		memcpy(&res.pv, &ss->pv, ss->depth * sizeof(move));
+
+		uci_info(ss, tm);
 	}
 
 	res.nodes = ss->nodes;
