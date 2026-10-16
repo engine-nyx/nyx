@@ -214,7 +214,10 @@ select(selector *s)
 selector
 selector_of(const position *p, move tt, enum search_stage stage)
 {
-	selector s = (selector)
+	selector s;
+	bool tt_is_quiesce;
+
+	s = (selector)
 	{
 		.pos=p,
 		.tt =tt,
@@ -230,7 +233,12 @@ selector_of(const position *p, move tt, enum search_stage stage)
 	case QUIESCENCE : s.stage = STAGE_TT_QUIESCE; break;
 	}
 
+	tt_is_quiesce = p->by_square[tt.to] != EMPTY ||
+		tt.type == EN_PASSANT ||
+		tt.type == PROMOTION;
+
 	if (is_null(tt) || !is_pseudo_legal(s.pos, tt)) ++s.stage;
+	else if (stage == QUIESCENCE && !tt_is_quiesce) ++s.stage;
 
 	return s;
 }
