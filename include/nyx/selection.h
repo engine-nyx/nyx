@@ -7,7 +7,6 @@
 #include <nyx/generation.h>
 #include <nyx/position.h>
 #include <nyx/types.h>
-#include <stddef.h>
 
 struct scored_move
 {
@@ -22,8 +21,8 @@ typedef struct
 	move tt;
 
 	struct scored_move sms[MAX_MOVES];
-	size_t num_moves, current;
-	size_t num_captures, num_good_captures, num_good_quiets;
+	usize num_moves, current;
+	usize num_captures, num_good_captures, num_good_quiets;
 } selector;
 
 enum search_stage

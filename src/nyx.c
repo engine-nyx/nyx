@@ -11,7 +11,6 @@
 #include <nyx/uci.h>
 #include <nyx/utils.h>
 #include <stdatomic.h>
-#include <stddef.h>
 #include <stdlib.h>
 
 #include <inttypes.h>
@@ -32,7 +31,7 @@ static char fen_arg_buffer[1024];
 static void
 str_join(int argc, char **argv, char sep_char, char *dest)
 {
-	size_t i;
+	usize i;
 	char sep[2];
 
 	dest[0] = '\0';
@@ -67,7 +66,7 @@ main(int argc, char **argv)
 		state_frame sf;
 		transposition_table tt = {};
 		limits lim;
-		size_t parsed;
+		usize parsed;
 
 		str_join(argc - 1, argv + 1, ' ', fen_arg_buffer);
 

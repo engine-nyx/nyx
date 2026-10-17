@@ -8,14 +8,13 @@
 #include <nyx/types.h>
 #include <nyx/utils.h>
 #include <stdbit.h>
-#include <stddef.h>
 #include <stdio.h>
 #include <string.h>
 
-size_t
+usize
 str_consume(const char **s, const char *pattern)
 {
-	size_t len;
+	usize len;
 
 	len = strlen(pattern);
 	if (strncmp(*s, pattern, len))
@@ -39,7 +38,7 @@ str_ltrim(const char **s)
 void
 print_bitboard(bitboard bb)
 {
-	size_t i, j;
+	usize i, j;
 	bitboard mask;
 
 	printf("┌───┬───┬───┬───┬───┬───┬───┬───┐\n");
@@ -93,10 +92,10 @@ print_board(const position *p)
 	printf("└───┴───┴───┴───┴───┴───┴───┴───┘\n");
 }
 
-static size_t
+static usize
 parse_board(const char *s, position *p)
 {
-	size_t i;
+	usize i;
 	unsigned file, rank;
 	square sq;
 	ptype pt;
@@ -149,7 +148,7 @@ parse_board(const char *s, position *p)
 	return i;
 }
 
-static size_t
+static usize
 parse_stm(const char *s, position *p)
 {
 	assert((*s == 'w' || *s == 'b') && "Invalid color");
@@ -163,10 +162,10 @@ parse_stm(const char *s, position *p)
 	return 1;
 }
 
-static size_t
+static usize
 parse_castle(const char *s, state_frame *sf)
 {
-	size_t i;
+	usize i;
 
 	i = 0;
 	sf->castle = NO_CASTLING;
@@ -203,7 +202,7 @@ get_digit(char c)
 	return (unsigned char) (c - '0');
 }
 
-static size_t
+static usize
 parse_ep(const char *s, state_frame *sf)
 {
 	unsigned file, rank;
@@ -224,7 +223,7 @@ parse_ep(const char *s, state_frame *sf)
 	return 2;
 }
 
-static size_t
+static usize
 parse_rule50(const char *s, state_frame *sf)
 {
 	sf->rule50 = get_digit(s[0]);
@@ -235,10 +234,10 @@ parse_rule50(const char *s, state_frame *sf)
 	return 2;
 }
 
-static size_t
+static usize
 parse_ply(const char *s, position *p)
 {
-	size_t i;
+	usize i;
 
 	p->root_fullmove = get_digit(s[0]);
 	if (!p->root_fullmove) return 1;
@@ -252,10 +251,10 @@ parse_ply(const char *s, position *p)
 	return i;
 }
 
-size_t
+usize
 parse_fen(const char *fen, position *p, state_frame *sf)
 {
-	size_t i;
+	usize i;
 
 	i = 0;
 	str_ltrim(&fen);
@@ -318,9 +317,9 @@ print_move(move m)
 }
 
 void
-print_line(move *ms, size_t len)
+print_line(move *ms, usize len)
 {
-	size_t i;
+	usize i;
 
 	for (i = 0; i < len; ++i)
 	{
@@ -378,7 +377,7 @@ pop_lsb(bitboard* bb)
 	return sq;
 }
 
-size_t
+usize
 do_lan_move(position *p, const char *lan, state_frame *sf)
 {
 	move m;

@@ -13,7 +13,6 @@
 #include <nyx/utils.h>
 #include <nyx/version.h>
 #include <stdatomic.h>
-#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,7 +31,7 @@ static struct
 
 static struct
 {
-	size_t transposition_table_capacity;
+	usize transposition_table_capacity;
 } UCI_config =
 {
 	.transposition_table_capacity = 10000000,
@@ -292,8 +291,8 @@ const struct
 static void
 uci_handle(const char *cmd)
 {
-	constexpr size_t num_uci_handlers = sizeof(UCI_HANDLERS) / sizeof(*UCI_HANDLERS);
-	size_t i;
+	constexpr usize num_uci_handlers = sizeof(UCI_HANDLERS) / sizeof(*UCI_HANDLERS);
+	usize i;
 
 	for (i = 0; i < num_uci_handlers; ++i)
 	{
@@ -308,7 +307,7 @@ uci_handle(const char *cmd)
 	puts("Invalid command!");
 }
 
-static constexpr size_t UCI_BUF_SIZE = 4096;
+static constexpr usize UCI_BUF_SIZE = 4096;
 
 void
 uci_loop(void)

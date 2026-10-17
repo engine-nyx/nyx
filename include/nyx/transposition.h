@@ -6,7 +6,6 @@
 
 #include <nyx/int.h>
 #include <nyx/types.h>
-#include <stddef.h>
 
 enum bound_type
 {
@@ -31,12 +30,12 @@ typedef struct
 
 typedef struct
 {
-	size_t capacity;
+	usize capacity;
 	tt_entry *entries;
 	u8 generation;
 } transposition_table;
 
-void tt_resize(transposition_table *tt, size_t capacity);
+void tt_resize(transposition_table *tt, usize capacity);
 void tt_clear(transposition_table *tt);
 bool tt_probe(const transposition_table *tt, u64 key, tt_entry *res);
 void tt_store(transposition_table *tt, u64 key, tt_entry data);

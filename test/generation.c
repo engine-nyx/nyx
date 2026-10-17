@@ -16,10 +16,10 @@ BEFORE()
 }
 
 static struct test_result
-check_legal_count(const position *pos, size_t expected)
+check_legal_count(const position *pos, usize expected)
 {
 	move ms[MAX_MOVES];
-	size_t n;
+	usize n;
 	char *msg;
 
 	n = generate_legals(pos, ms);
@@ -34,7 +34,7 @@ check_legal_count(const position *pos, size_t expected)
 }
 
 static struct test_result
-check_legal_count_fen(const char *fen, size_t expected)
+check_legal_count_fen(const char *fen, usize expected)
 {
 	position pos;
 	state_frame sf;

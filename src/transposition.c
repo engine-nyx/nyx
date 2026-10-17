@@ -5,11 +5,10 @@
 #include <nyx/transposition.h>
 #include <nyx/types.h>
 #include <nyx/utils.h>
-#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 
-constexpr size_t cluster_size = 4;
+constexpr usize cluster_size = 4;
 
 static tt_entry *
 cluster_of(const transposition_table *tt, u64 key)
@@ -21,7 +20,7 @@ bool
 tt_probe(const transposition_table *tt, u64 key, tt_entry *res)
 {
 	tt_entry *ent;
-	size_t i;
+	usize i;
 
 	ent = cluster_of(tt, key);
 	for (i = 0; i < cluster_size; ++i)
@@ -48,7 +47,7 @@ void
 tt_store(transposition_table *tt, u64 key, tt_entry data)
 {
 	tt_entry *dest, *ent;
-	size_t i;
+	usize i;
 
 	data.generation = tt->generation;
 	data.key = (u16) key;
@@ -81,7 +80,7 @@ tt_new_search(transposition_table *tt)
 }
 
 void
-tt_resize(transposition_table *tt, size_t capacity)
+tt_resize(transposition_table *tt, usize capacity)
 {
 	assert(capacity && "TT cannot have capacity 0");
 	tt->capacity = ((capacity + (cluster_size - 1)) / cluster_size) * cluster_size;
@@ -99,7 +98,7 @@ is_empty_entry(tt_entry ent)
 void
 tt_clear(transposition_table *tt)
 {
-	size_t i;
+	usize i;
 
 	memset(tt->entries, 0, tt->capacity * sizeof(tt_entry));
 

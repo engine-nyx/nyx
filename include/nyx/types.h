@@ -9,13 +9,14 @@
 #include <stddef.h>
 
 typedef u64f node_count;
+typedef size_t usize;
 
 typedef enum
 {
 	WHITE,
 	BLACK,
 } color;
-constexpr size_t NUM_COLORS = 2;
+constexpr usize NUM_COLORS = 2;
 
 typedef enum
 {
@@ -23,7 +24,7 @@ typedef enum
 	PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING,
 	ALL
 } ptype;
-constexpr size_t NUM_PIECE_TYPES = 8;
+constexpr usize NUM_PIECE_TYPES = 8;
 
 typedef enum : u8
 {
@@ -43,7 +44,7 @@ typedef enum : u8
 	BLACK_QUEEN  = QUEEN  + (BLACK << 3),
 	BLACK_KING   = KING   + (BLACK << 3),
 } pctype;
-constexpr size_t NUM_PIECE_COLORED_TYPES = 16;
+constexpr usize NUM_PIECE_COLORED_TYPES = 16;
 
 static inline color
 other_color(color c) { return (WHITE + BLACK) - c; }
@@ -66,7 +67,7 @@ typedef enum : u8
 	A8, B8, C8, D8, E8, F8, G8, H8,
 	NO_EP,
 } square;
-constexpr size_t NUM_SQUARES = 64;
+constexpr usize NUM_SQUARES = 64;
 static inline unsigned
 rank_of(square sq) { return sq >> 3; }
 static inline unsigned

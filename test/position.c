@@ -42,7 +42,7 @@ check_all_legals(const char *fen)
 	position p;
 	state_frame base;
 	move ms[MAX_MOVES];
-	size_t i, n;
+	usize i, n;
 
 	base = (state_frame) {}; // zero-initialize everything including padding bytes
 	parse_fen(fen, &p, &base);

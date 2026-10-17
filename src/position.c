@@ -8,7 +8,6 @@
 #include <nyx/position.h>
 #include <nyx/types.h>
 #include <nyx/utils.h>
-#include <stddef.h>
 #include <stdlib.h>
 
 static u64 zobrist_piece_square[12][64];
@@ -19,7 +18,7 @@ static u64 zobrist_castling[16];
 static inline u64
 zobrist_of(pctype pc, square sq)
 {
-	size_t pc_idx;
+	usize pc_idx;
 
 	pc_idx = (ptype_of(pc) - 1) + (color_of(pc) * 6);
 
@@ -418,7 +417,7 @@ bool
 is_pseudo_legal(const position *p, move m)
 {
 	move ms[MAX_MOVES];
-	size_t generated, i;
+	usize generated, i;
 	pctype pc;
 	ptype pt;
 	bool is_capture_pawn, is_single_pawn, is_double_pawn;

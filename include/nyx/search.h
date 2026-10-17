@@ -38,7 +38,7 @@ typedef struct
 	};
 } limits;
 
-constexpr size_t MAX_PLY = 100;
+constexpr usize MAX_PLY = 100;
 
 struct search_state
 {

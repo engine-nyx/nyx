@@ -42,7 +42,7 @@ check_all_legal_keys(const char *fen)
 	state_frame base;
 	move ms[MAX_MOVES];
 	u64 key;
-	size_t i, n;
+	usize i, n;
 
 	parse_fen(fen, &p, &base);
 	key = p.key;
@@ -68,7 +68,7 @@ TEST(key_uniqueness_of_legal_moves)
 	move ms[MAX_MOVES];
 	u64 before;
 	u64 first = 0, second = 0;
-	size_t i, n;
+	usize i, n;
 
 	parse_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", &p, &base);
 	before = p.key;

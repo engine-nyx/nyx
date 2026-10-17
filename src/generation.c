@@ -7,12 +7,11 @@
 #include <nyx/position.h>
 #include <nyx/types.h>
 #include <nyx/utils.h>
-#include <stddef.h>
 
-static size_t
+static usize
 splat_moves(square from, bitboard target, move *ms)
 {
-	size_t num_moves;
+	usize num_moves;
 	square to;
 
 	for (num_moves = 0; target; ++num_moves)
@@ -29,10 +28,10 @@ splat_moves(square from, bitboard target, move *ms)
 	return num_moves;
 }
 
-static size_t
+static usize
 generate_piece_moves(const position *p, ptype pt, bitboard target, move *ms)
 {
-	size_t num_moves;
+	usize num_moves;
 	bitboard bb, moves;
 	square sq;
 
@@ -52,10 +51,10 @@ generate_piece_moves(const position *p, ptype pt, bitboard target, move *ms)
 static constexpr bitboard RANK_1 = 0xFF;
 static constexpr bitboard RANK_8 = 0xFF00000000000000;
 
-static size_t
+static usize
 generate_pawn_quiet_promotion_moves(const position *p, bitboard target, ptype promtype, move *ms)
 {
-	size_t num_moves;
+	usize num_moves;
 	bitboard promotions;
 	square from, to;
 
@@ -76,10 +75,10 @@ generate_pawn_quiet_promotion_moves(const position *p, bitboard target, ptype pr
 }
 
 // pawn promotions: quiet knight, quiet bishop, quiet rook
-static size_t
+static usize
 generate_quiet_pawn_moves(const position *p, bitboard target, move *ms)
 {
-	size_t num_moves;
+	usize num_moves;
 	bitboard singles, doubles;
 	square from, to;
 
@@ -115,7 +114,7 @@ generate_quiet_pawn_moves(const position *p, bitboard target, move *ms)
 	return num_moves;
 }
 
-static size_t
+static usize
 pawn_all_promotions(square from, square to, move *ms)
 {
 	ms[0] = promotion_move(from, to, QUEEN);
@@ -127,10 +126,10 @@ pawn_all_promotions(square from, square to, move *ms)
 }
 
 // pawn promotions += quiet queen
-static size_t
+static usize
 generate_capture_pawn_moves(const position *p, bitboard target, move *ms)
 {
-	size_t num_moves;
+	usize num_moves;
 	bitboard singles, east, west, east_prom, west_prom, ep;
 	square from, to;
 
@@ -215,12 +214,12 @@ static bitboard castling_path[] =
 	[BLACK_OOO] = 0x0E00000000000000,
 };
 
-static size_t
+static usize
 generate_castling_moves(const position *p, move *ms)
 {
 	castling_rights cr;
 	square ksq;
-	size_t num_moves;
+	usize num_moves;
 	bitboard occ;
 
 	cr = p->sf->castle & white_black(WHITE_CASTLING, BLACK_CASTLING, p->stm);
@@ -250,10 +249,10 @@ generate_castling_moves(const position *p, move *ms)
 	return num_moves;
 }
 
-static size_t
+static usize
 generate_all_piece_moves(const position *p, bitboard target, move *ms)
 {
-	size_t num_moves;
+	usize num_moves;
 
 	num_moves = 0;
 	num_moves += generate_piece_moves(p, KNIGHT, target, ms + num_moves);
@@ -265,10 +264,10 @@ generate_all_piece_moves(const position *p, bitboard target, move *ms)
 	return num_moves;
 }
 
-size_t
+usize
 generate_captures(const position *p, move *ms)
 {
-	size_t num_moves;
+	usize num_moves;
 	bitboard target;
 
 	target = p->by_color[other_color(p->stm)];
@@ -280,10 +279,10 @@ generate_captures(const position *p, move *ms)
 	return num_moves;
 }
 
-size_t
+usize
 generate_quiets(const position *p, move *ms)
 {
-	size_t num_moves;
+	usize num_moves;
 	bitboard target;
 
 	target = ~p->by_ptype[ALL];
@@ -297,10 +296,10 @@ generate_quiets(const position *p, move *ms)
 }
 
 bitboard between_lut[NUM_SQUARES][NUM_SQUARES];
-size_t
+usize
 generate_evasions(const position *p, move *ms)
 {
-	size_t num_moves;
+	usize num_moves;
 	bitboard target, flee;
 
 	flee = ~p->by_color[p->stm];
@@ -323,10 +322,10 @@ generate_evasions(const position *p, move *ms)
 	return num_moves;
 }
 
-size_t
+usize
 generate_non_evasions(const position *p, move *ms)
 {
-	size_t num_moves;
+	usize num_moves;
 	bitboard target;
 
 	target = ~p->by_color[p->stm];
@@ -378,10 +377,10 @@ generation_init(void)
 	}
 }
 
-size_t
+usize
 generate_legals(const position *p, move *ms)
 {
-	size_t num_moves, i;
+	usize num_moves, i;
 	bool check_legal;
 	move m;
 	bitboard pinned;
@@ -408,7 +407,7 @@ generate_legals(const position *p, move *ms)
 	return num_moves;
 }
 
-size_t
+usize
 generate(enum generation_type gt, const position *p, move *ms)
 {
 	switch (gt)

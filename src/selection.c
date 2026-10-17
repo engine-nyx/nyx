@@ -6,7 +6,6 @@
 #include <nyx/position.h>
 #include <nyx/selection.h>
 #include <nyx/types.h>
-#include <stddef.h>
 
 enum stage
 {
@@ -28,9 +27,9 @@ enum stage
 };
 
 static void
-score_quiets(const move *ms, size_t num_moves, struct scored_move *sms)
+score_quiets(const move *ms, usize num_moves, struct scored_move *sms)
 {
-	size_t i;
+	usize i;
 	move m;
 	int score;
 
@@ -59,9 +58,9 @@ static const int PIECE_VALUE[NUM_PIECE_TYPES] =
 };
 
 static void
-score_moves(const selector *s, const move *ms, size_t num_moves, struct scored_move *sms)
+score_moves(const selector *s, const move *ms, usize num_moves, struct scored_move *sms)
 {
-	size_t i;
+	usize i;
 	move m;
 	int score;
 
@@ -83,9 +82,9 @@ score_moves(const selector *s, const move *ms, size_t num_moves, struct scored_m
 }
 
 static void
-insertion_sort(struct scored_move *ms, size_t num_moves)
+insertion_sort(struct scored_move *ms, usize num_moves)
 {
-	size_t sorted, i;
+	usize sorted, i;
 	struct scored_move temp;
 
 	for (sorted = 0; sorted < num_moves; ++sorted)
@@ -129,7 +128,7 @@ static move
 pseudo_select(selector *s)
 {
 	move ms[MAX_MOVES];
-	size_t generated;
+	usize generated;
 
 	switch (s->stage)
 	{

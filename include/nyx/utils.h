@@ -6,19 +6,18 @@
 
 #include <nyx/position.h>
 #include <nyx/types.h>
-#include <stddef.h>
 
 #define BITMASK(bits) (bits >= sizeof(unsigned long long) * 8 ? ((unsigned long long) 0) - 1 : ((unsigned long long) 1 << (bits)) - 1)
-size_t str_consume(const char **s, const char *pattern);
+usize str_consume(const char **s, const char *pattern);
 unsigned str_ltrim(const char **s);
 void print_bitboard(bitboard bb);
 
 void print_board(const position *p);
-size_t parse_fen(const char *fen, position *p, state_frame *sf);
+usize parse_fen(const char *fen, position *p, state_frame *sf);
 
 void print_square(square sq);
 void print_move(move m);
-void print_line(move *ms, size_t len);
+void print_line(move *ms, usize len);
 
 bitboard strbb(const char *s);
 
@@ -28,7 +27,7 @@ square lsb(bitboard bb);
 square pop_lsb(bitboard *bb);
 unsigned popcnt(bitboard bb);
 
-size_t do_lan_move(position *p, const char *lan, state_frame *sf);
+usize do_lan_move(position *p, const char *lan, state_frame *sf);
 move promotion_move(square from, square to, ptype prom);
 
 #endif // NYX_UTILS_H

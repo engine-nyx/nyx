@@ -14,7 +14,7 @@ perft(position *p, unsigned depth)
 {
 	node_count nodes;
 	move ms[MAX_MOVES];
-	size_t num_moves, i;
+	usize num_moves, i;
 	state_frame sf;
 
 	nodes = 0;
@@ -38,7 +38,7 @@ perft_verbose(position *p, unsigned depth)
 
 	node_count total, nodes;
 	move ms[MAX_MOVES];
-	size_t num_moves, i;
+	usize num_moves, i;
 	state_frame sf;
 
 	total = 0;

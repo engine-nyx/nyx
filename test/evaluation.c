@@ -179,7 +179,7 @@ TEST(eval_survives_make_unmake)
 	position p;
 	state_frame sf;
 	move ms[MAX_MOVES];
-	size_t i, n;
+	usize i, n;
 	int before;
 
 	sf = (state_frame) {};

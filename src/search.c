@@ -208,7 +208,7 @@ static void
 uci_info(struct search_state *ss, int score, time_manager *tm)
 {
 	millis spent;
-	size_t i;
+	usize i;
 
 	spent = now() - tm->start;
 
