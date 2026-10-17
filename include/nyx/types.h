@@ -4,6 +4,7 @@
 #ifndef NYX_TYPES_H
 #define NYX_TYPES_H
 
+#include <future/c2y.h>
 #include <limits.h>
 #include <nyx/int.h>
 #include <stddef.h>

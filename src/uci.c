@@ -1,6 +1,7 @@
 // Copyright (c) 2026 Kilian Chung
 // SPDX-License-Identifier: NLPL
 
+#include "future/c2y.h"
 #include <assert.h>
 #include <nyx/generation.h>
 #include <nyx/perft.h>
@@ -32,9 +33,18 @@ static struct
 static struct
 {
 	usize transposition_table_capacity;
-} UCI_config =
+	usize threads;
+} UCI_config;
+
+static const struct
 {
-	.transposition_table_capacity = 10000000,
+	usize min, max, value;
+	usize *ptr;
+	const char *name;
+} UCI_OPTIONS[] =
+{
+	{ 1, 33554432, 1000000, &UCI_config.transposition_table_capacity, "ttszk"   },
+	{ 1,        1,       1, &UCI_config.threads                     , "threads" },
 };
 
 // quit
@@ -82,7 +92,25 @@ uci_id(void)
 static void
 uci_options(void)
 {
-	puts("option name ttsz type spin default 10000000 min 1 max 33554432");
+	usize i;
+
+	for (i = 0; i < lengthof(UCI_OPTIONS); ++i)
+	{
+		printf("option name %s ", UCI_OPTIONS[i].name);
+		printf("type spin ");
+		printf("default %zu ", UCI_OPTIONS[i].value);
+		printf("min %zu ", UCI_OPTIONS[i].min);
+		printf("max %zu\n", UCI_OPTIONS[i].max);
+	}
+}
+
+static void
+uci_default_options(void)
+{
+	usize i;
+
+	for (i = 0; i < lengthof(UCI_OPTIONS); ++i)
+		*UCI_OPTIONS[i].ptr = UCI_OPTIONS[i].value;
 }
 
 static void uci_ucinewgame(const char *args);
@@ -91,8 +119,6 @@ static void
 uci_uci(const char *args)
 {
 	(void) args;
-
-	uci_ucinewgame("");
 
 	uci_id();
 	puts("");
@@ -122,10 +148,19 @@ uci_isready(const char *args)
 static void
 uci_setoption(const char *args)
 {
-	if (str_consume(&args, "ttsz"))
+	usize i, value;
+
+	for (i = 0; i < lengthof(UCI_OPTIONS); ++i)
 	{
-		assert(str_ltrim(&args) && "setting separator");
-		UCI_config.transposition_table_capacity = strtoull(args, nullptr, 10);
+		if (str_consume(&args, UCI_OPTIONS[i].name))
+		{
+			assert(str_ltrim(&args) && "setting separator");
+			value = strtoull(args, nullptr, 10);
+			if (value < UCI_OPTIONS[i].min || value > UCI_OPTIONS[i].max)
+				assert(false);
+			*UCI_OPTIONS[i].ptr = value;
+			break;
+		}
 	}
 }
 
@@ -287,14 +322,12 @@ const struct
 	{ "d"         , uci_d          },
 };
 
-
 static void
 uci_handle(const char *cmd)
 {
-	constexpr usize num_uci_handlers = sizeof(UCI_HANDLERS) / sizeof(*UCI_HANDLERS);
 	usize i;
 
-	for (i = 0; i < num_uci_handlers; ++i)
+	for (i = 0; i < lengthof(UCI_HANDLERS); ++i)
 	{
 		if (str_consume(&cmd, UCI_HANDLERS[i].cmd))
 		{
@@ -313,6 +346,9 @@ void
 uci_loop(void)
 {
 	char line[UCI_BUF_SIZE];
+
+	uci_default_options();
+	uci_ucinewgame("");
 
 	UCI_state.quit = false;
 
