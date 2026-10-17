@@ -43,13 +43,12 @@ constexpr size_t MAX_PLY = 100;
 struct search_state
 {
 	node_count nodes, qnodes;
-	unsigned depth, ply;
+	unsigned depth, qsearch_max, ply;
 
 	position *p;
 	transposition_table *tt;
 
 	move pv[MAX_PLY];
-	int score[MAX_PLY];
 };
 
 struct search_result
