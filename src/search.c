@@ -12,7 +12,6 @@
 #include <nyx/types.h>
 #include <nyx/utils.h>
 #include <stdio.h>
-#include <string.h>
 
 constexpr int VALUE_DRAW = 0;
 static int
