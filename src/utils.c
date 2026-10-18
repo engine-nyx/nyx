@@ -441,3 +441,14 @@ promotion_move(square from, square to, ptype pt)
 		.prom=(pt - KNIGHT) & BITMASK(2),
 	};
 }
+
+move *
+movecpy(move *restrict dest, const move *restrict src, usize n)
+{
+	usize i;
+
+	for (i = 0; i < n && !is_null(src[i]); ++i)
+		dest[i] = src[i];
+
+	return &dest[i];
+}

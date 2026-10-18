@@ -137,6 +137,8 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 	--ss->depth, ++ss->ply;
 	++ss->nodes;
 
+	if (pv) ss->pv[ss->ply][0] = NULL_MOVE;
+
 	s = selector_of(p, tt_probe_success ? ent.best_move : NULL_MOVE, MAIN);
 	best_score = -oo;
 	first_move = true;
@@ -170,6 +172,11 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 			best_move = m;
 
 			if (score >= beta) break;
+			if (pv)
+			{
+				ss->pv[ss->ply - 1][0] = m;
+				*movecpy(ss->pv[ss->ply - 1] + 1, ss->pv[ss->ply], ss->depth) = NULL_MOVE;
+			}
 		}
 	}
 
@@ -193,7 +200,6 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 		),
 		.pv=pv
 	});
-	if (pv) ss->pv[ss->ply] = best_move;
 
 	return best_score;
 }
@@ -234,10 +240,10 @@ uci_info(struct search_state *ss, int score, time_manager *tm)
 
 	for (i = 0; i < ss->depth; ++i)
 	{
-		if (is_null(ss->pv[i])) break;
+		if (is_null(ss->pv[0][i])) break;
 
 		printf(" ");
-		print_move(ss->pv[i]);
+		print_move(ss->pv[0][i]);
 	}
 	printf("\n");
 	fflush(stdout);
@@ -260,18 +266,18 @@ search(position *p, limits l, transposition_table *tt, atomic_bool *stop)
 	score = 0;
 	for (ss->depth = 0; !tm_soft_expired(tm, ss) && !is_mate_score(score); ++ss->depth)
 	{
-		score = search_rec(p, -oo, oo, tm, ss, true) * white_black(+1, -1, p->stm);
+		score = search_rec(p, -oo, oo, tm, ss, true);
 
 		// do not use partial search results
 		if (tm_hard_expired(tm, ss)) break;
 
 		res = (struct search_result)
 		{
-			.best=ss->pv[0],
+			.best=ss->pv[0][0],
 			.score=score,
 			.depth=ss->depth,
 		};
-		memcpy(&res.pv, &ss->pv, ss->depth * sizeof(move));
+		movecpy(res.pv, ss->pv[0], ss->depth);
 
 		uci_info(ss, score, tm);
 	}

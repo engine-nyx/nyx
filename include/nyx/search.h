@@ -48,7 +48,7 @@ struct search_state
 	position *p;
 	transposition_table *tt;
 
-	move pv[MAX_PLY];
+	move pv[MAX_PLY + 1][MAX_PLY + 1];
 };
 
 struct search_result

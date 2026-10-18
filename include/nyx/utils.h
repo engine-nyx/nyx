@@ -30,4 +30,6 @@ unsigned popcnt(bitboard bb);
 usize do_lan_move(position *p, const char *lan, state_frame *sf);
 move promotion_move(square from, square to, ptype prom);
 
+move *movecpy(move *restrict dest, const move *restrict src, usize n);
+
 #endif // NYX_UTILS_H
