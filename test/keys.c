@@ -1,7 +1,6 @@
 // Copyright (c) 2026 Kilian Chung
 // SPDX-License-Identifier: NLPL
 
-#include <string.h>
 #include <nyx/attacks.h>
 #include <nyx/generation.h>
 #include <nyx/position.h>
@@ -143,9 +142,9 @@ TEST(tt_store_probe_roundtrip)
 	ent.best_move = (move){ .from = E2, .to = E4, .prom = 0, .type = NORMAL };
 	ent.depth = 5;
 
-	tt_store(&tt, 0xDEADBEEFCAFEBABE, ent);
+	store(&tt, 0xDEADBEEFCAFEBABE, ent);
 
-	if (!tt_probe(&tt, 0xDEADBEEFCAFEBABE, &res))
+	if (!probe(&tt, 0xDEADBEEFCAFEBABE, &res))
 		return TEST_FAILURE("store followed by probe failed");
 
 	test_eq(res.bound, EXACT, "stored type");
@@ -154,7 +153,7 @@ TEST(tt_store_probe_roundtrip)
 	test_eq(res.best_move.to, E4, "stored move to");
 	test_eq(res.depth, 5, "stored depth");
 
-	if (tt_probe(&tt, 0x1234567890ABCDEF, &res))
+	if (probe(&tt, 0x1234567890ABCDEF, &res))
 		return TEST_FAILURE("probe found an entry for a different key");
 
 	tt_free(&tt);
@@ -170,12 +169,12 @@ TEST(tt_replacement_rule)
 	tt_resize(&tt, 1024);
 
 	a.score = 1;
-	tt_store(&tt, 0x11111111, a);
+	store(&tt, 0x11111111, a);
 
 	b.score = 2;
-	tt_store(&tt, 0x11111111, b);
+	store(&tt, 0x11111111, b);
 
-	if (!tt_probe(&tt, 0x11111111, &res))
+	if (!probe(&tt, 0x11111111, &res))
 		return TEST_FAILURE("probe after replacement failed");
 	test_eq(res.score, 2, "equal generation replaces old entry");
 
