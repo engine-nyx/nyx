@@ -232,7 +232,8 @@ selector_of(const position *p, move tt, enum search_stage stage)
 	case QUIESCENCE : s.stage = STAGE_TT_QUIESCE; break;
 	}
 
-	tt_is_quiesce = p->by_square[tt.to] != EMPTY ||
+	tt_is_quiesce = p->sf->checkers ||
+		p->by_square[tt.to] != EMPTY ||
 		tt.type == EN_PASSANT ||
 		tt.type == PROMOTION;
 
