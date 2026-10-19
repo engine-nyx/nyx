@@ -277,11 +277,15 @@ do_move(position *p, move m, state_frame *sf)
 	*sf = *p->sf;
 	sf->previous = p->sf;
 	p->sf = sf;
+	sf->key = p->key;
 
 	them = other_color(p->stm);
 	pc = p->by_square[m.from];
 	sf->capture = (m.type == EN_PASSANT) ? pctype_of(PAWN, them) : p->by_square[m.to];
 	check = gives_check(p, m);
+
+	if (ptype_of(pc) == PAWN || sf->capture) sf->rule50 = 0;
+	else ++sf->rule50;
 
 	switch (m.type)
 	{
@@ -355,7 +359,6 @@ undo_move(position *p, move m)
 {
 	--p->ply;
 	p->stm = other_color(p->stm);
-	p->key ^= zobrist_stm;
 
 	switch (m.type)
 	{
@@ -382,13 +385,8 @@ undo_move(position *p, move m)
 		break;
 	}
 
-	p->key ^= zobrist_castling[p->sf->castle];
-	if (p->sf->ep != NO_EP) p->key ^= zobrist_ep[file_of(p->sf->ep)];
-
+	p->key = p->sf->key;
 	p->sf = p->sf->previous;
-
-	p->key ^= zobrist_castling[p->sf->castle];
-	if (p->sf->ep != NO_EP) p->key ^= zobrist_ep[file_of(p->sf->ep)];
 }
 
 // we assume no check
@@ -471,4 +469,22 @@ is_pseudo_legal(const position *p, move m)
 	}
 
 	return true;
+}
+
+bool
+is_repetition(const position *pos)
+{
+	usize i;
+	state_frame *sf;
+
+	sf = pos->sf;
+
+	for (i = 0; i < sf->rule50 / 2; ++i)
+	{
+		sf = sf->previous;
+		if (pos->key == sf->key) return true;
+		sf = sf->previous;
+	}
+
+	return false;
 }

@@ -13,6 +13,16 @@
 #include <nyx/utils.h>
 #include <stdio.h>
 
+struct search_state
+{
+	node_count nodes, qnodes;
+	unsigned depth, qsearch_max, ply;
+
+	transposition_table *tt;
+
+	move pv[MAX_PLY][MAX_PLY + 1];
+};
+
 constexpr int VALUE_DRAW = 0;
 static int
 VALUE_MATE(unsigned ply)
@@ -53,14 +63,13 @@ qsearch_rec(position *p, int alpha, int beta, time_manager *tm, struct search_st
 	state_frame sf;
 	tt_entry ent;
 	bool tt_probe_success;
-	unsigned move_count;
 
 	best_score = p->sf->checkers ? -oo : evaluate(p);
 	best_move = NULL_MOVE;
 	if (best_score >= beta)
 		return best_score;
 
-	tt_probe_success = tt_probe(ss->tt, p->key, &ent);
+	tt_probe_success = probe(ss->tt, p->key, &ent);
 
 	if (tt_probe_success && tt_qskip(ent, alpha, beta))
 		return ent.score;
@@ -72,13 +81,24 @@ qsearch_rec(position *p, int alpha, int beta, time_manager *tm, struct search_st
 
 	s = selector_of(p, tt_probe_success ? ent.best_move : NULL_MOVE, QUIESCENCE);
 
-	move_count = 0;
 	while (!is_null(m = select(&s)))
 	{
-		++move_count;
+		if (sf.rule50 >= 100)
+		{
+			best_score = VALUE_DRAW;
+			break;
+		}
+
 		do_move(p, m, &sf);
 
-		score = -qsearch_rec(p, -beta, -MAX(best_score, alpha), tm, ss);
+		if (is_repetition(p))
+		{
+			score = VALUE_DRAW;
+		}
+		else
+		{
+			score = -qsearch_rec(p, -beta, -MAX(best_score, alpha), tm, ss);
+		}
 
 		undo_move(p, m);
 
@@ -92,13 +112,15 @@ qsearch_rec(position *p, int alpha, int beta, time_manager *tm, struct search_st
 	}
 
 	--ss->depth, --ss->ply;
-	if (!move_count)
+
+	if (!s.num_moves)
 	{
 		best_move = NULL_MOVE;
 		if (p->sf->checkers)
 			best_score = -VALUE_MATE(ss->ply);
 	}
-	tt_store(ss->tt, p->key, (tt_entry)
+
+	store(ss->tt, p->key, (tt_entry)
 	{
 		.depth=0,
 		.best_move=best_move,
@@ -123,9 +145,8 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 	state_frame sf;
 	tt_entry ent;
 	bool tt_probe_success, first_move;
-	unsigned move_count;
 
-	tt_probe_success = tt_probe(ss->tt, p->key, &ent);
+	tt_probe_success = probe(ss->tt, p->key, &ent);
 
 	if (!pv && tt_probe_success && tt_skip(ent, alpha, beta, *ss))
 		return ent.score;
@@ -141,14 +162,22 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 	s = selector_of(p, tt_probe_success ? ent.best_move : NULL_MOVE, MAIN);
 	best_score = -oo;
 	first_move = true;
-	move_count = 0;
 
-	while (!tm_hard_expired(tm, ss) && !is_null(m = select(&s)))
+	while (!tm_hard_expired(tm, ss->depth, ss->nodes, p) && !is_null(m = select(&s)))
 	{
-		++move_count;
+		if (sf.rule50 >= 100)
+		{
+			best_score = VALUE_DRAW;
+			break;
+		}
+
 		do_move(p, m, &sf);
 
-		if (first_move)
+		if (is_repetition(p))
+		{
+			score = VALUE_DRAW;
+		}
+		else if (first_move)
 		{
 			score = -search_rec(p, -beta, -alpha, tm, ss, pv);
 
@@ -180,13 +209,14 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 	}
 
 	++ss->depth, --ss->ply;
-	if (!move_count)
+
+	if (!s.num_moves)
 	{
 		best_move = NULL_MOVE;
 		best_score = p->sf->checkers ? -VALUE_MATE(ss->ply) : VALUE_DRAW;
 	}
 
-	tt_store(ss->tt, p->key, (tt_entry)
+	store(ss->tt, p->key, (tt_entry)
 	{
 		.depth=(u8)ss->depth,
 		.best_move=best_move,
@@ -256,19 +286,19 @@ search(position *p, limits l, transposition_table *tt, atomic_bool *stop)
 	struct search_result res;
 	int score;
 
-	ss = &(struct search_state) { .p=p, .tt=tt };
+	ss = &(struct search_state) { .tt=tt };
 	tm = &(time_manager) { .l=l, .stop=stop };
 	res = (struct search_result) {};
 	tm_start(tm);
 	tt_new_search(tt);
 
 	score = 0;
-	for (ss->depth = 0; !tm_soft_expired(tm, ss) && !is_mate_score(score); ++ss->depth)
+	for (ss->depth = 0; !tm_soft_expired(tm, ss->depth, ss->nodes, p) && !is_mate_score(score); ++ss->depth)
 	{
 		score = search_rec(p, -oo, oo, tm, ss, true);
 
 		// do not use partial search results
-		if (tm_hard_expired(tm, ss)) break;
+		if (tm_hard_expired(tm, ss->depth, ss->nodes, p)) break;
 
 		res = (struct search_result)
 		{

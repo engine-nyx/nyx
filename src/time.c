@@ -22,11 +22,11 @@ tm_start(time_manager *tm)
 }
 
 bool
-tm_hard_expired(const time_manager *tm, struct search_state *ss)
+tm_hard_expired(const time_manager *tm, unsigned depth, node_count nodes, const position *pos)
 {
 	millis ms;
 
-	if (*tm->stop || ss->depth >= MAX_PLY) return true;
+	if (*tm->stop || depth >= MAX_PLY) return true;
 
 	ms = now();
 
@@ -35,9 +35,9 @@ tm_hard_expired(const time_manager *tm, struct search_state *ss)
 	switch (tm->l.type)
 	{
 	case MOVETIME : return ms - tm->start > tm->l.movetime;
-	case DEPTH    : return ss->depth > tm->l.depth;
-	case NODES    : return ss->nodes > tm->l.nodes;
-	case CLOCK    : return ms - tm->start > tm->l.time[ss->p->root_stm] / (40 - ss->p->root_fullmove); /* TODO really bad approximator */
+	case DEPTH    : return depth > tm->l.depth;
+	case NODES    : return nodes > tm->l.nodes;
+	case CLOCK    : return ms - tm->start > tm->l.time[pos->root_stm] / (40 - pos->root_fullmove); /* TODO really bad approximator */
 	case INFINITE : return false;
 	case MATE     : return true;
 	}
@@ -46,7 +46,7 @@ tm_hard_expired(const time_manager *tm, struct search_state *ss)
 }
 
 bool
-tm_soft_expired(const time_manager *tm, struct search_state *ss)
+tm_soft_expired(const time_manager *tm, unsigned depth, node_count nodes, const position *pos)
 {
-	return tm_hard_expired(tm, ss);
+	return tm_hard_expired(tm, depth, nodes, pos);
 }

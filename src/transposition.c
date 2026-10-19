@@ -17,7 +17,7 @@ cluster_of(const transposition_table *tt, u64 key)
 }
 
 bool
-tt_probe(const transposition_table *tt, u64 key, tt_entry *res)
+probe(const transposition_table *tt, u64 key, tt_entry *res)
 {
 	tt_entry *ent;
 	usize i;
@@ -44,7 +44,7 @@ age(const transposition_table *tt, u8 generation)
 constexpr PARAMETER int age_weight = 4;
 
 void
-tt_store(transposition_table *tt, u64 key, tt_entry data)
+store(transposition_table *tt, u64 key, tt_entry data)
 {
 	tt_entry *dest, *ent;
 	usize i;

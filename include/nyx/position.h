@@ -14,6 +14,7 @@ typedef struct state_frame
 	castling_rights castle;
 	unsigned rule50;
 	int material;
+	u64 key;
 
 	// transient
 	struct state_frame *previous;
@@ -49,5 +50,7 @@ bool is_pseudo_legal(const position *p, move m);
 void finalize_position(position *p);
 
 void position_init(void);
+
+bool is_repetition(const position *pos);
 
 #endif // NYX_POSITION_H
