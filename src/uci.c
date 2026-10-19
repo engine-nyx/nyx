@@ -356,6 +356,7 @@ uci_loop(void)
 
 	while (!UCI_state.quit)
 	{
+		memset(line, 0, UCI_BUF_SIZE);
 		if (fgets(line, UCI_BUF_SIZE, stdin) == nullptr)
 			uci_quit("");
 		else
