@@ -23,7 +23,7 @@ static struct
 	time_manager tm;
 	atomic_bool stop;
 	position p;
-	state_frame sf;
+	state_frame sf[100];  // Rule50 guarantees non reversable moves every 100 halfmoves
 
 	transposition_table tt;
 
@@ -180,15 +180,17 @@ is_move(const char *s)
 static void
 uci_position(const char *args)
 {
+	usize i;
+
 	if (str_consume(&args, "startpos"))
 	{
-		parse_fen(startpos, &UCI_state.p, &UCI_state.sf);
+		parse_fen(startpos, &UCI_state.p, UCI_state.sf);
 	}
 
 	else if (str_consume(&args, "fen"))
 	{
 		assert(str_ltrim(&args) > 0 && "fen separator");
-		args += parse_fen(args, &UCI_state.p, &UCI_state.sf);
+		args += parse_fen(args, &UCI_state.p, UCI_state.sf);
 	}
 
 	else
@@ -199,9 +201,9 @@ uci_position(const char *args)
 	if (!str_ltrim(&args) || !str_consume(&args, "moves") || !str_ltrim(&args))
 		return;
 
-	while (is_move(args))
+	for (i = 1; is_move(args); ++i, i %= 100)
 	{
-		args += do_lan_move(&UCI_state.p, args, &UCI_state.sf);
+		args += do_lan_move(&UCI_state.p, args, UCI_state.sf + i);
 		if (!str_ltrim(&args)) break;
 	}
 }
