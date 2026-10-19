@@ -200,6 +200,7 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 			best_move = m;
 
 			if (score >= beta) break;
+
 			if (pv)
 			{
 				ss->pv[ss->ply - 1][0] = m;
