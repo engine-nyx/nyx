@@ -206,7 +206,11 @@ select(selector *s)
 
 	m = pseudo_select(s);
 	if (is_null(m) || is_legal(s->pos, m))
+	{
+		if (!is_null(m))
+			++s->selected;
 		return m;
+	}
 	return select(s);
 }
 

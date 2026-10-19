@@ -65,6 +65,7 @@ qsearch_rec(position *p, int alpha, int beta, time_manager *tm, struct search_st
 	bool tt_probe_success;
 
 	best_score = p->sf->checkers ? -oo : evaluate(p);
+	best_move = NULL_MOVE;
 	if (best_score >= beta)
 		return best_score;
 
@@ -112,7 +113,7 @@ qsearch_rec(position *p, int alpha, int beta, time_manager *tm, struct search_st
 
 	--ss->depth, --ss->ply;
 
-	if (!s.num_moves)
+	if (!s.selected)
 	{
 		best_move = NULL_MOVE;
 		if (p->sf->checkers)
@@ -167,6 +168,7 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 		if (p->sf->rule50 >= 100)
 		{
 			best_score = VALUE_DRAW;
+			best_move = NULL_MOVE;
 			break;
 		}
 
@@ -210,7 +212,7 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 
 	++ss->depth, --ss->ply;
 
-	if (!s.num_moves)
+	if (!s.selected)
 	{
 		best_move = NULL_MOVE;
 		best_score = p->sf->checkers ? -VALUE_MATE(ss->ply) : VALUE_DRAW;
