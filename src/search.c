@@ -88,7 +88,7 @@ qsearch_rec(position *p, int alpha, int beta, time_manager *tm, struct search_st
 
 	while (!is_null(m = select(&s)))
 	{
-		if (p->sf->rule50 >= 100)
+		if (p->sf->rule50 > 100)
 		{
 			best_score = VALUE_DRAW;
 			break;
@@ -170,7 +170,7 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 
 	while (!tm_hard_expired(tm, ss->depth, ss->nodes, p) && !is_null(m = select(&s)))
 	{
-		if (p->sf->rule50 >= 100)
+		if (p->sf->rule50 > 100)
 		{
 			best_score = VALUE_DRAW;
 			best_move = NULL_MOVE;
