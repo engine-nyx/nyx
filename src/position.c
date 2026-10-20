@@ -479,7 +479,7 @@ is_repetition(const position *pos)
 
 	sf = pos->sf;
 
-	for (i = 0; i < sf->rule50 / 2; ++i)
+	for (i = 0; i < pos->sf->rule50 / 2; ++i)
 	{
 		sf = sf->previous;
 		if (pos->key == sf->key) return true;
