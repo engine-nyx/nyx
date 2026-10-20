@@ -25,9 +25,14 @@ struct search_state
 
 constexpr int VALUE_DRAW = 0;
 static int
-VALUE_MATE(unsigned ply)
+VALUE_QMATE(unsigned ply)
 {
 	return (oo / 2) - ply;
+}
+static int
+VALUE_MATE(unsigned ply)
+{
+	return oo - ply;
 }
 
 #define MAX(a, b) ((a) >= (b) ? (a) : (b))
@@ -117,7 +122,7 @@ qsearch_rec(position *p, int alpha, int beta, time_manager *tm, struct search_st
 	{
 		best_move = NULL_MOVE;
 		if (p->sf->checkers)
-			best_score = -VALUE_MATE(ss->ply);
+			best_score = -VALUE_QMATE(ss->ply);
 	}
 
 	store(ss->tt, p->key, (tt_entry)
@@ -235,26 +240,34 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 	return best_score;
 }
 
+constexpr int MATE_THRESHOLD = oo - MAX_PLY;
+
 static bool
 is_mate_score(int score)
 {
-	return score < -oo / 3 || score > oo / 3;
+	return score <= -MATE_THRESHOLD || score >= MATE_THRESHOLD;
 }
 
 static void
 uci_info(struct search_state *ss, int score, time_manager *tm)
 {
 	millis spent;
+	const char *score_metric;
+	int score_value;
 	usize i;
 
 	spent = now() - tm->start;
+	score_metric = is_mate_score(score) ? "mate" : "cp";
+	score_value  = is_mate_score(score) ?
+		score < 0 ? -(score + oo) / 2 : -(score - oo - 1) / 2 :
+		score;
 
 	printf
 	(
 		"info "
 		"depth %u "
 		"seldepth %u "
-		"score cp %d "
+		"score %s %d "
 		"nodes %" PRIuFAST64 " "
 		"nps %" PRIuFAST64 " "
 		"hashfull %u "
@@ -262,7 +275,8 @@ uci_info(struct search_state *ss, int score, time_manager *tm)
 		"pv",
 		ss->depth,
 		ss->depth + ss->qsearch_max,
-		score,
+		score_metric,
+		score_value,
 		ss->nodes,
 		spent ? (ss->nodes * 1000) / spent : 0,
 		0,
