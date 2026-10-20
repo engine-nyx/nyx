@@ -279,7 +279,7 @@ uci_info(struct search_state *ss, int score, time_manager *tm)
 		score_value,
 		ss->nodes,
 		spent ? (ss->nodes * 1000) / spent : 0,
-		0,
+		tt_hashfull(ss->tt),
 		spent
 	);
 

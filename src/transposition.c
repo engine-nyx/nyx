@@ -114,3 +114,22 @@ tt_free(transposition_table *tt)
 	if (tt->entries)
 		free(tt->entries);
 }
+
+unsigned
+tt_hashfull(const transposition_table *tt)
+{
+	unsigned res;
+	usize i;
+	tt_entry ent;
+
+	res = 0;
+
+	for (i = 0; i < 1000; ++i)
+	{
+		ent = tt->entries[i];
+		if (!age(tt, ent.generation) && !is_null(ent.best_move))
+			++res;
+	}
+
+	return res;
+}

@@ -41,5 +41,6 @@ bool probe(const transposition_table *tt, u64 key, tt_entry *res);
 void store(transposition_table *tt, u64 key, tt_entry data);
 void tt_new_search(transposition_table *tt);
 void tt_free(transposition_table *tt);
+unsigned tt_hashfull(const transposition_table *tt);
 
 #endif // NYX_TRANSPOSITION_H
