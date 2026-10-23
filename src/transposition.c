@@ -16,8 +16,8 @@ cluster_of(const transposition_table *tt, u64 key)
 	return &tt->entries[(key % (tt->capacity / cluster_size)) * cluster_size];
 }
 
-bool
-probe(const transposition_table *tt, u64 key, tt_entry *res)
+tt_entry
+probe(const transposition_table *tt, u64 key)
 {
 	tt_entry *ent;
 	usize i;
@@ -26,13 +26,10 @@ probe(const transposition_table *tt, u64 key, tt_entry *res)
 	for (i = 0; i < cluster_size; ++i)
 	{
 		if (ent[i].key == (key & BITMASK(16)))
-		{
-			*res = ent[i];
-			return true;
-		}
+			return ent[i];
 	}
 
-	return false;
+	return (tt_entry) { .bound=INVALID };
 }
 
 static u8
@@ -56,9 +53,9 @@ store(transposition_table *tt, u64 key, tt_entry data)
 	ent = cluster_of(tt, key);
 	for (i = 0; i < cluster_size; ++i)
 	{
-		if (ent[i].key != (key & BITMASK(16))) continue;
+		if (ent[i].bound != INVALID && ent[i].key != (key & BITMASK(16))) continue;
 
-		if (data.depth >= ent[i].depth)
+		if (ent[i].bound == INVALID || data.depth >= ent[i].depth)
 			ent[i] = data;
 
 		return;
@@ -118,18 +115,18 @@ tt_free(transposition_table *tt)
 unsigned
 tt_hashfull(const transposition_table *tt)
 {
-	unsigned res;
+	unsigned permille;
 	usize i;
 	tt_entry ent;
 
-	res = 0;
+	permille = 0;
 
 	for (i = 0; i < 1000; ++i)
 	{
 		ent = tt->entries[i];
-		if (!age(tt, ent.generation) && !is_null(ent.best_move))
-			++res;
+		if (!age(tt, ent.generation) && ent.bound != INVALID)
+			++permille;
 	}
 
-	return res;
+	return permille;
 }

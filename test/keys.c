@@ -132,7 +132,7 @@ TEST(make_unmake_keys_castling)
 TEST(tt_store_probe_roundtrip)
 {
 	transposition_table tt = { 0 };
-	tt_entry ent = { 0 };
+	tt_entry ent = { .bound=EXACT };
 	tt_entry res;
 
 	tt_resize(&tt, 1024);
@@ -143,8 +143,9 @@ TEST(tt_store_probe_roundtrip)
 	ent.depth = 5;
 
 	store(&tt, 0xDEADBEEFCAFEBABE, ent);
+	res = probe(&tt, 0xDEADBEEFCAFEBABE);
 
-	if (!probe(&tt, 0xDEADBEEFCAFEBABE, &res))
+	if (res.bound == INVALID)
 		return TEST_FAILURE("store followed by probe failed");
 
 	test_eq(res.bound, EXACT, "stored type");
@@ -153,7 +154,8 @@ TEST(tt_store_probe_roundtrip)
 	test_eq(res.best_move.to, E4, "stored move to");
 	test_eq(res.depth, 5, "stored depth");
 
-	if (probe(&tt, 0x1234567890ABCDEF, &res))
+	res = probe(&tt, 0x1234567890ABCDEF);
+	if (res.bound != INVALID)
 		return TEST_FAILURE("probe found an entry for a different key");
 
 	tt_free(&tt);
@@ -163,7 +165,7 @@ TEST(tt_store_probe_roundtrip)
 TEST(tt_replacement_rule)
 {
 	transposition_table tt = { 0 };
-	tt_entry a = { 0 }, b = { 0 };
+	tt_entry a = { .bound=EXACT }, b = { .bound=EXACT };
 	tt_entry res;
 
 	tt_resize(&tt, 1024);
@@ -173,8 +175,9 @@ TEST(tt_replacement_rule)
 
 	b.score = 2;
 	store(&tt, 0x11111111, b);
+	res = probe(&tt, 0x11111111);
 
-	if (!probe(&tt, 0x11111111, &res))
+	if (res.bound == INVALID)
 		return TEST_FAILURE("probe after replacement failed");
 	test_eq(res.score, 2, "equal generation replaces old entry");
 

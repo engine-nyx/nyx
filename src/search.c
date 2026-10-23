@@ -25,14 +25,27 @@ struct search_state
 
 constexpr int VALUE_DRAW = 0;
 static int
-VALUE_QMATE(unsigned ply)
-{
-	return (oo / 2) - ply;
-}
-static int
 VALUE_MATE(unsigned ply)
 {
 	return oo - ply;
+}
+static int
+VALUE_QMATE(unsigned ply)
+{
+	return VALUE_MATE(ply + MAX_PLY + 1);
+}
+
+constexpr int MATE_THRESHOLD = oo - MAX_PLY;
+constexpr int QMATE_THRESHOLD = MATE_THRESHOLD - (MAX_PLY + 1);
+static bool
+is_mate_score(int score)
+{
+	return score <= -MATE_THRESHOLD || score >= MATE_THRESHOLD;
+}
+static bool
+is_qmate_score(int score)
+{
+	return score <= -QMATE_THRESHOLD || score >= QMATE_THRESHOLD;
 }
 
 #define MAX(a, b) ((a) >= (b) ? (a) : (b))
@@ -45,6 +58,7 @@ tt_qskip(tt_entry ent, int alpha, int beta)
 	case EXACT : return true;
 	case LOWER : return ent.score >= beta;
 	case UPPER : return ent.score <= alpha;
+	case INVALID: return false;
 	}
 
 	assert(false);
@@ -53,10 +67,7 @@ tt_qskip(tt_entry ent, int alpha, int beta)
 static inline bool
 tt_skip(tt_entry ent, int alpha, int beta, struct search_state ss)
 {
-	if (ent.depth < ss.depth)
-		return false;
-
-	return tt_qskip(ent, alpha, beta);
+	return tt_qskip(ent, alpha, beta) && ent.depth >= ss.depth;
 }
 
 static int
@@ -67,24 +78,23 @@ qsearch_rec(position *p, int alpha, int beta, time_manager *tm, struct search_st
 	int score, best_score;
 	state_frame sf;
 	tt_entry ent;
-	bool tt_probe_success;
 
 	best_score = p->sf->checkers ? -oo : evaluate(p);
 	best_move = NULL_MOVE;
 	if (best_score >= beta)
 		return best_score;
 
-	tt_probe_success = probe(ss->tt, p->key, &ent);
+	ent = probe(ss->tt, p->key);
 
-	if (tt_probe_success && tt_qskip(ent, alpha, beta))
-		return ent.score;
+	if (tt_qskip(ent, alpha, beta))
+		return is_qmate_score(ent.score) ? VALUE_QMATE(ss->ply) : ent.score;
 
 	++ss->depth, ++ss->ply;
 	++ss->nodes;
 	++ss->qnodes;
 	ss->qsearch_max = MAX(ss->qsearch_max, ss->depth);
 
-	s = selector_of(p, tt_probe_success ? ent.best_move : NULL_MOVE, QUIESCENCE);
+	s = selector_of(p, ent.bound == INVALID ? NULL_MOVE : ent.best_move, QUIESCENCE);
 
 	while (!is_null(m = select(&s)))
 	{
@@ -149,12 +159,12 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 	int score, best_score;
 	state_frame sf;
 	tt_entry ent;
-	bool tt_probe_success, first_move;
+	bool first_move;
 
-	tt_probe_success = probe(ss->tt, p->key, &ent);
+	ent = probe(ss->tt, p->key);
 
-	if (!pv && tt_probe_success && tt_skip(ent, alpha, beta, *ss))
-		return ent.score;
+	if (!pv && tt_skip(ent, alpha, beta, *ss))
+		return is_mate_score(ent.score) ? VALUE_MATE(ss->ply) : ent.score;
 
 	if (!ss->depth)
 		return qsearch_rec(p, alpha, beta, tm, ss);
@@ -164,7 +174,7 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 
 	if (pv) ss->pv[ss->ply][0] = NULL_MOVE;
 
-	s = selector_of(p, tt_probe_success ? ent.best_move : NULL_MOVE, MAIN);
+	s = selector_of(p, ent.bound == INVALID ? NULL_MOVE : ent.best_move, MAIN);
 	best_score = -oo;
 	first_move = true;
 
@@ -238,14 +248,6 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 	});
 
 	return best_score;
-}
-
-constexpr int MATE_THRESHOLD = oo - MAX_PLY;
-
-static bool
-is_mate_score(int score)
-{
-	return score <= -MATE_THRESHOLD || score >= MATE_THRESHOLD;
 }
 
 static void
