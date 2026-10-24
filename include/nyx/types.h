@@ -126,7 +126,7 @@ constexpr move NULL_MOVE = {};
 static inline bool
 is_null(move m) { return !(m.from || m.to); }
 
-constexpr int oo = INT_MAX;
+constexpr int oo = 0x7FFF;
 
 typedef u64f millis;
 
