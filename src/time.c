@@ -2,15 +2,15 @@
 // SPDX-License-Identifier: NLPL
 
 #include <assert.h>
+#include <compat/time.h>
 #include <nyx/time.h>
-#include <time.h>
 
 millis
 now(void)
 {
 	struct timespec ts;
 
-	timespec_get(&ts, TIME_UTC); /* TODO: change to monotonic clock */
+	timespec_get(&ts, TIME_MONOTONIC);
 
 	return (millis) ((ts.tv_sec * 1000) + (ts.tv_nsec / 1000000));
 }
