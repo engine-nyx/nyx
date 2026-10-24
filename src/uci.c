@@ -278,7 +278,7 @@ uci_go(const char *args)
 	}
 
 	UCI_state.stop = false;
-	res = search(&UCI_state.p, l, &UCI_state.tt, &UCI_state.stop);
+	res = search_uci(&UCI_state.p, l, &UCI_state.tt, &UCI_state.stop);
 	printf("bestmove ");
 	print_move(res.best);
 	printf("\n");

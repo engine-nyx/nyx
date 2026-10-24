@@ -292,8 +292,8 @@ uci_info(struct search_state *ss, int score, time_manager *tm)
 	fflush(stdout);
 }
 
-struct search_result
-search(position *p, limits l, transposition_table *tt, atomic_bool *stop)
+static struct search_result
+search_internal(position *p, limits l, transposition_table *tt, atomic_bool *stop, bool info_print)
 {
 	time_manager *tm;
 	struct search_state *ss;
@@ -322,11 +322,23 @@ search(position *p, limits l, transposition_table *tt, atomic_bool *stop)
 		};
 		movecpy(res.pv, ss->pv[0], ss->depth);
 
-		uci_info(ss, score, tm);
+		if (info_print) uci_info(ss, score, tm);
 	}
 
 	res.nodes = ss->nodes;
 	res.qnodes = ss->qnodes;
 
 	return res;
+}
+
+struct search_result
+search(position *p, limits l, transposition_table *tt, atomic_bool *stop)
+{
+	return search_internal(p, l, tt, stop, false);
+}
+
+struct search_result
+search_uci(position *p, limits l, transposition_table *tt, atomic_bool *stop)
+{
+	return search_internal(p, l, tt, stop, true);
 }

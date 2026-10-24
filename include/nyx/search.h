@@ -49,5 +49,6 @@ struct search_result
 };
 
 struct search_result search(position *p, limits l, transposition_table *tt, atomic_bool *stop);
+struct search_result search_uci(position *p, limits l, transposition_table *tt, atomic_bool *stop);
 
 #endif // NYX_SEARCH_H
