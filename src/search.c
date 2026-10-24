@@ -29,23 +29,19 @@ VALUE_MATE(unsigned ply)
 {
 	return oo - ply;
 }
-static int
-VALUE_QMATE(unsigned ply)
-{
-	return VALUE_MATE(ply + MAX_PLY + 1);
-}
-
 constexpr int MATE_THRESHOLD = oo - MAX_PLY;
-constexpr int QMATE_THRESHOLD = MATE_THRESHOLD - (MAX_PLY + 1);
 static bool
 is_mate_score(int score)
 {
 	return score <= -MATE_THRESHOLD || score >= MATE_THRESHOLD;
 }
-static bool
-is_qmate_score(int score)
+
+static int
+adjust_mate_score(int score, signed ply)
 {
-	return score <= -QMATE_THRESHOLD || score >= QMATE_THRESHOLD;
+	if (is_mate_score(score))
+		return score + (score < 0 ? +ply : -ply);
+	return score;
 }
 
 #define MAX(a, b) ((a) >= (b) ? (a) : (b))
@@ -65,9 +61,9 @@ tt_qskip(tt_entry ent, int alpha, int beta)
 }
 
 static inline bool
-tt_skip(tt_entry ent, int alpha, int beta, struct search_state ss)
+tt_skip(tt_entry ent, int alpha, int beta, unsigned depth)
 {
-	return tt_qskip(ent, alpha, beta) && ent.depth >= ss.depth;
+	return tt_qskip(ent, alpha, beta) && ent.depth >= depth;
 }
 
 static int
@@ -87,7 +83,7 @@ qsearch_rec(position *p, int alpha, int beta, time_manager *tm, struct search_st
 	ent = probe(ss->tt, p->key);
 
 	if (tt_qskip(ent, alpha, beta))
-		return is_qmate_score(ent.score) ? VALUE_QMATE(ss->ply) : ent.score;
+		return adjust_mate_score(ent.score, ss->ply);
 
 	++ss->depth, ++ss->ply;
 	++ss->nodes;
@@ -132,14 +128,14 @@ qsearch_rec(position *p, int alpha, int beta, time_manager *tm, struct search_st
 	{
 		best_move = NULL_MOVE;
 		if (p->sf->checkers)
-			best_score = -VALUE_QMATE(ss->ply);
+			best_score = -VALUE_MATE(ss->ply);
 	}
 
 	store(ss->tt, p->key, (tt_entry)
 	{
 		.depth=0,
 		.best_move=best_move,
-		.score=best_score,
+		.score=adjust_mate_score(best_score, -ss->ply),
 		.bound=
 		(
 			best_score >= beta ? LOWER :
@@ -163,8 +159,8 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 
 	ent = probe(ss->tt, p->key);
 
-	if (!pv && tt_skip(ent, alpha, beta, *ss))
-		return is_mate_score(ent.score) ? VALUE_MATE(ss->ply) : ent.score;
+	if (!pv && tt_skip(ent, alpha, beta, ss->depth))
+		return adjust_mate_score(ent.score, ss->ply);
 
 	if (!ss->depth)
 		return qsearch_rec(p, alpha, beta, tm, ss);
@@ -237,7 +233,7 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 	{
 		.depth=(u8)ss->depth,
 		.best_move=best_move,
-		.score=best_score,
+		.score=adjust_mate_score(best_score, -ss->ply),
 		.bound=
 		(
 			best_score >= beta  ? LOWER :
