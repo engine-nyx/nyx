@@ -1,8 +1,8 @@
 // Copyright (c) 2026 Kilian Chung
 // SPDX-License-Identifier: NLPL
 
-#include "future/c2y.h"
 #include <assert.h>
+#include <future/c2y.h>
 #include <nyx/generation.h>
 #include <nyx/perft.h>
 #include <nyx/position.h>
@@ -17,17 +17,29 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <threads.h>
+
+enum search_state
+{
+	IDLE,
+	SEARCHING,
+	STOPPING,
+};
 
 static struct
 {
 	time_manager tm;
 	atomic_bool stop;
 	position p;
-	state_frame sf[100];  // Rule50 guarantees non reversable moves every 100 halfmoves
+	state_frame sf[150];  // Rule75 guarantees non reversable moves every 150 halfmoves
 
 	transposition_table tt;
 
 	bool quit;
+
+	atomic_int search_state;
+	thrd_t search_thread;
+	limits lim;
 } UCI_state;
 
 static struct
@@ -116,10 +128,8 @@ uci_default_options(void)
 static void uci_ucinewgame(const char *args);
 
 static void
-uci_uci(const char *args)
+uci_uci(const char *)
 {
-	(void) args;
-
 	uci_id();
 	puts("");
 	uci_options();
@@ -128,20 +138,16 @@ uci_uci(const char *args)
 }
 
 static void
-uci_ucinewgame(const char *args)
+uci_ucinewgame(const char *)
 {
-	(void) args;
-
 	uci_stop("");
 	uci_position("startpos");
 	tt_resize(&UCI_state.tt, UCI_config.transposition_table_capacity);
 }
 
 static void
-uci_isready(const char *args)
+uci_isready(const char *)
 {
-	(void) args;
-
 	puts("readyok");
 }
 
@@ -201,19 +207,30 @@ uci_position(const char *args)
 	if (!str_ltrim(&args) || !str_consume(&args, "moves") || !str_ltrim(&args))
 		return;
 
-	for (i = 1; is_move(args); ++i, i %= 100)
+	for (i = 1; is_move(args); ++i, i %= 150)
 	{
 		args += do_lan_move(&UCI_state.p, args, UCI_state.sf + i);
 		if (!str_ltrim(&args)) break;
 	}
 }
 
+static int
+search_start(void *)
+{
+	struct search_result res;
+
+	UCI_state.stop = false;
+	res = search_uci(&UCI_state.p, UCI_state.lim, &UCI_state.tt, &UCI_state.stop);
+	printf("bestmove ");
+	print_move(res.best);
+	printf("\n");
+	UCI_state.search_state = IDLE;
+	return 0;
+}
+
 static void
 uci_go(const char *args)
 {
-	limits l;
-	struct search_result res;
-
 	if (str_consume(&args, "perft"))
 	{
 		str_ltrim(&args);
@@ -225,7 +242,7 @@ uci_go(const char *args)
 	{
 		str_ltrim(&args);
 		unsigned depth = (unsigned) strtoul(args, nullptr, 10);
-		l = (limits)
+		UCI_state.lim = (limits)
 		{
 			.type=DEPTH,
 			.depth=depth,
@@ -236,7 +253,7 @@ uci_go(const char *args)
 	{
 		str_ltrim(&args);
 		millis ms = (millis) (strtoull(args, nullptr, 10));
-		l = (limits)
+		UCI_state.lim = (limits)
 		{
 			.type=MOVETIME,
 			.movetime=ms,
@@ -247,62 +264,70 @@ uci_go(const char *args)
 	{
 		str_ltrim(&args);
 		node_count nodes = (node_count) (strtoull(args, nullptr, 10));
-		l = (limits)
+		UCI_state.lim = (limits)
 		{
 			.type=NODES,
 			.nodes=nodes,
 		};
 	}
 
+	else if (str_consume(&args, "infinite"))
+	{
+		UCI_state.lim = (limits) { .type=INFINITE };
+	}
+
 	else
 	{
-		l = (limits) { .type=CLOCK };
+		UCI_state.lim = (limits) { .type=CLOCK };
 
 		if (!str_consume(&args, "wtime")) assert(false);
 		if (!str_ltrim(&args))            assert(false);
-		l.time[WHITE] = (unsigned) strtoul(args, (char **) &args, 10); // TODO: why does strtoul need a char instead of const char
+		UCI_state.lim.time[WHITE] = (unsigned) strtoul(args, (char **) &args, 10); // TODO: why does strtoul need a char instead of const char
 		if (!str_ltrim(&args))            assert(false);
 		if (!str_consume(&args, "btime")) assert(false);
 		if (!str_ltrim(&args))            assert(false);
-		l.time[BLACK] = (unsigned) strtoul(args, (char **) &args, 10);
+		UCI_state.lim.time[BLACK] = (unsigned) strtoul(args, (char **) &args, 10);
 
 		if (str_ltrim(&args) && str_consume(&args, "winc"))
 		{
 			if (!str_ltrim(&args))           assert(false);
-			l.inc[WHITE] = (unsigned) strtoul(args, (char **) &args, 10);
+			UCI_state.lim.inc[WHITE] = (unsigned) strtoul(args, (char **) &args, 10);
 			if (!str_ltrim(&args))           assert(false);
 			if (!str_consume(&args, "binc")) assert(false);
 			if (!str_ltrim(&args))           assert(false);
-			l.inc[BLACK] = (unsigned) strtoul(args, nullptr, 10);
+			UCI_state.lim.inc[BLACK] = (unsigned) strtoul(args, nullptr, 10);
 		}
 	}
 
-	UCI_state.stop = false;
-	res = search_uci(&UCI_state.p, l, &UCI_state.tt, &UCI_state.stop);
-	printf("bestmove ");
-	print_move(res.best);
-	printf("\n");
+	UCI_state.search_state = SEARCHING;
+	thrd_create(&UCI_state.search_thread, &search_start, NULL);
 }
 
 static void
-uci_stop(const char *args)
+uci_stop(const char *)
 {
-	(void) args;
-
-	UCI_state.stop = true;
+	switch (UCI_state.search_state)
+	{
+	case IDLE:
+		break;
+	case STOPPING:
+		assert(false);
+		break;
+	case SEARCHING:
+		UCI_state.stop = true;
+		thrd_join(UCI_state.search_thread, NULL);
+		break;
+	}
 }
 
 static void
-uci_ponderhit(const char *args)
+uci_ponderhit(const char *)
 {
-	(void) args;
 }
 
 static void
-uci_d(const char *args)
+uci_d(const char *)
 {
-	(void) args;
-
 	print_board(&UCI_state.p);
 }
 
