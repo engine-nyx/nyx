@@ -274,6 +274,7 @@ parse_fen(const char *fen, position *p, state_frame *sf)
 	if (fen[i] == ' ' && isdigit(fen[i + 1]) && ++i)
 		i += parse_ply(fen + i, p);
 
+	sf->key = p->key;
 	sf->checkers = attackers(p, king_square(p, p->stm)) & p->by_color[other_color(p->stm)];
 	sf->previous = nullptr;
 
