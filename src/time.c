@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <compat/time.h>
 #include <nyx/time.h>
+#include <stdatomic.h>
 
 millis
 now(void)
@@ -26,7 +27,7 @@ tm_hard_expired(const time_manager *tm, unsigned depth, node_count nodes, const 
 {
 	millis ms;
 
-	if (*tm->stop || depth >= MAX_PLY) return true;
+	if (atomic_load_explicit(tm->stop, memory_order_relaxed) || depth >= MAX_PLY) return true;
 
 	ms = now();
 
