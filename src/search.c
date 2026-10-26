@@ -307,7 +307,7 @@ search_internal(position *p, limits l, transposition_table *tt, atomic_bool *sto
 	tt_new_search(tt);
 
 	score = 0;
-	for (ss->depth = 0; !tm_soft_expired(tm, ss->depth, ss->nodes, p) && !is_mate_score(score); ++ss->depth)
+	for (ss->depth = 0; !(tm_soft_expired(tm, ss->depth, ss->nodes, p) || (is_mate_score(score) && ss->depth > 1)); ++ss->depth)
 	{
 		score = search_rec(p, -oo, oo, tm, ss, true);
 
