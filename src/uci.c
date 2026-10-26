@@ -386,7 +386,6 @@ uci_loop(void)
 			uci_quit("");
 		else
 			uci_handle(line);
-		fflush(stdout);
 	}
 
 	tt_free(&UCI_state.tt);

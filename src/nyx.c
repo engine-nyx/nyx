@@ -54,6 +54,8 @@ main(int argc, char **argv)
 	position_init();
 	evaluation_init();
 
+	setvbuf(stdout, NULL, _IOLBF, 0);
+
 	if (argc == 1)
 	{
 		uci_loop();

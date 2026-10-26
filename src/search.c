@@ -289,7 +289,6 @@ uci_info(struct search_state *ss, int score, time_manager *tm)
 		print_move(ss->pv[0][i]);
 	}
 	printf("\n");
-	fflush(stdout);
 }
 
 static struct search_result
