@@ -55,8 +55,8 @@ static const struct
 	const char *name;
 } UCI_OPTIONS[] =
 {
-	{ 1, 33554432, 1000000, &UCI_config.transposition_table_capacity, "ttszk"   },
-	{ 1,        1,       1, &UCI_config.threads                     , "threads" },
+	{ 1, 33554432, 100000, &UCI_config.transposition_table_capacity, "ttszk"   },
+	{ 1,        1,      1, &UCI_config.threads                     , "threads" },
 };
 
 // quit
@@ -142,7 +142,7 @@ uci_ucinewgame(const char *)
 {
 	uci_stop("");
 	uci_position("startpos");
-	tt_resize(&UCI_state.tt, UCI_config.transposition_table_capacity);
+	tt_resize(&UCI_state.tt, UCI_config.transposition_table_capacity * 1000);
 }
 
 static void
