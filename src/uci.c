@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: NLPL
 
 #include <assert.h>
+#include <compat/threads.h>
 #include <future/c2y.h>
 #include <nyx/generation.h>
 #include <nyx/perft.h>
@@ -17,7 +18,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <threads.h>
 
 enum search_state
 {
