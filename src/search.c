@@ -48,7 +48,7 @@ adjust_mate_score(int score, signed ply)
 #define MIN(a, b) ((a) >= (b) ? (b) : (a))
 
 static inline bool
-tt_qskip(tt_entry ent, int alpha, int beta)
+tt_skip(tt_entry ent, int alpha, int beta)
 {
 	switch (ent.bound)
 	{
@@ -59,12 +59,6 @@ tt_qskip(tt_entry ent, int alpha, int beta)
 	}
 
 	assert(false);
-}
-
-static inline bool
-tt_skip(tt_entry ent, int alpha, int beta, unsigned depth)
-{
-	return tt_qskip(ent, alpha, beta) && ent.depth >= depth;
 }
 
 static int
@@ -83,10 +77,10 @@ qsearch_rec(position *p, int alpha, int beta, time_manager *tm, struct search_st
 
 	ent = probe(ss->tt, p->key);
 
-	if (tt_qskip(ent, alpha, beta))
+	if (ent.bound == LOWER) alpha = MAX(alpha, adjust_mate_score(ent.score, ss->ply));
+	if (ent.bound == UPPER) beta  = MIN(beta, adjust_mate_score(ent.score, ss->ply));
+	if (tt_skip(ent, alpha, beta))
 		return adjust_mate_score(ent.score, ss->ply);
-	if (ent.bound == LOWER) alpha = MAX(alpha, ent.score);
-	if (ent.bound == UPPER) beta  = MIN(beta, ent.score);
 
 	++ss->depth, ++ss->ply;
 	++ss->nodes;
@@ -162,10 +156,13 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 
 	ent = probe(ss->tt, p->key);
 
-	if (!pv && tt_skip(ent, alpha, beta, ss->depth))
-		return adjust_mate_score(ent.score, ss->ply);
-	if (ent.depth >= ss->depth && ent.bound == LOWER) alpha = MAX(alpha, ent.score);
-	if (ent.depth >= ss->depth && ent.bound == UPPER) beta  = MIN(beta, ent.score);
+	if (!pv && ent.depth >= ss->depth)
+	{
+		if (ent.bound == LOWER) alpha = MAX(alpha, adjust_mate_score(ent.score, ss->ply));
+		if (ent.bound == UPPER) beta  = MIN(beta, adjust_mate_score(ent.score, ss->ply));
+		if (tt_skip(ent, alpha, beta))
+			return adjust_mate_score(ent.score, ss->ply);
+	}
 
 	if (!ss->depth)
 		return qsearch_rec(p, alpha, beta, tm, ss);
