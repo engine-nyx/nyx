@@ -29,7 +29,7 @@ tm_hard_expired(const time_manager *tm, unsigned depth, node_count nodes, const 
 
 	if (atomic_load_explicit(tm->stop, memory_order_relaxed) || depth >= MAX_PLY) return true;
 
-	ms = now();
+	ms = nodes & 1024 ? now() : tm->start;
 
 	if (tm->l.type == MOVETIME) assert(ms >= tm->start);
 
