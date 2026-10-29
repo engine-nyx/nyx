@@ -164,8 +164,8 @@ search_rec(position *p, int alpha, int beta, time_manager *tm, struct search_sta
 
 	if (!pv && tt_skip(ent, alpha, beta, ss->depth))
 		return adjust_mate_score(ent.score, ss->ply);
-	if (ent.depth >= ss->ply && ent.bound == LOWER) alpha = MAX(alpha, ent.score);
-	if (ent.depth >= ss->ply && ent.bound == UPPER) beta  = MIN(beta, ent.score);
+	if (ent.depth >= ss->depth && ent.bound == LOWER) alpha = MAX(alpha, ent.score);
+	if (ent.depth >= ss->depth && ent.bound == UPPER) beta  = MIN(beta, ent.score);
 
 	if (!ss->depth)
 		return qsearch_rec(p, alpha, beta, tm, ss);
