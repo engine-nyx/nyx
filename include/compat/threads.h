@@ -59,6 +59,8 @@ thrd_join(thrd_t t, int *res)
 	return thrd_success;
 }
 
+#undef INFINITE
+
 #endif // _WIN32
 
 #endif // COMPAT_THREADS_H
