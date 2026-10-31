@@ -362,11 +362,11 @@ uci_loop(void)
 {
 	char line[UCI_BUF_SIZE];
 
-	uci_default_options();
-	uci_ucinewgame("");
-
 	UCI_state.quit = false;
 	UCI_state.joined = true;
+
+	uci_default_options();
+	uci_ucinewgame("");
 
 	while (!UCI_state.quit)
 	{
