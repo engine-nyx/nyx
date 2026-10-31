@@ -12,7 +12,6 @@ typedef struct
 {
 	millis start, soft, hard;
 	millis remaining, inc;
-	atomic_bool *stop;
 	limits l;
 } time_manager;
 

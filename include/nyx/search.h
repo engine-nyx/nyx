@@ -36,6 +36,8 @@ typedef struct
 			unsigned inc[NUM_COLORS];
 		};
 	};
+
+	atomic_bool *stop;
 } limits;
 
 constexpr usize MAX_PLY = 100;
@@ -48,10 +50,11 @@ struct search_result
 	int score;
 };
 
+constexpr usize MAX_CONTINUATION = 8;
 struct histories
 {
 	i16 butterfly[NUM_PIECE_TYPES][NUM_SQUARES];
-	i16 continuation[6][NUM_PIECE_TYPES][NUM_SQUARES][NUM_PIECE_TYPES][NUM_SQUARES];
+	i16 continuation[MAX_CONTINUATION + 1][NUM_PIECE_TYPES][NUM_SQUARES][NUM_PIECE_TYPES][NUM_SQUARES];
 };
 
 struct search_state
@@ -68,7 +71,7 @@ struct search_state
 	ptype moved_pieces[MAX_PLY];
 };
 
-struct search_result search(position *pos, limits lim, transposition_table *tt, atomic_bool *stop);
-struct search_result search_uci(position *pos, limits lim, transposition_table *tt, atomic_bool *stop);
+struct search_result search(position *pos, limits lim, transposition_table *tt);
+struct search_result search_uci(position *pos, limits lim, transposition_table *tt);
 
 #endif // NYX_SEARCH_H

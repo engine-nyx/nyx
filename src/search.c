@@ -298,7 +298,7 @@ uci_info(struct search_state *ss, int score, time_manager *tm)
 }
 
 static struct search_result
-search_internal(position *pos, limits lim, transposition_table *tt, atomic_bool *stop, bool info_print)
+search_internal(position *pos, limits lim, transposition_table *tt, bool info_print)
 {
 	time_manager *tm;
 	struct search_state *ss;
@@ -310,7 +310,7 @@ search_internal(position *pos, limits lim, transposition_table *tt, atomic_bool 
 	ss->tt = tt;
 	ss->pos = pos;
 
-	tm = &(time_manager) { .l=lim, .stop=stop };
+	tm = &(time_manager) { .l=lim };
 	res = (struct search_result) {};
 	tm_start(tm);
 	tt_new_search(tt);
@@ -331,7 +331,7 @@ search_internal(position *pos, limits lim, transposition_table *tt, atomic_bool 
 		};
 		movecpy(res.pv, ss->pv[0], ss->depth);
 
-		if (info_print) uci_info(ss, score, tm);
+		if (info_print && ss->depth) uci_info(ss, score, tm);
 	}
 
 	res.nodes = ss->nodes;
@@ -342,15 +342,15 @@ search_internal(position *pos, limits lim, transposition_table *tt, atomic_bool 
 }
 
 struct search_result
-search(position *pos, limits lim, transposition_table *tt, atomic_bool *stop)
+search(position *pos, limits lim, transposition_table *tt)
 {
-	return search_internal(pos, lim, tt, stop, false);
+	return search_internal(pos, lim, tt, false);
 }
 
 struct search_result
-search_uci(position *pos, limits lim, transposition_table *tt, atomic_bool *stop)
+search_uci(position *pos, limits lim, transposition_table *tt)
 {
-	return search_internal(pos, lim, tt, stop, true);
+	return search_internal(pos, lim, tt, true);
 }
 
 constexpr int MAX_HISTORY = 10'000;
@@ -384,7 +384,7 @@ update_histories(struct search_state *ss, bool cutoff)
 	{
 		bonus = MIN(MAX((300 * (int) ss->depth) - 250, -MAX_HISTORY), +MAX_HISTORY);
 		gravity_update(&ss->hist.butterfly[pt][m.to], bonus);
-		for (ply = 1; ply < 3 && ply < ss->ply; ++ply)
+		for (ply = 1; ply <= MAX_CONTINUATION && ply < ss->ply; ++ply)
 		{
 			moved_piece = ss->moved_pieces[ss->ply - ply - 1];
 			played_move = ss->played_moves[ss->ply - ply - 1];

@@ -27,7 +27,7 @@ tm_hard_expired(const time_manager *tm, const struct search_state *ss)
 {
 	millis ms;
 
-	if (atomic_load_explicit(tm->stop, memory_order_relaxed) || ss->depth >= MAX_PLY) return true;
+	if (atomic_load_explicit(tm->l.stop, memory_order_relaxed) || ss->depth >= MAX_PLY) return true;
 
 	ms = ss->nodes & 1024 ? now() : tm->start;
 

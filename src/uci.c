@@ -19,12 +19,15 @@
 #include <stdlib.h>
 #include <string.h>
 
+// Rule75 guarantees non reversable moves every 150 halfmoves
+constexpr usize STATE_FRAME_RING_BUFFER_SIZE = 150;
+
 static struct
 {
 	time_manager tm;
 	atomic_bool stop;
 	position p;
-	state_frame sf[150];  // Rule75 guarantees non reversable moves every 150 halfmoves
+	state_frame sf[STATE_FRAME_RING_BUFFER_SIZE];
 
 	transposition_table tt;
 
@@ -200,7 +203,7 @@ uci_position(const char *args)
 	if (!str_ltrim(&args) || !str_consume(&args, "moves") || !str_ltrim(&args))
 		return;
 
-	for (i = 1; is_move(args); ++i, i %= 150)
+	for (i = 1; is_move(args); i = (i + 1) % STATE_FRAME_RING_BUFFER_SIZE)
 	{
 		args += do_lan_move(&UCI_state.p, args, UCI_state.sf + i);
 		if (!str_ltrim(&args)) break;
@@ -213,7 +216,8 @@ search_start(void *)
 	struct search_result res;
 
 	UCI_state.stop = false;
-	res = search_uci(&UCI_state.p, UCI_state.lim, &UCI_state.tt, &UCI_state.stop);
+	UCI_state.lim.stop = &UCI_state.stop;
+	res = search_uci(&UCI_state.p, UCI_state.lim, &UCI_state.tt);
 	printf("bestmove ");
 	print_move(res.best);
 	printf("\n");

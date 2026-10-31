@@ -54,7 +54,7 @@ score_quiets(const move *ms, usize num_moves, struct scored_move *sms, const str
 
 		pt = ptype_of(ss->pos->by_square[m.from]);
 
-		for (ply = 1; ply < 3 && ply < ss->ply; ++ply)
+		for (ply = 1; ply <= MAX_CONTINUATION && ply < ss->ply; ++ply)
 		{
 			score += ss->hist.continuation[ply]
 				[ss->moved_pieces[ss->ply - ply - 1]][ss->played_moves[ss->ply - ply - 1].to]
