@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: NLPL
 
 #include <assert.h>
+#include <nyx/attacks.h>
 #include <nyx/generation.h>
 #include <nyx/position.h>
 #include <nyx/selection.h>
@@ -26,17 +27,40 @@ enum stage
 	STAGE_QUIESCE,
 };
 
+static const int PIECE_VALUE[NUM_PIECE_TYPES] =
+{
+	[NONE]   = 0,
+	[PAWN]   = 208,
+	[KNIGHT] = 781,
+	[BISHOP] = 825,
+	[ROOK]   = 1276,
+	[QUEEN]  = 2538,
+	[KING]   = oo,
+};
+
 static void
-score_quiets(const move *ms, usize num_moves, struct scored_move *sms)
+score_quiets(const move *ms, usize num_moves, struct scored_move *sms, const struct search_state *ss)
 {
 	usize i;
 	move m;
 	int score;
+	ptype pt;
+	usize ply;
 
 	for (i = 0; i < num_moves; ++i)
 	{
 		m = ms[i];
 		score = 0;
+
+		pt = ptype_of(ss->pos->by_square[m.from]);
+
+		for (ply = 1; ply < 3 && ply < ss->ply; ++ply)
+		{
+			score += ss->hist.continuation[ply]
+				[ss->moved_pieces[ss->ply - ply - 1]][ss->played_moves[ss->ply - ply - 1].to]
+				[pt][m.to];
+		}
+		score += ss->hist.butterfly[pt][m.to];
 
 		sms[i] = (struct scored_move)
 		{
@@ -46,19 +70,8 @@ score_quiets(const move *ms, usize num_moves, struct scored_move *sms)
 	}
 }
 
-static const int PIECE_VALUE[NUM_PIECE_TYPES] =
-{
-	[NONE]   = 0,
-	[PAWN]   = 100,
-	[KNIGHT] = 320,
-	[BISHOP] = 330,
-	[ROOK]   = 500,
-	[QUEEN]  = 900,
-	[KING]   = oo,
-};
-
 static void
-score_moves(const selector *s, const move *ms, usize num_moves, struct scored_move *sms)
+score_captures(const move *ms, usize num_moves, struct scored_move *sms, const struct search_state *ss)
 {
 	usize i;
 	move m;
@@ -70,8 +83,32 @@ score_moves(const selector *s, const move *ms, usize num_moves, struct scored_mo
 		score = 0;
 
 		// MVV-LVA
-		score += PIECE_VALUE[ptype_of(s->pos->by_square[m.to])];
-		score -= PIECE_VALUE[ptype_of(s->pos->by_square[m.from])];
+		score += PIECE_VALUE[ptype_of(ss->pos->by_square[m.to])] * 100;
+		score -= PIECE_VALUE[ptype_of(ss->pos->by_square[m.from])];
+
+		sms[i] = (struct scored_move)
+		{
+			.m=m,
+			.score=score,
+		};
+	}
+}
+
+static void
+score_evasions(const move *ms, usize num_moves, struct scored_move *sms, const struct search_state *ss)
+{
+	usize i;
+	move m;
+	int score;
+
+	for (i = 0; i < num_moves; ++i)
+	{
+		m = ms[i];
+		score = 0;
+
+		// MVV-LVA
+		score += PIECE_VALUE[ptype_of(ss->pos->by_square[m.to])] * 100;
+		score -= PIECE_VALUE[ptype_of(ss->pos->by_square[m.from])];
 
 		sms[i] = (struct scored_move)
 		{
@@ -141,8 +178,8 @@ pseudo_select(selector *s)
 	case STAGE_INIT_CAPTURES:
 	case STAGE_INIT_QUIESCE:
 		s->current = 0;
-		s->num_moves = generate(CAPTURES, s->pos, ms);
-		score_moves(s, ms, s->num_moves, s->sms);
+		s->num_moves = generate(CAPTURES, s->ss->pos, ms);
+		score_captures(ms, s->num_moves, s->sms, s->ss);
 		insertion_sort(s->sms, s->num_moves);
 		++s->stage;
 		return pseudo_select(s);
@@ -157,8 +194,8 @@ pseudo_select(selector *s)
 
 	case STAGE_INIT_QUIETS:
 		// put quiet moves after the captures
-		generated = generate(QUIETS, s->pos, ms);
-		score_quiets(ms, generated, s->sms + s->num_captures);
+		generated = generate(QUIETS, s->ss->pos, ms);
+		score_quiets(ms, generated, s->sms + s->num_captures, s->ss);
 		insertion_sort(s->sms + s->num_captures, generated);
 		s->num_moves += generated;
 		s->current = s->num_captures;
@@ -185,8 +222,8 @@ pseudo_select(selector *s)
 
 	case STAGE_INIT_EVASIONS:
 		s->current = 0;
-		s->num_moves = generate(EVASIONS, s->pos, ms);
-		score_moves(s, ms, s->num_moves, s->sms);
+		s->num_moves = generate(EVASIONS, s->ss->pos, ms);
+		score_evasions(ms, s->num_moves, s->sms, s->ss);
 		insertion_sort(s->sms, s->num_moves);
 		++s->stage;
 		[[fallthrough]];
@@ -205,7 +242,7 @@ select(selector *s)
 	move m;
 
 	m = pseudo_select(s);
-	if (is_null(m) || is_legal(s->pos, m))
+	if (is_null(m) || is_legal(s->ss->pos, m))
 	{
 		if (!is_null(m))
 			++s->selected;
@@ -215,18 +252,18 @@ select(selector *s)
 }
 
 selector
-selector_of(const position *p, move tt, enum search_stage stage)
+selector_of(const struct search_state *ss, move tt, enum search_stage stage)
 {
 	selector s;
 	bool tt_is_quiesce;
 
 	s = (selector)
 	{
-		.pos=p,
-		.tt =tt,
+		.tt=tt,
+		.ss=ss,
 	};
 
-	if (p->sf->checkers)
+	if (ss->pos->sf->checkers)
 	{
 		s.stage = STAGE_TT_EVASIONS;
 	}
@@ -236,12 +273,12 @@ selector_of(const position *p, move tt, enum search_stage stage)
 	case QUIESCENCE : s.stage = STAGE_TT_QUIESCE; break;
 	}
 
-	tt_is_quiesce = p->sf->checkers ||
-		p->by_square[tt.to] != EMPTY ||
+	tt_is_quiesce = ss->pos->sf->checkers ||
+		ss->pos->by_square[tt.to] != EMPTY ||
 		tt.type == EN_PASSANT ||
 		tt.type == PROMOTION;
 
-	if (is_null(tt) || !is_pseudo_legal(s.pos, tt)) ++s.stage;
+	if (is_null(tt) || !is_pseudo_legal(ss->pos, tt)) ++s.stage;
 	else if (stage == QUIESCENCE && !tt_is_quiesce) ++s.stage;
 
 	return s;
