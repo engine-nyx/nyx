@@ -75,6 +75,7 @@ main(int argc, char **argv)
 		parsed = parse_fen(fen_arg_buffer, &p, &sf);
 		unsigned long arg_depth = strtoul(fen_arg_buffer + parsed, nullptr, 10);
 		lim = arg_depth ? (limits) { .type=DEPTH, .depth=arg_depth} : (limits) { .type=INFINITE };
+		lim.stop = &stop;
 
 		tt_resize(&tt, 100000);
 
@@ -82,7 +83,7 @@ main(int argc, char **argv)
 		printf("Press Ctrl+C to stop search...");
 		fflush(stdout);
 
-		struct search_result res = search(&p, lim, &tt, &stop);
+		struct search_result res = search(&p, lim, &tt);
 
 		tt_free(&tt);
 
