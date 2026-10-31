@@ -24,7 +24,7 @@ TEST(search_tt_mate_score_probe_normalization)
 	transposition_table tt = { 0 };
 	position p;
 	state_frame sf;
-	limits l;
+	limit l;
 	atomic_bool stop = false;
 	struct search_result res;
 
@@ -34,14 +34,14 @@ TEST(search_tt_mate_score_probe_normalization)
 	// 1rb5/4r3/3p1npb/3kp1P1/1P3P1P/5nR1/2Q1BK2/bN4NR w - - 0 1
 	parse_fen("1rb5/4r3/3p1npb/3kp1P1/1P3P1P/5nR1/2Q1BK2/bN4NR w - - 0 1", &p, &sf);
 
-	l = (limits) { .type = DEPTH, .depth = 5, .stop = &stop };
+	l = (limit) { .type = DEPTH, .depth = 5, .stop = &stop };
 	res = search(&p, l, &tt);
 
 	// Should find mate in 1 -> score = oo - 1 = 32766
 	test_gt(res.score, 32667, "found mate score (above MATE_THRESHOLD)");
 
 	// Now verify second search from same position also finds mate using TT
-	l = (limits) { .type = DEPTH, .depth = 8, .stop = &stop };
+	l = (limit) { .type = DEPTH, .depth = 8, .stop = &stop };
 	res = search(&p, l, &tt);
 	test_gt(res.score, 32667, "second search also finds mate");
 
@@ -55,7 +55,7 @@ TEST(qsearch_tt_mate_score_normalization)
 	transposition_table tt = { 0 };
 	position p;
 	state_frame sf;
-	limits l;
+	limit l;
 	atomic_bool stop = false;
 	struct search_result res;
 
@@ -65,7 +65,7 @@ TEST(qsearch_tt_mate_score_normalization)
 	// Same mate in 1 position
 	parse_fen("1rb5/4r3/3p1npb/3kp1P1/1P3P1P/5nR1/2Q1BK2/bN4NR w - - 0 1", &p, &sf);
 
-	l = (limits) { .type = DEPTH, .depth = 1, .stop = &stop };
+	l = (limit) { .type = DEPTH, .depth = 1, .stop = &stop };
 	res = search(&p, l, &tt);
 	test_gt(res.score, 32667, "depth 1 finds mate via qsearch");
 
@@ -141,7 +141,7 @@ TEST(search_negative_mate_score)
 	transposition_table tt = { 0 };
 	position p;
 	state_frame sf;
-	limits l;
+	limit l;
 	atomic_bool stop = false;
 	struct search_result res;
 
@@ -151,7 +151,7 @@ TEST(search_negative_mate_score)
 	// rnbqkbnr/ppppp2p/5p2/6pQ/4P3/3P4/PPP2PPP/RNB1KBNR b KQkq - 0 1
 	parse_fen("rnbqkbnr/ppppp2p/5p2/6pQ/4P3/3P4/PPP2PPP/RNB1KBNR b KQkq - 0 1", &p, &sf);
 
-	l = (limits) { .type = DEPTH, .depth = 5, .stop = &stop };
+	l = (limit) { .type = DEPTH, .depth = 5, .stop = &stop };
 	res = search(&p, l, &tt);
 
 	// Should find mated in 1 -> score = -(oo - 1) = -32766

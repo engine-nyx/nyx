@@ -298,7 +298,7 @@ uci_info(struct search_state *ss, int score, time_manager *tm)
 }
 
 static struct search_result
-search_internal(position *pos, limits lim, transposition_table *tt, bool info_print)
+search_internal(position *pos, limit lim, transposition_table *tt, bool info_print)
 {
 	time_manager *tm;
 	struct search_state *ss;
@@ -342,13 +342,13 @@ search_internal(position *pos, limits lim, transposition_table *tt, bool info_pr
 }
 
 struct search_result
-search(position *pos, limits lim, transposition_table *tt)
+search(position *pos, limit lim, transposition_table *tt)
 {
 	return search_internal(pos, lim, tt, false);
 }
 
 struct search_result
-search_uci(position *pos, limits lim, transposition_table *tt)
+search_uci(position *pos, limit lim, transposition_table *tt)
 {
 	return search_internal(pos, lim, tt, true);
 }

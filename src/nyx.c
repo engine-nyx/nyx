@@ -67,14 +67,14 @@ main(int argc, char **argv)
 		position p;
 		state_frame sf;
 		transposition_table tt = {};
-		limits lim;
+		limit lim;
 		usize parsed;
 
 		str_join(argc - 1, argv + 1, ' ', fen_arg_buffer);
 
 		parsed = parse_fen(fen_arg_buffer, &p, &sf);
 		unsigned long arg_depth = strtoul(fen_arg_buffer + parsed, nullptr, 10);
-		lim = arg_depth ? (limits) { .type=DEPTH, .depth=arg_depth} : (limits) { .type=INFINITE };
+		lim = arg_depth ? (limit) { .type=DEPTH, .depth=arg_depth} : (limit) { .type=INFINITE };
 		lim.stop = &stop;
 
 		tt_resize(&tt, 100000);

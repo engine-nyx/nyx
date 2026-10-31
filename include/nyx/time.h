@@ -12,7 +12,7 @@ typedef struct
 {
 	millis start, soft, hard;
 	millis remaining, inc;
-	limits l;
+	limit l;
 } time_manager;
 
 struct time_manager tm_init(millis remaining, millis inc, atomic_bool *stop);

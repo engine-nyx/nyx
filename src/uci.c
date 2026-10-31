@@ -35,7 +35,7 @@ static struct
 
 	atomic_bool joined;
 	thrd_t search_thread;
-	limits lim;
+	limit lim;
 } UCI_state;
 
 static struct
@@ -240,7 +240,7 @@ uci_go(const char *args)
 	{
 		str_ltrim(&args);
 		unsigned depth = (unsigned) strtoul(args, nullptr, 10);
-		UCI_state.lim = (limits)
+		UCI_state.lim = (limit)
 		{
 			.type=DEPTH,
 			.depth=depth,
@@ -251,7 +251,7 @@ uci_go(const char *args)
 	{
 		str_ltrim(&args);
 		millis ms = (millis) (strtoull(args, nullptr, 10));
-		UCI_state.lim = (limits)
+		UCI_state.lim = (limit)
 		{
 			.type=MOVETIME,
 			.movetime=ms,
@@ -262,7 +262,7 @@ uci_go(const char *args)
 	{
 		str_ltrim(&args);
 		node_count nodes = (node_count) (strtoull(args, nullptr, 10));
-		UCI_state.lim = (limits)
+		UCI_state.lim = (limit)
 		{
 			.type=NODES,
 			.nodes=nodes,
@@ -271,12 +271,12 @@ uci_go(const char *args)
 
 	else if (str_consume(&args, "infinite"))
 	{
-		UCI_state.lim = (limits) { .type=INFINITE };
+		UCI_state.lim = (limit) { .type=INFINITE };
 	}
 
 	else
 	{
-		UCI_state.lim = (limits) { .type=CLOCK };
+		UCI_state.lim = (limit) { .type=CLOCK };
 
 		if (!str_consume(&args, "wtime")) assert(false);
 		if (!str_ltrim(&args))            assert(false);

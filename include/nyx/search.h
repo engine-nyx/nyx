@@ -38,7 +38,7 @@ typedef struct
 	};
 
 	atomic_bool *stop;
-} limits;
+} limit;
 
 constexpr usize MAX_PLY = 100;
 
@@ -71,7 +71,7 @@ struct search_state
 	ptype moved_pieces[MAX_PLY];
 };
 
-struct search_result search(position *pos, limits lim, transposition_table *tt);
-struct search_result search_uci(position *pos, limits lim, transposition_table *tt);
+struct search_result search(position *pos, limit lim, transposition_table *tt);
+struct search_result search_uci(position *pos, limit lim, transposition_table *tt);
 
 #endif // NYX_SEARCH_H
