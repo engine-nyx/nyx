@@ -244,6 +244,7 @@ attacks_piece(ptype pt, square sq, bitboard occ)
 	}
 
 	assert(false);
+	return EMPTYBB;
 }
 
 bitboard

@@ -420,4 +420,5 @@ generate(enum generation_type gt, const position *p, move *ms)
 	}
 
 	assert(false);
+	return 0;
 }

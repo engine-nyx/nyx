@@ -234,6 +234,7 @@ pseudo_select(selector *s)
 	}
 
 	assert(false);
+	return NULL_MOVE;
 }
 
 move
