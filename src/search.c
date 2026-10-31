@@ -13,6 +13,7 @@
 #include <nyx/utils.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 constexpr int VALUE_DRAW = 0;
 static int
@@ -303,7 +304,11 @@ search_internal(position *pos, limits lim, transposition_table *tt, atomic_bool 
 	struct search_result res;
 	int score;
 
-	ss = &(struct search_state) { .tt=tt, .pos=pos };
+	ss = malloc(sizeof(struct search_state));
+	memset(ss, 0, sizeof(struct search_state));
+	ss->tt = tt;
+	ss->pos = pos;
+
 	tm = &(time_manager) { .l=lim, .stop=stop };
 	res = (struct search_result) {};
 	tm_start(tm);
@@ -330,6 +335,7 @@ search_internal(position *pos, limits lim, transposition_table *tt, atomic_bool 
 
 	res.nodes = ss->nodes;
 	res.qnodes = ss->qnodes;
+	free(ss);
 
 	return res;
 }
