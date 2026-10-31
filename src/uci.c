@@ -19,13 +19,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-enum search_state
-{
-	IDLE,
-	SEARCHING,
-	STOPPING,
-};
-
 static struct
 {
 	time_manager tm;
@@ -37,7 +30,7 @@ static struct
 
 	bool quit;
 
-	atomic_int search_state;
+	atomic_bool joined;
 	thrd_t search_thread;
 	limits lim;
 } UCI_state;
@@ -224,13 +217,14 @@ search_start(void *)
 	printf("bestmove ");
 	print_move(res.best);
 	printf("\n");
-	UCI_state.search_state = IDLE;
 	return 0;
 }
 
 static void
 uci_go(const char *args)
 {
+	uci_stop("");
+
 	if (str_consume(&args, "perft"))
 	{
 		str_ltrim(&args);
@@ -299,24 +293,18 @@ uci_go(const char *args)
 		}
 	}
 
-	UCI_state.search_state = SEARCHING;
+	UCI_state.joined = false;
 	thrd_create(&UCI_state.search_thread, &search_start, NULL);
 }
 
 static void
 uci_stop(const char *)
 {
-	switch (UCI_state.search_state)
+	if (!UCI_state.joined)
 	{
-	case IDLE:
-		break;
-	case STOPPING:
-		assert(false);
-		break;
-	case SEARCHING:
 		UCI_state.stop = true;
 		thrd_join(UCI_state.search_thread, NULL);
-		break;
+		UCI_state.joined = true;
 	}
 }
 
@@ -378,6 +366,7 @@ uci_loop(void)
 	uci_ucinewgame("");
 
 	UCI_state.quit = false;
+	UCI_state.joined = true;
 
 	while (!UCI_state.quit)
 	{
