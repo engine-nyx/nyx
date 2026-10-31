@@ -6,6 +6,7 @@
 
 #include <nyx/generation.h>
 #include <nyx/position.h>
+#include <nyx/search.h>
 #include <nyx/types.h>
 
 struct scored_move
@@ -16,9 +17,9 @@ struct scored_move
 
 typedef struct
 {
-	const position *pos;
 	int stage;
 	move tt;
+	const struct search_state *ss;
 
 	struct scored_move sms[MAX_MOVES];
 	usize num_moves, current;
@@ -32,7 +33,7 @@ enum search_stage
 	QUIESCENCE,
 };
 
-selector selector_of(const position *p, move tt, enum search_stage stage);
+selector selector_of(const struct search_state *ss, move tt, enum search_stage stage);
 move select(selector *s);
 
 #endif // NYX_SELECTION_H

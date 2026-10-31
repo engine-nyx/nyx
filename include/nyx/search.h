@@ -48,7 +48,27 @@ struct search_result
 	int score;
 };
 
-struct search_result search(position *p, limits l, transposition_table *tt, atomic_bool *stop);
-struct search_result search_uci(position *p, limits l, transposition_table *tt, atomic_bool *stop);
+struct histories
+{
+	i16 butterfly[NUM_PIECE_TYPES][NUM_SQUARES];
+	i16 continuation[6][NUM_PIECE_TYPES][NUM_SQUARES][NUM_PIECE_TYPES][NUM_SQUARES];
+};
+
+struct search_state
+{
+	node_count nodes, qnodes;
+	unsigned depth, qsearch_max, ply;
+
+	transposition_table *tt;
+	position *pos;
+
+	struct histories hist;
+	move pv[MAX_PLY][MAX_PLY + 1];
+	move played_moves[MAX_PLY];
+	ptype moved_pieces[MAX_PLY];
+};
+
+struct search_result search(position *pos, limits lim, transposition_table *tt, atomic_bool *stop);
+struct search_result search_uci(position *pos, limits lim, transposition_table *tt, atomic_bool *stop);
 
 #endif // NYX_SEARCH_H
