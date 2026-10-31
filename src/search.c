@@ -93,8 +93,8 @@ qsearch_rec(struct search_state *ss, int alpha, int beta, time_manager *tm)
 			break;
 		}
 
-		do_move(pos, m, &sf);
 		record_move(ss, m);
+		do_move(pos, m, &sf);
 
 		if (is_repetition(pos))
 		{
@@ -185,8 +185,8 @@ search_rec(struct search_state *ss, int alpha, int beta, time_manager *tm, bool 
 			break;
 		}
 
-		do_move(pos, m, &sf);
 		record_move(ss, m);
+		do_move(pos, m, &sf);
 
 		if (is_repetition(pos))
 		{
