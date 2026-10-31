@@ -18,6 +18,11 @@ static bitboard anti_mask[NUM_SQUARES];
 static bitboard lut_knight_attacks[NUM_SQUARES];
 static bitboard lut_king_attacks  [NUM_SQUARES];
 
+static inline bitboard no(bitboard bb) { return (bb << 8); }
+static inline bitboard so(bitboard bb) { return (bb >> 8); }
+static inline bitboard ea(bitboard bb) { return ((bb << 1) & 0xFEFEFEFEFEFEFEFE); }
+static inline bitboard we(bitboard bb) { return ((bb >> 1) & 0x7F7F7F7F7F7F7F7F); }
+
 #ifdef __BMI2__
 static bitboard lut_rook_attacks  [102400];
 static bitboard lut_bishop_attacks[5248];
@@ -29,12 +34,6 @@ static bitboard lut_bishop_offset [NUM_SQUARES];
 constexpr bitboard NO_EDGES     = 0x007E7E7E7E7E7E00;
 constexpr bitboard RANK_ATTACKS = 0x000000000000007E;
 constexpr bitboard FILE_ATTACKS = 0x0001010101010100;
-#endif // __BMI2__
-
-static inline bitboard no(bitboard bb) { return (bb << 8); }
-static inline bitboard so(bitboard bb) { return (bb >> 8); }
-static inline bitboard ea(bitboard bb) { return ((bb << 1) & 0xFEFEFEFEFEFEFEFE); }
-static inline bitboard we(bitboard bb) { return ((bb >> 1) & 0x7F7F7F7F7F7F7F7F); }
 
 static bitboard
 calc_rook_attacks(bitboard occ, square sq)
@@ -65,16 +64,19 @@ calc_bishop_attacks(bitboard occ, square sq)
 
 	return attacks;
 }
+#endif // __BMI2__
 
 void
 attacks_init(void)
 {
 	square sq;
 	bitboard ray, bb;
+#ifdef __BMI2__
 	usize rook_offset, bishop_offset;
 	usize rook_popcnt, bishop_popcnt;
 
 	rook_offset = bishop_offset = 0;
+#endif // __BMI2__
 
 	for (sq = 0; sq < NUM_SQUARES; ++sq)
 	{
