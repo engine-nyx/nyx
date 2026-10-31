@@ -142,7 +142,10 @@ parse_board(const char *s, position *p)
 
 		assert(file == 8 && "Must fill all files");
 		if (rank > 0)
-			assert(s[i++] == '/' && "Rank separator");
+		{
+			assert(s[i] == '/' && "Rank separator");
+			++i;
+		}
 	}
 
 	return i;
