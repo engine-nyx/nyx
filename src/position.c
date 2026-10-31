@@ -237,6 +237,7 @@ gives_check(const position *p, move m)
 	}
 
 	assert(false);
+	return false;
 }
 
 static inline bool

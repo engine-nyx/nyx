@@ -51,6 +51,7 @@ tt_skip(tt_entry ent, int alpha, int beta)
 	}
 
 	assert(false);
+	return false;
 }
 
 static void record_move(struct search_state *ss, move m);
