@@ -6,7 +6,6 @@
 
 #include <nyx/search.h>
 #include <nyx/types.h>
-#include <stdatomic.h>
 
 typedef struct
 {
@@ -15,7 +14,6 @@ typedef struct
 	limit l;
 } time_manager;
 
-struct time_manager tm_init(millis remaining, millis inc, atomic_bool *stop);
 bool tm_hard_expired(const time_manager *tm, const struct search_state *ss);
 bool tm_soft_expired(const time_manager *tm, const struct search_state *ss);
 void tm_start(time_manager *tm);
