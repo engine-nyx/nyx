@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <string.h>
 
-static atomic_bool stop = false;
+static volatile atomic_bool stop = false;
 
 static void
 sig_handler(int signum)
