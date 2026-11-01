@@ -38,83 +38,72 @@ static const int PIECE_VALUE[NUM_PIECE_TYPES] =
 	[KING]   = oo,
 };
 
-static void
-score_quiets(const move *ms, usize num_moves, struct scored_move *sms, const struct search_state *ss)
+static int
+score_capture(move m, const struct search_state *ss)
 {
-	usize i;
-	move m;
+	int score;
+
+	score = 0;
+	score += PIECE_VALUE[ptype_of(ss->pos->by_square[m.to])] * 100;
+	score -= PIECE_VALUE[ptype_of(ss->pos->by_square[m.from])];
+
+	return score;
+}
+
+static int
+score_quiet(move m, const struct search_state *ss)
+{
 	int score;
 	ptype pt;
 	usize ply;
 
+	score = 0;
+
+	pt = ptype_of(ss->pos->by_square[m.from]);
+
+	for (ply = 1; ply <= MAX_CONTINUATION && ply < ss->ply; ++ply)
+	{
+		score += ss->hist.continuation[ply]
+			[ss->moved_pieces[ss->ply - ply - 1]][ss->played_moves[ss->ply - ply - 1].to]
+			[pt][m.to];
+	}
+	score += ss->hist.butterfly[pt][m.to];
+
+	return score;
+}
+
+static int
+score_evasion(move m, const struct search_state *ss)
+{
+	int score;
+
+	score = 0;
+	score += PIECE_VALUE[ptype_of(ss->pos->by_square[m.to])] * 100;
+	score -= PIECE_VALUE[ptype_of(ss->pos->by_square[m.from])];
+
+	return score;
+}
+
+static void
+score(enum generation_type type, const move *ms, usize num_moves, struct scored_move *sms, const struct search_state *ss)
+{
+	usize i;
+	int score;
+
 	for (i = 0; i < num_moves; ++i)
 	{
-		m = ms[i];
 		score = 0;
 
-		pt = ptype_of(ss->pos->by_square[m.from]);
-
-		for (ply = 1; ply <= MAX_CONTINUATION && ply < ss->ply; ++ply)
+		switch (type)
 		{
-			score += ss->hist.continuation[ply]
-				[ss->moved_pieces[ss->ply - ply - 1]][ss->played_moves[ss->ply - ply - 1].to]
-				[pt][m.to];
+		case CAPTURES : score = score_capture(ms[i], ss); break;
+		case QUIETS   : score = score_quiet  (ms[i], ss); break;
+		case EVASIONS : score = score_evasion(ms[i], ss); break;
+		default       : assert(false);
 		}
-		score += ss->hist.butterfly[pt][m.to];
 
-		sms[i] = (struct scored_move)
-		{
-			.m=m,
-			.score=score,
-		};
-	}
-}
-
-static void
-score_captures(const move *ms, usize num_moves, struct scored_move *sms, const struct search_state *ss)
-{
-	usize i;
-	move m;
-	int score;
-
-	for (i = 0; i < num_moves; ++i)
-	{
-		m = ms[i];
-		score = 0;
-
-		// MVV-LVA
-		score += PIECE_VALUE[ptype_of(ss->pos->by_square[m.to])] * 100;
-		score -= PIECE_VALUE[ptype_of(ss->pos->by_square[m.from])];
-
-		sms[i] = (struct scored_move)
-		{
-			.m=m,
-			.score=score,
-		};
-	}
-}
-
-static void
-score_evasions(const move *ms, usize num_moves, struct scored_move *sms, const struct search_state *ss)
-{
-	usize i;
-	move m;
-	int score;
-
-	for (i = 0; i < num_moves; ++i)
-	{
-		m = ms[i];
-		score = 0;
-
-		// MVV-LVA
-		score += PIECE_VALUE[ptype_of(ss->pos->by_square[m.to])] * 100;
-		score -= PIECE_VALUE[ptype_of(ss->pos->by_square[m.from])];
-
-		sms[i] = (struct scored_move)
-		{
-			.m=m,
-			.score=score,
-		};
+		sms[i].m = ms[i];
+		sms[i].score = score;
 	}
 }
 
@@ -146,8 +135,8 @@ next_move(selector *s)
 	return s->sms[s->current++].m;
 }
 
-constexpr int GOOD_CAPTURE_THRESHOLD = 2;
-constexpr int GOOD_QUIET_THRESHOLD = -2;
+constexpr PARAMETER int GOOD_CAPTURE_THRESHOLD = 2;
+constexpr PARAMETER int GOOD_QUIET_THRESHOLD = -2;
 
 static bool
 has_good_captures(const selector *s)
@@ -179,7 +168,7 @@ pseudo_select(selector *s)
 	case STAGE_INIT_QUIESCE:
 		s->current = 0;
 		s->num_moves = generate(CAPTURES, s->ss->pos, ms);
-		score_captures(ms, s->num_moves, s->sms, s->ss);
+		score(CAPTURES, ms, s->num_moves, s->sms, s->ss);
 		insertion_sort(s->sms, s->num_moves);
 		++s->stage;
 		return pseudo_select(s);
@@ -195,7 +184,7 @@ pseudo_select(selector *s)
 	case STAGE_INIT_QUIETS:
 		// put quiet moves after the captures
 		generated = generate(QUIETS, s->ss->pos, ms);
-		score_quiets(ms, generated, s->sms + s->num_captures, s->ss);
+		score(QUIETS, ms, generated, s->sms + s->num_captures, s->ss);
 		insertion_sort(s->sms + s->num_captures, generated);
 		s->num_moves += generated;
 		s->current = s->num_captures;
@@ -223,7 +212,7 @@ pseudo_select(selector *s)
 	case STAGE_INIT_EVASIONS:
 		s->current = 0;
 		s->num_moves = generate(EVASIONS, s->ss->pos, ms);
-		score_evasions(ms, s->num_moves, s->sms, s->ss);
+		score(EVASIONS, ms, s->num_moves, s->sms, s->ss);
 		insertion_sort(s->sms, s->num_moves);
 		++s->stage;
 		[[fallthrough]];
