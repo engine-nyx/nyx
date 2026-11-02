@@ -53,7 +53,7 @@ struct search_result
 constexpr usize MAX_CONTINUATION = 8;
 struct histories
 {
-	i16 butterfly[NUM_PIECE_TYPES][NUM_SQUARES];
+	i16 main[NUM_COLORS][NUM_SQUARES][NUM_SQUARES];
 	i16 continuation[MAX_CONTINUATION + 1][NUM_PIECE_TYPES][NUM_SQUARES][NUM_PIECE_TYPES][NUM_SQUARES];
 };
 

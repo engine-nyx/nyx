@@ -44,10 +44,10 @@ tt_skip(tt_entry ent, int alpha, int beta)
 {
 	switch (ent.bound)
 	{
-	case EXACT : return true;
-	case LOWER : return ent.score >= beta;
-	case UPPER : return ent.score <= alpha;
-	case INVALID: return false;
+	case EXACT   : return true;
+	case LOWER   : return ent.score >= beta;
+	case UPPER   : return ent.score <= alpha;
+	case INVALID : return false;
 	}
 
 	assert(false);
@@ -55,7 +55,7 @@ tt_skip(tt_entry ent, int alpha, int beta)
 }
 
 static void record_move(struct search_state *ss, move m);
-static void update_histories(struct search_state *ss, bool cutoff);
+static void update_histories(struct search_state *ss, selector *s, move best_move, enum bound_type bound);
 
 static int
 qsearch_rec(struct search_state *ss, int alpha, int beta, time_manager *tm)
@@ -95,7 +95,6 @@ qsearch_rec(struct search_state *ss, int alpha, int beta, time_manager *tm)
 			break;
 		}
 
-		record_move(ss, m);
 		do_move(pos, m, &sf);
 
 		if (is_repetition(pos))
@@ -107,7 +106,6 @@ qsearch_rec(struct search_state *ss, int alpha, int beta, time_manager *tm)
 			score = -qsearch_rec(ss, -beta, -MAX(best_score, alpha), tm);
 		}
 
-		update_histories(ss, score >= beta);
 		undo_move(pos, m);
 
 		if (score > best_score)
@@ -209,7 +207,6 @@ search_rec(struct search_state *ss, int alpha, int beta, time_manager *tm, bool 
 				score = -search_rec(ss, -beta, -MAX(alpha, best_score), tm, true);
 		}
 
-		update_histories(ss, score >= beta);
 		undo_move(pos, m);
 
 		if (score > best_score)
@@ -233,6 +230,13 @@ search_rec(struct search_state *ss, int alpha, int beta, time_manager *tm, bool 
 	{
 		best_move = NULL_MOVE;
 		best_score = pos->sf->checkers ? -VALUE_MATE(ss->ply) : VALUE_DRAW;
+	}
+	else
+	{
+		update_histories(ss, &s, best_move,
+			best_score >= beta  ? LOWER :
+			best_score <= alpha ? UPPER :
+			EXACT);
 	}
 
 	store(ss->tt, pos->key, (tt_entry)
@@ -353,6 +357,13 @@ search_uci(position *pos, limit lim, transposition_table *tt)
 	return search_internal(pos, lim, tt, true);
 }
 
+static void
+record_move(struct search_state *ss, move m)
+{
+	ss->played_moves[ss->ply - 1] = m;
+	ss->moved_pieces[ss->ply - 1] = ptype_of(ss->pos->by_square[m.from]);
+}
+
 constexpr int MAX_HISTORY = 10'000;
 
 static void
@@ -362,33 +373,41 @@ gravity_update(i16 *value, int bonus)
 }
 
 static void
-record_move(struct search_state *ss, move m)
+update_continuations(struct search_state *ss, move m, int bonus)
 {
-	ss->played_moves[ss->ply - 1] = m;
-	ss->moved_pieces[ss->ply - 1] = ptype_of(ss->pos->by_square[m.from]);
+	usize ply;
+	ptype pt, moved_piece;
+	move played_move;
+
+	pt = ptype_of(ss->pos->by_square[m.to]);
+
+	for (ply = 1; ply <= MAX_CONTINUATION && ply < ss->ply; ++ply)
+	{
+		moved_piece = ss->moved_pieces[ss->ply - ply - 1];
+		played_move = ss->played_moves[ss->ply - ply - 1];
+		gravity_update(&ss->hist.continuation[ply][moved_piece][played_move.to][pt][m.to], bonus);
+	}
 }
 
 static void
-update_histories(struct search_state *ss, bool cutoff)
+update_histories(struct search_state *ss, selector *s, move best_move, enum bound_type bound)
 {
-	move m, played_move;
-	ptype pt, moved_piece;
+	move m;
+	int bonus_abs, bonus;
+	usize i;
 
-	int bonus;
-	usize ply;
-
-	m = ss->played_moves[ss->ply - 1];
-	pt = ptype_of(ss->pos->by_square[m.to]);
-
-	if (cutoff)
+	if (bound == LOWER)
 	{
-		bonus = MIN(MAX((300 * (int) ss->depth) - 250, -MAX_HISTORY), +MAX_HISTORY);
-		gravity_update(&ss->hist.butterfly[pt][m.to], bonus);
-		for (ply = 1; ply <= MAX_CONTINUATION && ply < ss->ply; ++ply)
+		if (s->num_moves && s->current > s->num_captures)  // quiet generation stage  // TODO: dont forget about evasions
 		{
-			moved_piece = ss->moved_pieces[ss->ply - ply - 1];
-			played_move = ss->played_moves[ss->ply - ply - 1];
-			gravity_update(&ss->hist.continuation[ply][moved_piece][played_move.to][pt][m.to], bonus);
+			bonus_abs = MIN(MAX(((int) (ss->depth * ss->depth)), -MAX_HISTORY), +MAX_HISTORY);
+			for (i = s->num_captures; i < s->current; ++i)
+			{
+				m = s->sms[i].m;
+				bonus = m.raw == best_move.raw ? +bonus_abs : -bonus_abs;
+				gravity_update(&ss->hist.main[ss->pos->stm][m.from][m.to], bonus);
+				update_continuations(ss, m, bonus);
+			}
 		}
 	}
 }

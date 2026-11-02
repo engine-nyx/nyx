@@ -55,11 +55,13 @@ score_quiet(move m, const struct search_state *ss)
 {
 	int score;
 	ptype pt;
+	color us;
 	usize ply;
 
 	score = 0;
 
 	pt = ptype_of(ss->pos->by_square[m.from]);
+	us = color_of(ss->pos->by_square[m.from]);
 
 	for (ply = 1; ply <= MAX_CONTINUATION && ply < ss->ply; ++ply)
 	{
@@ -67,7 +69,7 @@ score_quiet(move m, const struct search_state *ss)
 			[ss->moved_pieces[ss->ply - ply - 1]][ss->played_moves[ss->ply - ply - 1].to]
 			[pt][m.to];
 	}
-	score += ss->hist.butterfly[pt][m.to];
+	score += ss->hist.main[us][m.from][m.to];
 
 	return score;
 }
