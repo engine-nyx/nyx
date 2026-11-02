@@ -65,11 +65,11 @@ score_quiet(move m, const struct search_state *ss)
 
 	for (ply = 1; ply <= MAX_CONTINUATION && ply < ss->ply; ++ply)
 	{
-		score += ss->hist.continuation[ply]
+		score += ss->hist->continuation[ply]
 			[ss->moved_pieces[ss->ply - ply - 1]][ss->played_moves[ss->ply - ply - 1].to]
 			[pt][m.to];
 	}
-	score += ss->hist.main[us][m.from][m.to];
+	score += ss->hist->main[us][m.from][m.to];
 
 	return score;
 }

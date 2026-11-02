@@ -13,7 +13,6 @@
 #include <nyx/utils.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 constexpr int VALUE_DRAW = 0;
 static int
@@ -309,10 +308,8 @@ search_internal(position *pos, limit lim, transposition_table *tt, bool info_pri
 	struct search_result res;
 	int score;
 
-	ss = malloc(sizeof(struct search_state));
-	memset(ss, 0, sizeof(struct search_state));
-	ss->tt = tt;
-	ss->pos = pos;
+	ss = &(struct search_state) { .tt=tt, .pos=pos };
+	ss->hist = calloc(1, sizeof(struct histories));
 
 	tm = &(time_manager) { .l=lim };
 	res = (struct search_result) {};
@@ -338,9 +335,9 @@ search_internal(position *pos, limit lim, transposition_table *tt, bool info_pri
 		if (info_print && ss->depth) uci_info(ss, score, tm);
 	}
 
+	free(ss->hist);
 	res.nodes = ss->nodes;
 	res.qnodes = ss->qnodes;
-	free(ss);
 
 	return res;
 }
@@ -385,7 +382,7 @@ update_continuations(struct search_state *ss, move m, int bonus)
 	{
 		moved_piece = ss->moved_pieces[ss->ply - ply - 1];
 		played_move = ss->played_moves[ss->ply - ply - 1];
-		gravity_update(&ss->hist.continuation[ply][moved_piece][played_move.to][pt][m.to], bonus);
+		gravity_update(&ss->hist->continuation[ply][moved_piece][played_move.to][pt][m.to], bonus);
 	}
 }
 
@@ -405,7 +402,7 @@ update_histories(struct search_state *ss, selector *s, move best_move, enum boun
 			{
 				m = s->sms[i].m;
 				bonus = m.raw == best_move.raw ? +bonus_abs : -bonus_abs;
-				gravity_update(&ss->hist.main[ss->pos->stm][m.from][m.to], bonus);
+				gravity_update(&ss->hist->main[ss->pos->stm][m.from][m.to], bonus);
 				update_continuations(ss, m, bonus);
 			}
 		}

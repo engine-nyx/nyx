@@ -65,7 +65,7 @@ struct search_state
 	transposition_table *tt;
 	position *pos;
 
-	struct histories hist;
+	struct histories *hist;
 	move pv[MAX_PLY][MAX_PLY + 1];
 	move played_moves[MAX_PLY];
 	ptype moved_pieces[MAX_PLY];
