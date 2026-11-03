@@ -151,11 +151,13 @@ uci_setoption(const char *args)
 {
 	usize i, value;
 
+	assert(str_consume(&args, "name")); assert(str_ltrim(&args) && "setting separator");
 	for (i = 0; i < lengthof(UCI_OPTIONS); ++i)
 	{
 		if (str_consume(&args, UCI_OPTIONS[i].name))
 		{
 			assert(str_ltrim(&args) && "setting separator");
+			assert(str_consume(&args, "value")); assert(str_ltrim(&args) && "setting separator");
 			value = strtoull(args, nullptr, 10);
 			if (value < UCI_OPTIONS[i].min || value > UCI_OPTIONS[i].max)
 				assert(false);
@@ -165,6 +167,7 @@ uci_setoption(const char *args)
 	}
 
 	tt_resize(&UCI_state.tt, UCI_config.transposition_table_capacity * 1000);
+	printf("Resized TT to %lu\n", UCI_config.transposition_table_capacity * 1000);
 }
 
 static const char *startpos = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
