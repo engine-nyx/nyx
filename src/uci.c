@@ -44,6 +44,10 @@ static struct
 	usize threads;
 } UCI_config;
 
+#ifndef DEFAULT_TTSZK
+#define DEFAULT_TTSZK 100000
+#endif // DEFAULT_TTSZK
+
 static const struct
 {
 	usize min, max, value;
@@ -51,8 +55,8 @@ static const struct
 	const char *name;
 } UCI_OPTIONS[] =
 {
-	{ 1, 33554432, 100000, &UCI_config.transposition_table_capacity, "ttszk"   },
-	{ 1,        1,      1, &UCI_config.threads                     , "threads" },
+	{ 1, 33554432, DEFAULT_TTSZK, &UCI_config.transposition_table_capacity, "ttszk"   },
+	{ 1,        1,             1, &UCI_config.threads                     , "threads" },
 };
 
 // quit
