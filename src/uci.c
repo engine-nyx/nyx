@@ -112,13 +112,19 @@ uci_options(void)
 	}
 }
 
+static void uci_setoption(const char *args);
+
 static void
 uci_default_options(void)
 {
 	usize i;
+	char cmd[4096];
 
 	for (i = 0; i < lengthof(UCI_OPTIONS); ++i)
-		*UCI_OPTIONS[i].ptr = UCI_OPTIONS[i].value;
+	{
+		snprintf(cmd, 4096, "name %s value %zu\n", UCI_OPTIONS[i].name, UCI_OPTIONS[i].value);
+		uci_setoption(cmd);
+	}
 }
 
 static void uci_ucinewgame(const char *args);
