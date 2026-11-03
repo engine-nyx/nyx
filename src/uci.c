@@ -138,7 +138,6 @@ uci_ucinewgame(const char *)
 {
 	uci_stop("");
 	uci_position("startpos");
-	tt_resize(&UCI_state.tt, UCI_config.transposition_table_capacity * 1000);
 }
 
 static void
@@ -164,6 +163,8 @@ uci_setoption(const char *args)
 			break;
 		}
 	}
+
+	tt_resize(&UCI_state.tt, UCI_config.transposition_table_capacity * 1000);
 }
 
 static const char *startpos = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
