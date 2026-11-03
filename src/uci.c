@@ -167,7 +167,6 @@ uci_setoption(const char *args)
 	}
 
 	tt_resize(&UCI_state.tt, UCI_config.transposition_table_capacity * 1000);
-	printf("Resized TT to %lu\n", UCI_config.transposition_table_capacity * 1000);
 }
 
 static const char *startpos = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
