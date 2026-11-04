@@ -1,5 +1,7 @@
 // Copyright (c) 2026 Kilian Chung
 // SPDX-License-Identifier: NLPL
+//
+// Implementing: https://chessprogramming.org/PeSTO's_Evaluation_Function
 
 #include <nyx/evaluation.h>
 #include <nyx/types.h>
