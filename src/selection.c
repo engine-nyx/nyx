@@ -1,13 +1,13 @@
 // Copyright (c) 2026 Kilian Chung
 // SPDX-License-Identifier: NLPL
 
-#include "nyx/utils.h"
 #include <assert.h>
 #include <nyx/attacks.h>
 #include <nyx/generation.h>
 #include <nyx/position.h>
 #include <nyx/selection.h>
 #include <nyx/types.h>
+#include <nyx/utils.h>
 
 enum stage
 {
@@ -46,16 +46,11 @@ void voider(void);
 static int
 score_capture(move m, const struct search_state *ss)
 {
-	voider();
 	int score;
-	pctype pc, capture;
 
 	score = 0;
-	pc = ss->pos->by_square[m.from];
-	capture = ss->pos->by_square[m.to];
-
-	score += ss->hist->capture[pc][m.to][ptype_of(capture)];
-	score += CAPTURED_PIECE_SCORE_WEIGHT * PIECE_VALUE[ptype_of(capture)];
+	score += PIECE_VALUE[ptype_of(ss->pos->by_square[m.to])] * CAPTURED_PIECE_SCORE_WEIGHT;
+	score -= PIECE_VALUE[ptype_of(ss->pos->by_square[m.from])];
 
 	return score;
 }
