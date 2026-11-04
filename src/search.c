@@ -35,9 +35,6 @@ adjust_mate_score(int score, signed ply)
 	return score;
 }
 
-#define MAX(a, b) ((a) >= (b) ? (a) : (b))
-#define MIN(a, b) ((a) >= (b) ? (b) : (a))
-
 static inline bool
 tt_skip(tt_entry ent, int alpha, int beta)
 {
@@ -358,7 +355,7 @@ static void
 record_move(struct search_state *ss, move m)
 {
 	ss->played_moves[ss->ply - 1] = m;
-	ss->moved_pieces[ss->ply - 1] = ptype_of(ss->pos->by_square[m.from]);
+	ss->moved_pieces[ss->ply - 1] = ss->pos->by_square[m.from];
 }
 
 constexpr int MAX_HISTORY = 10'000;
@@ -366,22 +363,23 @@ constexpr int MAX_HISTORY = 10'000;
 static void
 gravity_update(i16 *value, int bonus)
 {
-	*value += bonus - (((*value) * abs(bonus))/ MAX_HISTORY);
+	*value += bonus - (((*value) * abs(bonus)) / MAX_HISTORY);
 }
 
 static void
 update_continuations(struct search_state *ss, move m, int bonus)
 {
 	usize ply;
-	ptype pt, moved_piece;
+	ptype pt;
+	pctype moved_piece;
 	move played_move;
 
-	pt = ptype_of(ss->pos->by_square[m.to]);
+	pt = ptype_of(ss->pos->by_square[m.from]);
 
-	for (ply = 1; ply <= MAX_CONTINUATION && ply < ss->ply; ++ply)
+	for (ply = 1; ply <= MAX_CONTINUATION && ply <= ss->ply; ++ply)
 	{
-		moved_piece = ss->moved_pieces[ss->ply - ply - 1];
-		played_move = ss->played_moves[ss->ply - ply - 1];
+		moved_piece = ss->moved_pieces[ss->ply - ply];
+		played_move = ss->played_moves[ss->ply - ply];
 		gravity_update(&ss->hist->continuation[ply][moved_piece][played_move.to][pt][m.to], bonus);
 	}
 }
@@ -392,12 +390,25 @@ update_histories(struct search_state *ss, selector *s, move best_move, enum boun
 	move m;
 	int bonus_abs, bonus;
 	usize i;
+	pctype pc, capture;
+
+	bonus_abs = MIN(MAX(((int) (ss->depth * ss->depth)), -MAX_HISTORY), +MAX_HISTORY);
 
 	if (bound == LOWER)
 	{
-		if (s->num_moves && s->current > s->num_captures)  // quiet generation stage  // TODO: dont forget about evasions
-		{
-			bonus_abs = MIN(MAX(((int) (ss->depth * ss->depth)), -MAX_HISTORY), +MAX_HISTORY);
+		if (s->num_captures && s->current < s->num_good_captures)
+		{  // capture generation stage
+			for (i = 0; i < s->current; ++i)
+			{
+				pc = ss->pos->by_square[m.from];
+				capture = ss->pos->by_square[m.to];
+				m = s->sms[i].m;
+				bonus = m.raw == best_move.raw ? +bonus_abs : -bonus_abs;
+				gravity_update(&ss->hist->capture[pc][m.to][ptype_of(capture)], bonus);
+			}
+		}
+		else if (s->num_moves && s->current >= s->num_captures)
+		{  // quiet generation stage  // TODO: dont forget about evasions
 			for (i = s->num_captures; i < s->current; ++i)
 			{
 				m = s->sms[i].m;

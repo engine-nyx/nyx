@@ -248,22 +248,28 @@ attacks_piece(ptype pt, square sq, bitboard occ)
 }
 
 bitboard
-attackers(const position *p, square sq)
+attackers_explicit(const position *pos, square sq, bitboard occ)
 {
 	bitboard attackers;
 
-	attackers = 0;
+	attackers = EMPTYBB;
 
-	attackers |= attacks_piece(ROOK  , sq, p->by_ptype[ALL]) & p->by_ptype[ROOK];
-	attackers |= attacks_piece(ROOK  , sq, p->by_ptype[ALL]) & p->by_ptype[QUEEN];
-	attackers |= attacks_piece(BISHOP, sq, p->by_ptype[ALL]) & p->by_ptype[BISHOP];
-	attackers |= attacks_piece(BISHOP, sq, p->by_ptype[ALL]) & p->by_ptype[QUEEN];
-	attackers |= attacks_piece(KNIGHT, sq, p->by_ptype[ALL]) & p->by_ptype[KNIGHT];
-	attackers |= attacks_piece(KING  , sq, p->by_ptype[ALL]) & p->by_ptype[KING];
-	attackers |= attacks_pawn(sq, BLACK) & p->by_ptype[PAWN] & p->by_color[WHITE];
-	attackers |= attacks_pawn(sq, WHITE) & p->by_ptype[PAWN] & p->by_color[BLACK];
+	attackers |= attacks_piece(ROOK  , sq, occ) & pos->by_ptype[ROOK];
+	attackers |= attacks_piece(ROOK  , sq, occ) & pos->by_ptype[QUEEN];
+	attackers |= attacks_piece(BISHOP, sq, occ) & pos->by_ptype[BISHOP];
+	attackers |= attacks_piece(BISHOP, sq, occ) & pos->by_ptype[QUEEN];
+	attackers |= attacks_piece(KNIGHT, sq, occ) & pos->by_ptype[KNIGHT];
+	attackers |= attacks_piece(KING  , sq, occ) & pos->by_ptype[KING];
+	attackers |= attacks_pawn(sq, BLACK) & pos->by_ptype[PAWN] & pos->by_color[WHITE];
+	attackers |= attacks_pawn(sq, WHITE) & pos->by_ptype[PAWN] & pos->by_color[BLACK];
 
 	return attackers;
+}
+
+bitboard
+attackers(const position *pos, square sq)
+{
+	return attackers_explicit(pos, sq, pos->by_ptype[ALL]);
 }
 
 bool

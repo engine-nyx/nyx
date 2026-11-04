@@ -54,7 +54,8 @@ constexpr usize MAX_CONTINUATION = 8;
 struct histories
 {
 	i16 main[NUM_COLORS][NUM_SQUARES][NUM_SQUARES];
-	i16 continuation[MAX_CONTINUATION + 1][NUM_PIECE_TYPES][NUM_SQUARES][NUM_PIECE_TYPES][NUM_SQUARES];
+	i16 continuation[MAX_CONTINUATION + 1][NUM_PIECE_COLORED_TYPES][NUM_SQUARES][NUM_PIECE_TYPES][NUM_SQUARES];
+	i16 capture[NUM_PIECE_COLORED_TYPES][NUM_SQUARES][NUM_PIECE_TYPES];
 };
 
 struct search_state
@@ -68,7 +69,7 @@ struct search_state
 	struct histories *hist;
 	move pv[MAX_PLY][MAX_PLY + 1];
 	move played_moves[MAX_PLY];
-	ptype moved_pieces[MAX_PLY];
+	pctype moved_pieces[MAX_PLY];
 };
 
 struct search_result search(position *pos, limit lim, transposition_table *tt);

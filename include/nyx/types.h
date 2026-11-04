@@ -130,6 +130,9 @@ constexpr int oo = 0x7FFF;
 
 typedef u64f millis;
 
+#define MAX(a, b) ((a) >= (b) ? (a) : (b))
+#define MIN(a, b) ((a) >= (b) ? (b) : (a))
+
 #define PARAMETER
 
 #endif // NYX_TYPES_H

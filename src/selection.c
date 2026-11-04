@@ -1,6 +1,7 @@
 // Copyright (c) 2026 Kilian Chung
 // SPDX-License-Identifier: NLPL
 
+#include "nyx/utils.h"
 #include <assert.h>
 #include <nyx/attacks.h>
 #include <nyx/generation.h>
@@ -38,14 +39,23 @@ static const int PIECE_VALUE[NUM_PIECE_TYPES] =
 	[KING]   = oo,
 };
 
+constexpr PARAMETER int CAPTURED_PIECE_SCORE_WEIGHT = 5;
+
+void voider(void);
+
 static int
 score_capture(move m, const struct search_state *ss)
 {
+	voider();
 	int score;
+	pctype pc, capture;
 
 	score = 0;
-	score += PIECE_VALUE[ptype_of(ss->pos->by_square[m.to])] * 100;
-	score -= PIECE_VALUE[ptype_of(ss->pos->by_square[m.from])];
+	pc = ss->pos->by_square[m.from];
+	capture = ss->pos->by_square[m.to];
+
+	score += ss->hist->capture[pc][m.to][ptype_of(capture)];
+	score += CAPTURED_PIECE_SCORE_WEIGHT * PIECE_VALUE[ptype_of(capture)];
 
 	return score;
 }
@@ -80,7 +90,7 @@ score_evasion(move m, const struct search_state *ss)
 	int score;
 
 	score = 0;
-	score += PIECE_VALUE[ptype_of(ss->pos->by_square[m.to])] * 100;
+	score += PIECE_VALUE[ptype_of(ss->pos->by_square[m.to])] * CAPTURED_PIECE_SCORE_WEIGHT;
 	score -= PIECE_VALUE[ptype_of(ss->pos->by_square[m.from])];
 
 	return score;
@@ -275,3 +285,55 @@ selector_of(const struct search_state *ss, move tt, enum search_stage stage)
 
 	return s;
 }
+
+static square
+lowest_piece(const position *pos, bitboard bb)
+{
+	ptype pt;
+	bitboard subset;
+
+	for (pt = PAWN; pt <= KING; ++pt)
+	{
+		subset = bb & pos->by_ptype[pt];
+		if (subset)
+			return subset & -subset;
+	}
+
+	return EMPTYBB;
+}
+
+static int
+see_ge(const position *pos, move m)
+{
+	int gain[32];
+	usize d;
+	bitboard attackers, gone, from_bb;
+
+	d = 0;
+	attackers = bbsq(m.from);
+	gone = EMPTYBB;
+	gain[d] = PIECE_VALUE[ptype_of(pos->by_square[m.to])];
+
+	do
+	{
+		++d;
+		from_bb = lowest_piece(pos, attackers);
+		gain[d] = PIECE_VALUE[pos->by_square[lsb(from_bb)]] - gain[d - 1];
+
+		gone |= from_bb;
+		attackers &= ~from_bb;
+		if (!attackers)
+		{
+			attackers = attackers_explicit(pos, m.to, pos->by_ptype[ALL] & ~gone);
+			attackers &= ~gone;
+			attackers &= pos->by_color[d & 1 ? pos->stm : other_color(pos->stm)];
+		}
+	} while (attackers);
+
+	while (--d)
+		gain[d - 1] = MIN(gain[d - 1], -gain[d]);
+
+	return gain[0];
+}
+
+void voider(void) { (void) see_ge; }
