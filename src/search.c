@@ -196,7 +196,7 @@ search_rec(struct search_state *ss, int alpha, int beta, time_manager *tm, bool 
 		}
 		else
 		{
-			score = -search_rec(ss, -(best_score + 1), -best_score, tm, false);
+			score = -search_rec(ss, -(MAX(best_score, alpha) + 1), -MAX(best_score, alpha), tm, false);
 
 			// re-search fail-high nodes
 			if (score > best_score && pv)
