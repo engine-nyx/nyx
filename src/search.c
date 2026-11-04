@@ -389,26 +389,30 @@ update_histories(struct search_state *ss, selector *s, move best_move, enum boun
 {
 	move m;
 	int bonus_abs, bonus;
+	bool is_capture;
 	usize i;
 	pctype pc, capture;
 
 	bonus_abs = MIN(MAX(((int) (ss->depth * ss->depth)), -MAX_HISTORY), +MAX_HISTORY);
+	is_capture = ss->pos->by_square[best_move.to] != EMPTY ||
+		best_move.type == EN_PASSANT ||
+		best_move.type == PROMOTION;
 
 	if (bound == LOWER)
 	{
-		if (s->num_captures && s->current < s->num_good_captures)
-		{  // capture generation stage
+		if (is_capture)
+		{
 			for (i = 0; i < s->current; ++i)
 			{
+				m = s->sms[i].m;
 				pc = ss->pos->by_square[m.from];
 				capture = ss->pos->by_square[m.to];
-				m = s->sms[i].m;
 				bonus = m.raw == best_move.raw ? +bonus_abs : -bonus_abs;
 				gravity_update(&ss->hist->capture[pc][m.to][ptype_of(capture)], bonus);
 			}
 		}
-		else if (s->num_moves && s->current >= s->num_captures)
-		{  // quiet generation stage  // TODO: dont forget about evasions
+		else // quiet
+		{
 			for (i = s->num_captures; i < s->current; ++i)
 			{
 				m = s->sms[i].m;
