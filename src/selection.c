@@ -41,16 +41,18 @@ static const int PIECE_VALUE[NUM_PIECE_TYPES] =
 
 constexpr PARAMETER int CAPTURED_PIECE_SCORE_WEIGHT = 5;
 
-void voider(void);
-
 static int
 score_capture(move m, const struct search_state *ss)
 {
 	int score;
+	pctype pc, capture;
 
 	score = 0;
-	score += PIECE_VALUE[ptype_of(ss->pos->by_square[m.to])] * CAPTURED_PIECE_SCORE_WEIGHT;
-	score -= PIECE_VALUE[ptype_of(ss->pos->by_square[m.from])];
+	pc = ss->pos->by_square[m.from];
+	capture = ss->pos->by_square[m.to];
+
+	score += ss->hist->capture[pc][m.to][ptype_of(capture)];
+	score += CAPTURED_PIECE_SCORE_WEIGHT * PIECE_VALUE[ptype_of(capture)];
 
 	return score;
 }
@@ -297,7 +299,7 @@ lowest_piece(const position *pos, bitboard bb)
 	return EMPTYBB;
 }
 
-static int
+/* TODO: re-add 'static' */ int
 see_ge(const position *pos, move m)
 {
 	int gain[32];
@@ -330,5 +332,3 @@ see_ge(const position *pos, move m)
 
 	return gain[0];
 }
-
-void voider(void) { (void) see_ge; }
