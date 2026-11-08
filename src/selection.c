@@ -84,13 +84,9 @@ score_quiet(move m, const struct search_state *ss)
 static int
 score_evasion(move m, const struct search_state *ss)
 {
-	int score;
-
-	score = 0;
-	score += PIECE_VALUE[ptype_of(ss->pos->by_square[m.to])] * CAPTURED_PIECE_SCORE_WEIGHT;
-	score -= PIECE_VALUE[ptype_of(ss->pos->by_square[m.from])];
-
-	return score;
+	return is_capture(ss->pos, m) ?
+		score_capture(m, ss) :
+		score_quiet(m, ss);
 }
 
 static void

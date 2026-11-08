@@ -489,3 +489,11 @@ is_repetition(const position *pos)
 
 	return false;
 }
+
+bool
+is_capture(const position *pos, move m)
+{
+	return pos->by_square[m.to] != EMPTY ||
+		m.type == EN_PASSANT ||
+		(m.type == PROMOTION && promtype_of(m) == QUEEN);
+}

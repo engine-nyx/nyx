@@ -389,18 +389,14 @@ update_histories(struct search_state *ss, selector *s, move best_move, enum boun
 {
 	move m;
 	int bonus_abs, bonus;
-	bool is_capture;
 	usize i;
 	pctype pc, capture;
 
 	bonus_abs = MIN(MAX(((int) (ss->depth * ss->depth)), -MAX_HISTORY), +MAX_HISTORY);
-	is_capture = ss->pos->by_square[best_move.to] != EMPTY ||
-		best_move.type == EN_PASSANT ||
-		best_move.type == PROMOTION;
 
 	if (bound == LOWER)
 	{
-		if (is_capture)
+		if (is_capture(ss->pos, best_move))
 		{
 			for (i = 0; i < s->current; ++i)
 			{

@@ -46,6 +46,7 @@ square king_square(const position *p, color c);
 
 bool is_legal(const position *p, move m);
 bool is_pseudo_legal(const position *p, move m);
+bool is_capture(const position *pos, move m);
 
 void finalize_position(position *p);
 
