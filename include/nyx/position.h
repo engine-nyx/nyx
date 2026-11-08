@@ -34,7 +34,7 @@ typedef struct
 	bitboard by_ptype[NUM_PIECE_TYPES];
 	pctype by_square[NUM_SQUARES];
 
-	u64 key, pawn_key;
+	u64 key;
 } position;
 
 void put_piece(position *p, pctype pc, square sq);

@@ -264,7 +264,7 @@ parse_fen(const char *fen, position *p, state_frame *sf)
 	p->sf = sf;
 	sf->rule50 = 0;
 	p->ply = 0;
-	p->key = p->pawn_key = 0;
+	p->key = 0;
 	sf->material = 0;
 	sf->capture = EMPTY;
 

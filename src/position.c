@@ -93,9 +93,6 @@ put_piece(position *p, pctype pc, square sq)
 
 	p->sf->material += PIECE_VALUE[pc];
 	p->key ^= zobrist_of(pc, sq);
-
-	if (ptype_of(pc) == PAWN)
-		p->pawn_key ^= zobrist_of(pc, sq);
 }
 
 static void
@@ -112,9 +109,6 @@ remove_piece(position *p, square sq)
 
 	p->sf->material -= PIECE_VALUE[pc];
 	p->key ^= zobrist_of(pc, sq);
-
-	if (ptype_of(pc) == PAWN)
-		p->pawn_key ^= zobrist_of(pc, sq);
 }
 
 static void
@@ -133,9 +127,6 @@ move_piece(position *p, square from, square to)
 	p->by_color[color_of(pc)] ^= from_to;
 
 	p->key ^= zobrist_of(pc, from) ^ zobrist_of(pc, to);
-
-	if (ptype_of(pc) == PAWN)
-		p->pawn_key ^= zobrist_of(pc, from) ^ zobrist_of(pc, to);
 }
 
 static void

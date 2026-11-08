@@ -416,10 +416,8 @@ update_histories(struct search_state *ss, selector *s, move best_move, enum boun
 			for (i = s->num_captures; i < s->current; ++i)
 			{
 				m = s->sms[i].m;
-				pc = ss->pos->by_square[m.from];
 				bonus = m.raw == best_move.raw ? +bonus_abs : -bonus_abs;
 				gravity_update(&ss->hist->main[ss->pos->stm][m.from][m.to], bonus);
-				gravity_update(&ss->hist->pawn[ss->pos->pawn_key & BITMASK(PAWN_HASH_SIZE)][pc][m.to], bonus);
 				update_continuations(ss, m, bonus);
 			}
 		}

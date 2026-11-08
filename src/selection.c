@@ -61,25 +61,22 @@ static int
 score_quiet(move m, const struct search_state *ss)
 {
 	int score;
-	pctype pc;
 	ptype pt;
 	color us;
 	usize ply;
 
 	score = 0;
 
-	pc = ss->pos->by_square[m.from];
-	pt = ptype_of(pc);
-	us = color_of(pc);
+	pt = ptype_of(ss->pos->by_square[m.from]);
+	us = color_of(ss->pos->by_square[m.from]);
 
-	score += ss->hist->main[us][m.from][m.to];
 	for (ply = 1; ply <= MAX_CONTINUATION && ply < ss->ply; ++ply)
 	{
 		score += ss->hist->continuation[ply]
 			[ss->moved_pieces[ss->ply - ply - 1]][ss->played_moves[ss->ply - ply - 1].to]
 			[pt][m.to];
 	}
-	score += ss->hist->pawn[ss->pos->pawn_key & BITMASK(PAWN_HASH_SIZE)][pc][m.to];
+	score += ss->hist->main[us][m.from][m.to];
 
 	return score;
 }
