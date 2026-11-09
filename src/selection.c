@@ -240,8 +240,12 @@ pseudo_select(selector *s)
 		[[fallthrough]];
 
 	case STAGE_EVASIONS:
-	case STAGE_QUIESCE:
 		return next_move(s);
+
+	case STAGE_QUIESCE:
+		if (has_good_captures(s))
+			return next_move(s);
+		return NULL_MOVE;
 	}
 
 	assert(false);
@@ -320,6 +324,9 @@ see_ge(const position *pos, move m, int ge)
 	bitboard attackers, gone, from_bb;
 	color stm;
 	int value;
+
+	if (m.type != NORMAL)
+		return 0 >= ge;
 
 	gone = EMPTYBB;
 	stm = pos->stm;
