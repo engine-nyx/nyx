@@ -142,13 +142,28 @@ next_move(selector *s)
 	return s->sms[s->current++].m;
 }
 
-constexpr PARAMETER int GOOD_CAPTURE_THRESHOLD = 2;
+constexpr PARAMETER int GOOD_CAPTURE_THRESHOLD = 0;
 constexpr PARAMETER int GOOD_QUIET_THRESHOLD = -2;
 
+static bool see_ge(const position *pos, move m, int ge);
+
 static bool
-has_good_captures(const selector *s)
+has_good_captures(selector *s)
 {
-	return s->current < s->num_moves && s->sms[s->current].score >= GOOD_CAPTURE_THRESHOLD;
+	struct scored_move swap;
+
+	while (s->current < s->num_good_captures)
+	{
+		if (see_ge(s->ss->pos, s->sms[s->current].m, GOOD_CAPTURE_THRESHOLD /* TODO: make dependent on score */))
+			return true;
+
+		--s->num_good_captures;
+		swap = s->sms[s->current];
+		s->sms[s->current] = s->sms[s->num_good_captures];
+		s->sms[s->num_good_captures] = swap;
+	}
+
+	return false;
 }
 
 static bool
@@ -175,6 +190,7 @@ pseudo_select(selector *s)
 	case STAGE_INIT_QUIESCE:
 		s->current = 0;
 		s->num_moves = generate(CAPTURES, s->ss->pos, ms);
+		s->num_good_captures = s->num_moves;
 		score(CAPTURES, ms, s->num_moves, s->sms, s->ss);
 		insertion_sort(s->sms, s->num_moves);
 		++s->stage;
@@ -184,24 +200,23 @@ pseudo_select(selector *s)
 		if (has_good_captures(s))
 			return next_move(s);
 		s->num_captures = s->num_moves;
-		s->num_good_captures = s->current;
 		++s->stage;
 		[[fallthrough]];
 
 	case STAGE_INIT_QUIETS:
 		// put quiet moves after the captures
+		s->current = s->num_captures;
 		generated = generate(QUIETS, s->ss->pos, ms);
+		s->num_moves += generated;
+		s->num_good_quiets = generated;
 		score(QUIETS, ms, generated, s->sms + s->num_captures, s->ss);
 		insertion_sort(s->sms + s->num_captures, generated);
-		s->num_moves += generated;
-		s->current = s->num_captures;
 		++s->stage;
 		[[fallthrough]];
 
 	case STAGE_GOOD_QUIETS:
 		if (has_good_quiets(s))
 			return next_move(s);
-		s->num_good_quiets = s->current - s->num_captures;
 		s->current = s->num_good_captures;
 		++s->stage;
 		[[fallthrough]];
@@ -281,11 +296,13 @@ selector_of(const struct search_state *ss, move tt, enum search_stage stage)
 	return s;
 }
 
-static square
-lowest_piece(const position *pos, bitboard bb)
+static bitboard
+lowest_piece_bb(const position *pos, bitboard bb, color c)
 {
 	ptype pt;
 	bitboard subset;
+
+	bb &= pos->by_color[c];
 
 	for (pt = PAWN; pt <= KING; ++pt)
 	{
@@ -297,36 +314,35 @@ lowest_piece(const position *pos, bitboard bb)
 	return EMPTYBB;
 }
 
-/* TODO: re-add 'static' */ int
-see_ge(const position *pos, move m)
+static bool
+see_ge(const position *pos, move m, int ge)
 {
-	int gain[32];
-	usize d;
 	bitboard attackers, gone, from_bb;
+	color stm;
+	int value;
 
-	d = 0;
-	attackers = bbsq(m.from);
 	gone = EMPTYBB;
-	gain[d] = PIECE_VALUE[ptype_of(pos->by_square[m.to])];
+	stm = pos->stm;
+	value = PIECE_VALUE[ptype_of(pos->by_square[m.to])];
+	if (value < ge) return false;
 
-	do
+	for (attackers = bbsq(m.from); attackers & pos->by_color[stm]; stm = other_color(stm), ge *= -1, value *= -1)
 	{
-		++d;
-		from_bb = lowest_piece(pos, attackers);
-		gain[d] = PIECE_VALUE[pos->by_square[lsb(from_bb)]] - gain[d - 1];
+		from_bb = lowest_piece_bb(pos, attackers, stm);
+		value -= PIECE_VALUE[ptype_of(pos->by_square[lsb(from_bb)])];
+		if (value >= ge)
+			return stm == pos->stm;
 
 		gone |= from_bb;
 		attackers &= ~from_bb;
-		if (!attackers)
+		if (!(attackers & pos->by_color[other_color(stm)]))
 		{
 			attackers = attackers_explicit(pos, m.to, pos->by_ptype[ALL] & ~gone);
 			attackers &= ~gone;
-			attackers &= pos->by_color[d & 1 ? pos->stm : other_color(pos->stm)];
 		}
-	} while (attackers);
+	}
 
-	while (--d)
-		gain[d - 1] = MIN(gain[d - 1], -gain[d]);
-
-	return gain[0];
+	// return true if it's the enemy's turn but they don't have any more defenders;
+	// return false otherwise.
+	return stm != pos->stm;
 }
