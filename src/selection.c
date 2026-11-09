@@ -81,11 +81,13 @@ score_quiet(move m, const struct search_state *ss)
 	return score;
 }
 
+constexpr PARAMETER int CAPTURE_EVASION_BONUS = 1 << 28;
+
 static int
 score_evasion(move m, const struct search_state *ss)
 {
 	return is_capture(ss->pos, m) ?
-		score_capture(m, ss) :
+		score_capture(m, ss) + CAPTURE_EVASION_BONUS :
 		score_quiet(m, ss);
 }
 
