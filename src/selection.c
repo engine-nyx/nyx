@@ -81,7 +81,7 @@ score_quiet(move m, const struct search_state *ss)
 	return score;
 }
 
-constexpr PARAMETER int CAPTURE_EVASION_BONUS = 1 << 28;
+constexpr PARAMETER int CAPTURE_EVASION_BONUS = 1 << 15;
 
 static int
 score_evasion(move m, const struct search_state *ss)
@@ -208,7 +208,6 @@ pseudo_select(selector *s)
 		s->current = s->num_captures;
 		generated = generate(QUIETS, s->ss->pos, ms);
 		s->num_moves += generated;
-		s->num_good_quiets = generated;
 		score(QUIETS, ms, generated, s->sms + s->num_captures, s->ss);
 		insertion_sort(s->sms + s->num_captures, generated);
 		++s->stage;
@@ -217,6 +216,7 @@ pseudo_select(selector *s)
 	case STAGE_GOOD_QUIETS:
 		if (has_good_quiets(s))
 			return next_move(s);
+		s->num_good_quiets = s->current - s->num_good_captures;
 		s->current = s->num_good_captures;
 		++s->stage;
 		[[fallthrough]];
