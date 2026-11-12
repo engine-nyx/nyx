@@ -142,7 +142,6 @@ next_move(selector *s)
 	return s->sms[s->current++].m;
 }
 
-constexpr PARAMETER int GOOD_CAPTURE_THRESHOLD = 0;
 constexpr PARAMETER int GOOD_SEE_THRESHOLD = 0;
 constexpr PARAMETER int GOOD_QUIET_THRESHOLD = -2;
 
@@ -155,7 +154,7 @@ has_good_captures(selector *s)
 
 	while (s->current < s->num_good_captures)
 	{
-		if (see_ge(s->ss->pos, s->sms[s->current].m, GOOD_SEE_THRESHOLD /* TODO: make dependent on score */) && s->sms[s->current].score >= GOOD_CAPTURE_THRESHOLD)
+		if (see_ge(s->ss->pos, s->sms[s->current].m, GOOD_SEE_THRESHOLD /* TODO: make dependent on score */))
 			return true;
 
 		--s->num_good_captures;
@@ -241,12 +240,8 @@ pseudo_select(selector *s)
 		[[fallthrough]];
 
 	case STAGE_EVASIONS:
-		return next_move(s);
-
 	case STAGE_QUIESCE:
-		if (has_good_captures(s))
-			return next_move(s);
-		return NULL_MOVE;
+		return next_move(s);
 	}
 
 	assert(false);
@@ -302,12 +297,10 @@ selector_of(const struct search_state *ss, move tt, enum search_stage stage)
 }
 
 static bitboard
-lowest_piece_bb(const position *pos, bitboard bb, color c)
+lowest_piece_bb(const position *pos, bitboard bb)
 {
 	ptype pt;
 	bitboard subset;
-
-	bb &= pos->by_color[c];
 
 	for (pt = PAWN; pt <= KING; ++pt)
 	{
@@ -323,7 +316,7 @@ static bool
 see_ge(const position *pos, move m, int ge)
 {
 	int value;
-	bitboard atk, occ, from_bb;
+	bitboard atk, stm_atk, occ, from_bb;
 	color stm;
 	ptype pt;
 
@@ -336,9 +329,16 @@ see_ge(const position *pos, move m, int ge)
 	occ = pos->by_ptype[ALL] ^ bbsq(m.from) ^ bbsq(m.to);
 	stm = other_color(pos->stm);
 
-	for (atk = attackers_explicit(pos, m.to, occ) & occ; atk & pos->by_color[stm]; stm = other_color(stm))
+	for (atk = attackers_explicit(pos, m.to, occ) & occ; (stm_atk = atk & pos->by_color[stm]); stm = other_color(stm))
 	{
-		from_bb = lowest_piece_bb(pos, atk, stm);
+		// filter out pinned pieces as long as there are pinners
+		if (pos->sf->pinners[other_color(stm)] & occ)
+		{
+			stm_atk &= ~pos->sf->blockers[stm];
+			if (!stm_atk) break;
+		}
+
+		from_bb = lowest_piece_bb(pos, stm_atk);
 		pt = ptype_of(pos->by_square[lsb(from_bb)]);
 		value = PIECE_VALUE[pt] - value;
 		if (value < (int) (stm == pos->stm))

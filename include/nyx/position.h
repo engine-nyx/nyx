@@ -19,7 +19,7 @@ typedef struct state_frame
 	// transient
 	struct state_frame *previous;
 	bitboard checkers;
-	bitboard blockers[NUM_COLORS];
+	bitboard blockers[NUM_COLORS], pinners[NUM_COLORS];
 	bitboard check_squares[NUM_PIECE_TYPES];
 } state_frame;
 

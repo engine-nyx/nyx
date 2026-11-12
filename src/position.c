@@ -162,6 +162,7 @@ update_blockers(position *p, color c)
 	occ = p->by_ptype[ALL] ^ snipers;
 
 	p->sf->blockers[c] = EMPTYBB;
+	p->sf->pinners[other_color(c)] = EMPTYBB;
 	while (snipers)
 	{
 		sniper = pop_lsb(&snipers);
@@ -170,6 +171,8 @@ update_blockers(position *p, color c)
 		if (popcnt(line) == 1)
 		{
 			p->sf->blockers[c] |= line;
+			if (line & p->by_color[c])
+				p->sf->pinners[other_color(c)] |= bbsq(sniper);
 		}
 	}
 }
