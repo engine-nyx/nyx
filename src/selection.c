@@ -143,6 +143,7 @@ next_move(selector *s)
 }
 
 constexpr PARAMETER int GOOD_CAPTURE_THRESHOLD = 0;
+constexpr PARAMETER int GOOD_SEE_THRESHOLD = 0;
 constexpr PARAMETER int GOOD_QUIET_THRESHOLD = -2;
 
 static bool see_ge(const position *pos, move m, int ge);
@@ -154,7 +155,7 @@ has_good_captures(selector *s)
 
 	while (s->current < s->num_good_captures)
 	{
-		if (see_ge(s->ss->pos, s->sms[s->current].m, 0 /* TODO: make dependent on score */) && s->sms[s->current].score >= GOOD_CAPTURE_THRESHOLD)
+		if (see_ge(s->ss->pos, s->sms[s->current].m, GOOD_SEE_THRESHOLD /* TODO: make dependent on score */) && s->sms[s->current].score >= GOOD_CAPTURE_THRESHOLD)
 			return true;
 
 		--s->num_good_captures;
