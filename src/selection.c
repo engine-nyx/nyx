@@ -154,7 +154,7 @@ has_good_captures(selector *s)
 
 	while (s->current < s->num_good_captures)
 	{
-		if (see_ge(s->ss->pos, s->sms[s->current].m, GOOD_CAPTURE_THRESHOLD /* TODO: make dependent on score */))
+		if (see_ge(s->ss->pos, s->sms[s->current].m, 0 /* TODO: make dependent on score */) && s->sms[s->current].score >= GOOD_CAPTURE_THRESHOLD)
 			return true;
 
 		--s->num_good_captures;
@@ -216,7 +216,7 @@ pseudo_select(selector *s)
 	case STAGE_GOOD_QUIETS:
 		if (has_good_quiets(s))
 			return next_move(s);
-		s->num_good_quiets = s->current - s->num_good_captures;
+		s->num_good_quiets = s->current - s->num_captures;
 		s->current = s->num_good_captures;
 		++s->stage;
 		[[fallthrough]];
@@ -321,32 +321,42 @@ lowest_piece_bb(const position *pos, bitboard bb, color c)
 static bool
 see_ge(const position *pos, move m, int ge)
 {
-	bitboard attackers, gone, from_bb;
-	color stm;
 	int value;
+	bitboard atk, occ, from_bb;
+	color stm;
+	ptype pt;
 
-	if (m.type != NORMAL)
-		return 0 >= ge;
+	if (m.type != NORMAL) return 0 >= ge;
+	value = PIECE_VALUE[ptype_of(pos->by_square[m.to])] - ge;
+	if (value < 0) return false;
+	value = PIECE_VALUE[ptype_of(pos->by_square[m.from])] - value;
+	if (value <= 0) return true;
 
-	gone = EMPTYBB;
-	stm = pos->stm;
-	value = PIECE_VALUE[ptype_of(pos->by_square[m.to])];
-	if (value < ge) return false;
+	occ = pos->by_ptype[ALL] ^ bbsq(m.from) ^ bbsq(m.to);
+	stm = other_color(pos->stm);
 
-	for (attackers = bbsq(m.from); attackers & pos->by_color[stm]; stm = other_color(stm), ge *= -1, value *= -1)
+	for (atk = attackers_explicit(pos, m.to, occ) & occ; atk & pos->by_color[stm]; stm = other_color(stm))
 	{
-		from_bb = lowest_piece_bb(pos, attackers, stm);
-		value -= PIECE_VALUE[ptype_of(pos->by_square[lsb(from_bb)])];
-		if (value >= ge)
+		from_bb = lowest_piece_bb(pos, atk, stm);
+		pt = ptype_of(pos->by_square[lsb(from_bb)]);
+		value = PIECE_VALUE[pt] - value;
+		if (value < (int) (stm == pos->stm))
 			return stm == pos->stm;
 
-		gone |= from_bb;
-		attackers &= ~from_bb;
-		if (!(attackers & pos->by_color[other_color(stm)]))
+		occ &= ~from_bb;
+
+		// reveal xray attacks
+		switch (pt)
 		{
-			attackers = attackers_explicit(pos, m.to, pos->by_ptype[ALL] & ~gone);
-			attackers &= ~gone;
+		case PAWN   : atk |=  attacks_piece(BISHOP, m.to, occ) & (pos->by_ptype[BISHOP] | pos->by_ptype[QUEEN]); break;
+		case KNIGHT : break;
+		case BISHOP : atk |=  attacks_piece(BISHOP, m.to, occ) & (pos->by_ptype[BISHOP] | pos->by_ptype[QUEEN]); break;
+		case ROOK   : atk |=  attacks_piece(ROOK  , m.to, occ) & (pos->by_ptype[ROOK]   | pos->by_ptype[QUEEN]); break;
+		case QUEEN  : atk |= (attacks_piece(BISHOP, m.to, occ) & pos->by_ptype[BISHOP]) | (attacks_piece(ROOK, m.to, occ) & pos->by_ptype[ROOK]); break;
+		case KING   : return (bool) (atk & ~pos->by_color[stm]) == (stm == pos->stm);
+		default     : assert(false);
 		}
+		atk &= occ;
 	}
 
 	// return true if it's the enemy's turn but they don't have any more defenders;
