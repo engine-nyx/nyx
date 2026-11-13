@@ -148,6 +148,7 @@ uci_ucinewgame(const char *)
 {
 	uci_stop("");
 	uci_position("startpos");
+	tt_clear(&UCI_state.tt);
 }
 
 static void
