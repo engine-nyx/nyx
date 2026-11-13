@@ -168,6 +168,21 @@ search_rec(struct search_state *ss, int alpha, int beta, time_manager *tm, bool 
 
 	if (pv) ss->pv[ss->ply][0] = NULL_MOVE;
 
+	if (!pv && !pos->sf->checkers) /* NMP condition */
+	{
+		unsigned reduction = MIN(ss->depth, 4);
+		ss->depth -= reduction;
+		do_move(pos, NULL_MOVE, &sf);
+		score = -search_rec(ss, -beta, -(beta - 1), tm, false);
+		undo_move(pos, NULL_MOVE);
+		ss->depth += reduction;
+		if (score >= beta)
+		{
+			++ss->depth, --ss->ply;
+			return beta;
+		}
+	}
+
 	s = selector_of(ss, ent.bound == INVALID ? NULL_MOVE : ent.best_move, MAIN);
 	best_score = -oo;
 	first_move = true;

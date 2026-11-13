@@ -269,14 +269,22 @@ en_passant_capturable(const position *p, move m)
 	return !we_discover && they_cover;
 }
 
+static void do_null_move(position *pos, state_frame *sf);
+
 void
 do_move(position *p, move m, state_frame *sf)
 {
-	assert(color_of(p->by_square[m.from]) == p->stm && "Wrong color moved");
-
 	color them;
 	pctype pc;
 	bool check;
+
+	if (is_null(m))
+	{
+		do_null_move(p, sf);
+		return;
+	}
+
+	assert(color_of(p->by_square[m.from]) == p->stm && "Wrong color moved");
 
 	*sf = *p->sf;
 	sf->previous = p->sf;
@@ -364,33 +372,55 @@ undo_move(position *p, move m)
 	--p->ply;
 	p->stm = other_color(p->stm);
 
-	switch (m.type)
+	if (!is_null(m))
 	{
-	case CASTLING:
-		// king
-		move_piece(p, m.to, m.from);
-		// rook
-		move_piece(p, (m.from + m.to) / 2, m.from + (m.from < m.to ? +3 : -4));
-		break;
-	case PROMOTION:
-		swap_piece(p, pctype_of(PAWN, p->stm), m.to);
-		move_piece(p, m.to, m.from);
-		if (p->sf->capture)
-			put_piece(p, p->sf->capture, m.to);
-		break;
-	case EN_PASSANT:
-		put_piece(p, p->sf->capture, m.to + white_black(-8, +8, p->stm));
-		move_piece(p, m.to, m.from);
-		break;
-	case NORMAL:
-		move_piece(p, m.to, m.from);
-		if (p->sf->capture)
-			put_piece(p, p->sf->capture, m.to);
-		break;
+		switch (m.type)
+		{
+		case CASTLING:
+			// king
+			move_piece(p, m.to, m.from);
+			// rook
+			move_piece(p, (m.from + m.to) / 2, m.from + (m.from < m.to ? +3 : -4));
+			break;
+		case PROMOTION:
+			swap_piece(p, pctype_of(PAWN, p->stm), m.to);
+			move_piece(p, m.to, m.from);
+			if (p->sf->capture)
+				put_piece(p, p->sf->capture, m.to);
+			break;
+		case EN_PASSANT:
+			put_piece(p, p->sf->capture, m.to + white_black(-8, +8, p->stm));
+			move_piece(p, m.to, m.from);
+			break;
+		case NORMAL:
+			move_piece(p, m.to, m.from);
+			if (p->sf->capture)
+				put_piece(p, p->sf->capture, m.to);
+			break;
+		}
 	}
 
 	p->key = p->sf->key;
 	p->sf = p->sf->previous;
+}
+
+static void
+do_null_move(position *pos, state_frame *sf)
+{
+	*sf = *pos->sf;
+	sf->previous = pos->sf;
+	pos->sf = sf;
+	sf->key = pos->key;
+	++sf->rule50;
+	if (sf->ep != NO_EP)
+	{
+		pos->key ^= zobrist_ep[file_of(sf->ep)];
+		sf->ep = NO_EP;
+	}
+	pos->stm = other_color(pos->stm);
+	pos->key ^= zobrist_stm;
+	++pos->ply;
+	update_check_squares(pos);
 }
 
 // we assume no check
