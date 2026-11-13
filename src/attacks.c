@@ -267,7 +267,7 @@ attackers_explicit(const position *pos, square sq, bitboard occ)
 }
 
 bitboard
-attackers(const position *pos, square sq)
+attackers_to(const position *pos, square sq)
 {
 	return attackers_explicit(pos, sq, pos->by_ptype[ALL]);
 }

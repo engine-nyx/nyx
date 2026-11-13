@@ -316,7 +316,7 @@ static bool
 see_ge(const position *pos, move m, int ge)
 {
 	int value;
-	bitboard atk, stm_atk, occ, from_bb;
+	bitboard attackers, attackers_stm, occ, from_bb;
 	color stm;
 	ptype pt;
 
@@ -329,16 +329,16 @@ see_ge(const position *pos, move m, int ge)
 	occ = pos->by_ptype[ALL] ^ bbsq(m.from) ^ bbsq(m.to);
 	stm = other_color(pos->stm);
 
-	for (atk = attackers_explicit(pos, m.to, occ) & occ; (stm_atk = atk & pos->by_color[stm]); stm = other_color(stm))
+	for (attackers = attackers_explicit(pos, m.to, occ) & occ; (attackers_stm = attackers & pos->by_color[stm]); stm = other_color(stm))
 	{
 		// filter out pinned pieces as long as there are pinners
 		if (pos->sf->pinners[other_color(stm)] & occ)
 		{
-			stm_atk &= ~pos->sf->blockers[stm];
-			if (!stm_atk) break;
+			attackers_stm &= ~pos->sf->blockers[stm];
+			if (!attackers_stm) break;
 		}
 
-		from_bb = lowest_piece_bb(pos, stm_atk);
+		from_bb = lowest_piece_bb(pos, attackers_stm);
 		pt = ptype_of(pos->by_square[lsb(from_bb)]);
 		value = PIECE_VALUE[pt] - value;
 		if (value < (int) (stm == pos->stm))
@@ -349,15 +349,15 @@ see_ge(const position *pos, move m, int ge)
 		// reveal xray attacks
 		switch (pt)
 		{
-		case PAWN   : atk |=  attacks_piece(BISHOP, m.to, occ) & (pos->by_ptype[BISHOP] | pos->by_ptype[QUEEN]); break;
+		case PAWN   : attackers |=  attacks_piece(BISHOP, m.to, occ) & (pos->by_ptype[BISHOP] | pos->by_ptype[QUEEN]); break;
 		case KNIGHT : break;
-		case BISHOP : atk |=  attacks_piece(BISHOP, m.to, occ) & (pos->by_ptype[BISHOP] | pos->by_ptype[QUEEN]); break;
-		case ROOK   : atk |=  attacks_piece(ROOK  , m.to, occ) & (pos->by_ptype[ROOK]   | pos->by_ptype[QUEEN]); break;
-		case QUEEN  : atk |= (attacks_piece(BISHOP, m.to, occ) & pos->by_ptype[BISHOP]) | (attacks_piece(ROOK, m.to, occ) & pos->by_ptype[ROOK]); break;
-		case KING   : return (bool) (atk & ~pos->by_color[stm]) == (stm == pos->stm);
+		case BISHOP : attackers |=  attacks_piece(BISHOP, m.to, occ) & (pos->by_ptype[BISHOP] | pos->by_ptype[QUEEN]); break;
+		case ROOK   : attackers |=  attacks_piece(ROOK  , m.to, occ) & (pos->by_ptype[ROOK]   | pos->by_ptype[QUEEN]); break;
+		case QUEEN  : attackers |= (attacks_piece(BISHOP, m.to, occ) & pos->by_ptype[BISHOP]) | (attacks_piece(ROOK, m.to, occ) & pos->by_ptype[ROOK]); break;
+		case KING   : return (bool) (attackers & ~pos->by_color[stm]) == (stm == pos->stm);
 		default     : assert(false);
 		}
-		atk &= occ;
+		attackers &= occ;
 	}
 
 	// return true if it's the enemy's turn but they don't have any more defenders;

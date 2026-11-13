@@ -278,7 +278,7 @@ parse_fen(const char *fen, position *p, state_frame *sf)
 		i += parse_ply(fen + i, p);
 
 	sf->key = p->key;
-	sf->checkers = attackers(p, king_square(p, p->stm)) & p->by_color[other_color(p->stm)];
+	sf->checkers = attackers_to(p, king_square(p, p->stm)) & p->by_color[other_color(p->stm)];
 	sf->previous = nullptr;
 
 	finalize_position(p);

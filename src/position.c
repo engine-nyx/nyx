@@ -339,7 +339,7 @@ do_move(position *p, move m, state_frame *sf)
 	p->sf->castle &= ~(castling_rights_mask[m.from] | castling_rights_mask[m.to]);
 	p->key ^= zobrist_castling[p->sf->castle];
 
-	sf->checkers = check ? attackers(p, king_square(p, them)) & p->by_color[p->stm] : 0;
+	sf->checkers = check ? attackers_to(p, king_square(p, them)) & p->by_color[p->stm] : 0;
 
 	p->stm = them;
 	p->key ^= zobrist_stm;
@@ -398,13 +398,13 @@ bool
 is_legal(const position *p, move m)
 {
 	pctype pc;
-	bitboard enemy; // TODO: check if should use attackers or attackers_exist
+	bitboard enemy; // TODO: check if should use attackers_to or attackers_exist
 
 	pc = p->by_square[m.from];
 	enemy = p->by_color[other_color(p->stm)];
 
 	if (m.type == CASTLING)
-		return !((attackers(p, m.to) | attackers(p, (m.from + m.to) / 2)) & enemy);
+		return !((attackers_to(p, m.to) | attackers_to(p, (m.from + m.to) / 2)) & enemy);
 
 	if (ptype_of(pc) == KING)
 		return !attackers_exist(p, m.to, p->by_ptype[ALL] ^ bbsq(m.from), other_color(p->stm));
