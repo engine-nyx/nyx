@@ -138,6 +138,8 @@ qsearch_rec(struct search_state *ss, int alpha, int beta, time_manager *tm)
 	return best_score;
 }
 
+constexpr PARAMETER unsigned NMP_REDUCTION = 2;
+
 static int
 search_rec(struct search_state *ss, int alpha, int beta, time_manager *tm, bool pv)
 {
@@ -170,7 +172,7 @@ search_rec(struct search_state *ss, int alpha, int beta, time_manager *tm, bool 
 
 	if (!pv && !pos->sf->checkers) /* NMP condition */
 	{
-		unsigned reduction = MIN(ss->depth, 4);
+		unsigned reduction = MIN(ss->depth, NMP_REDUCTION);
 		ss->depth -= reduction;
 		do_move(pos, NULL_MOVE, &sf);
 		score = -search_rec(ss, -beta, -(beta - 1), tm, false);
