@@ -12,6 +12,6 @@ fi
 
 printf '%s: ' "$TARGET"
 grep -oE 'PARAMETER[[:space:]]*\([[:space:]]*[[:alnum:]_]+[[:space:]]*\)' "$SOURCE" | \
-    sed -E "s/PARAMETER[[:space:]]*\([[:space:]]*/${PARAM_DIR}\//; s/[[:space:]]*\)/.param/" | \
+    sed -E "s|PARAMETER[[:space:]]*\([[:space:]]*|${PARAM_DIR}/|; s|[[:space:]]*\)|.param|" | \
     sort -u | tr '\n' ' '
 printf '\n'
