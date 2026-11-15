@@ -38,7 +38,7 @@ age(const transposition_table *tt, u8 generation)
 	return (tt->generation - generation) & BITMASK(5);
 }
 
-constexpr PARAMETER int age_weight = 4;
+constexpr int age_weight = PARAMETER(tt_age_weight);
 
 void
 store(transposition_table *tt, u64 key, tt_entry data)

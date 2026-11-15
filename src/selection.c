@@ -39,7 +39,7 @@ static const int PIECE_VALUE[NUM_PIECE_TYPES] =
 	[KING]   = oo,
 };
 
-constexpr PARAMETER int CAPTURED_PIECE_SCORE_WEIGHT = 5;
+constexpr int CAPTURED_PIECE_SCORE_WEIGHT = PARAMETER(captured_piece_score_weight);
 
 static int
 score_capture(move m, const struct search_state *ss)
@@ -81,7 +81,7 @@ score_quiet(move m, const struct search_state *ss)
 	return score;
 }
 
-constexpr PARAMETER int CAPTURE_EVASION_BONUS = 1 << 15;
+constexpr int CAPTURE_EVASION_BONUS = 1 << 15;
 
 static int
 score_evasion(move m, const struct search_state *ss)
@@ -142,8 +142,8 @@ next_move(selector *s)
 	return s->sms[s->current++].m;
 }
 
-constexpr PARAMETER int GOOD_SEE_THRESHOLD = 0;
-constexpr PARAMETER int GOOD_QUIET_THRESHOLD = -2;
+constexpr int GOOD_SEE_THRESHOLD = PARAMETER(good_see_threshold);
+constexpr int GOOD_QUIET_THRESHOLD = PARAMETER(good_quiet_threshold);
 
 static bool see_ge(const position *pos, move m, int ge);
 

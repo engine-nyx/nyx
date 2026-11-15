@@ -138,7 +138,7 @@ qsearch_rec(struct search_state *ss, int alpha, int beta, time_manager *tm)
 	return best_score;
 }
 
-constexpr PARAMETER unsigned NMP_REDUCTION = 2;
+constexpr unsigned NMP_REDUCTION = PARAMETER(nmp_reduction);
 
 static int
 search_rec(struct search_state *ss, int alpha, int beta, time_manager *tm, bool pv)
