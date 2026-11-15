@@ -40,7 +40,7 @@ $(TEST_BUILD_DIR)/%.o: $(TEST_DIR)/%.c | $(TEST_BUILD_DIR) $(TARGET_PARAMS)
 	tools/paramdep_generator.sh $< $@ $(PARAM_DIR) > $(@:.o=.params.d)
 
 $(TARGET_PARAMS): $(PARAMS) | $(BUILD_DIR)
-	for f in $(PARAMS); do name="$${f##*/}"; name="$${name%.param}"; printf "NYX_PARAMETER_%s=%s\n" "$$name" "$$(cat "$$f")"; done > $(TARGET_PARAMS)
+	for f in $(PARAMS); do name="$${f##*/}"; name="$${name%.param}"; printf "NYX_PARAMETER_%s=%s\n" "$$name" "$$(head -n 1 "$$f")"; done > $(TARGET_PARAMS)
 
 $(BUILD_DIR) $(RELEASE_BUILD_DIR) $(TEST_BUILD_DIR):
 	mkdir -p $@
