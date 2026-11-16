@@ -8,6 +8,7 @@ Check out our [website](https://engine-nyx.xyz/) for source, releases, live play
 ## Requirements
 
 - A working C23 compiler
+- GNU Make 4.2 or newer
 
 ## Quickstart
 
