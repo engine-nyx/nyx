@@ -226,7 +226,7 @@ run_test_group(group_node *group)
 			continue;
 		}
 
-		printf(" => %-*s (%2zu/%2zu)", (int) group->longest_test_name, current_test->name, ran + 1, group->test_count);
+		printf(" => %-*s [%2zu/%2zu]", (int) group->longest_test_name, current_test->name, ran + 1, group->test_count);
 		fflush(stdout);
 		current_test->res = current_test->fn();
 		++ran;
