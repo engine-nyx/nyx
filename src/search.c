@@ -26,12 +26,19 @@ is_mate_score(int score)
 {
 	return score <= -MATE_THRESHOLD || score >= MATE_THRESHOLD;
 }
+static unsigned
+mate_score_distance(int score)
+{
+	if (!is_mate_score(score))
+		return oo;
 
+	return score + (score < 0 ? +oo : -oo);
+}
 static int
 adjust_mate_score(int score, signed ply)
 {
 	if (is_mate_score(score))
-		return score + (score < 0 ? +ply : -ply);
+		score += score < 0 ? +ply : -ply;
 	return score;
 }
 
@@ -122,7 +129,7 @@ qsearch_rec(struct search_state *ss, int alpha, int beta, time_manager *tm)
 			best_score = -VALUE_MATE(ss->ply);
 	}
 
-	store(ss->tt, pos->key, (tt_entry)
+	if (!tm->has_expired) store(ss->tt, pos->key, (tt_entry)
 	{
 		.depth=0,
 		.best_move=best_move,
@@ -252,7 +259,7 @@ search_rec(struct search_state *ss, int alpha, int beta, time_manager *tm, bool 
 			EXACT);
 	}
 
-	store(ss->tt, pos->key, (tt_entry)
+	if (!tm->has_expired) store(ss->tt, pos->key, (tt_entry)
 	{
 		.depth=(u8)ss->depth,
 		.best_move=best_move,
@@ -331,7 +338,7 @@ search_internal(position *pos, limit lim, transposition_table *tt, bool info_pri
 	tt_new_search(tt);
 
 	score = 0;
-	for (ss->depth = 0; !(tm_soft_expired(tm, ss) || (is_mate_score(score) && ss->depth > 1)); ++ss->depth)
+	for (ss->depth = 0; !tm_soft_expired(tm, ss) && ss->depth <= mate_score_distance(score); ++ss->depth)
 	{
 		score = search_rec(ss, -oo, oo, tm, true);
 

@@ -19,11 +19,12 @@ now(void)
 void
 tm_start(time_manager *tm)
 {
+	tm->has_expired = false;
 	tm->start = now();
 }
 
-bool
-tm_hard_expired(const time_manager *tm, const struct search_state *ss)
+static bool
+tm_hard_expired_internal(const time_manager *tm, const struct search_state *ss)
 {
 	millis ms;
 
@@ -47,7 +48,19 @@ tm_hard_expired(const time_manager *tm, const struct search_state *ss)
 }
 
 bool
-tm_soft_expired(const time_manager *tm, const struct search_state *ss)
+tm_hard_expired(time_manager *tm, const struct search_state *ss)
+{
+	if (tm_hard_expired_internal(tm, ss))
+	{
+		tm->has_expired = true;
+		return true;
+	}
+
+	return false;
+}
+
+bool
+tm_soft_expired(time_manager *tm, const struct search_state *ss)
 {
 	return tm_hard_expired(tm, ss);
 }

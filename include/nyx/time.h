@@ -12,10 +12,11 @@ typedef struct
 	millis start, soft, hard;
 	millis remaining, inc;
 	limit l;
+	bool has_expired;
 } time_manager;
 
-bool tm_hard_expired(const time_manager *tm, const struct search_state *ss);
-bool tm_soft_expired(const time_manager *tm, const struct search_state *ss);
+bool tm_hard_expired(time_manager *tm, const struct search_state *ss);
+bool tm_soft_expired(time_manager *tm, const struct search_state *ss);
 void tm_start(time_manager *tm);
 millis now(void);
 
