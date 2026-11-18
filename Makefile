@@ -18,8 +18,6 @@ PARAMS        := $(wildcard $(PARAM_DIR)/*.param)
 PARAM_DEP_GEN := tools/paramdep_generator.sh
 DEPS          := $(OBJS:.o=.d) $(TOBJS:.o=.d) $(OBJS:.o=.params.d) $(TOBJS:.o=.params.d)
 
-# The first line of each params/*.param file is its value.
-# $(file) needs GNU make 4.2+ but avoids awk/head and the generated params.env.
 param_value = $(firstword $(file <$(1)))
 PARAM_FLAGS := $(foreach f,$(PARAMS),-DNYX_PARAMETER_$(basename $(notdir $(f)))=$(call param_value,$(f)))
 
@@ -36,20 +34,13 @@ $(TARGET_RELEASE): $(OBJS) | $(RELEASE_BUILD_DIR)
 $(TARGET_TEST): $(filter-out $(RELEASE_BUILD_DIR)/nyx.o,$(OBJS)) $(TOBJS) | $(TEST_BUILD_DIR)
 	$(LD) $(LDFLAGS) $^ -o $@
 
-# The scanner emits only the params actually used by each source, so a change
-# to a param rebuilds just the objects that reference it. Keeping the dep files
-# as targets also recreates them if they are deleted.
-$(RELEASE_BUILD_DIR)/%.params.d: $(SRC_DIR)/%.c $(PARAM_DEP_GEN) | $(RELEASE_BUILD_DIR)
-	$(PARAM_DEP_GEN) $< $(RELEASE_BUILD_DIR)/$*.o $(PARAM_DIR) > $@
-
-$(TEST_BUILD_DIR)/%.params.d: $(TEST_DIR)/%.c $(PARAM_DEP_GEN) | $(TEST_BUILD_DIR)
-	$(PARAM_DEP_GEN) $< $(TEST_BUILD_DIR)/$*.o $(PARAM_DIR) > $@
-
 $(RELEASE_BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(RELEASE_BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(PARAM_FLAGS) $(CFLAGS) -c $< -o $@
+	$(PARAM_DEP_GEN) $< $@ $(PARAM_DIR) > $(RELEASE_BUILD_DIR)/$*.param.d
 
 $(TEST_BUILD_DIR)/%.o: $(TEST_DIR)/%.c | $(TEST_BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(PARAM_FLAGS) $(CFLAGS) -c $< -o $@
+	$(PARAM_DEP_GEN) $< $@ $(PARAM_DIR) > $(TEST_BUILD_DIR)/$*.param.d
 
 $(BUILD_DIR) $(RELEASE_BUILD_DIR) $(TEST_BUILD_DIR):
 	mkdir -p $@
@@ -65,8 +56,4 @@ run: $(TARGET_RELEASE)
 test: $(TARGET_TEST)
 	./$(TARGET_TEST)
 
-ifneq ($(filter clean,$(MAKECMDGOALS)),)
-# `make clean` should not regenerate dependency files just to delete them.
-else
 -include $(DEPS)
-endif
