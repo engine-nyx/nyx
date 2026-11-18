@@ -16,7 +16,7 @@ TESTS         := $(wildcard $(TEST_DIR)/*.c)
 TOBJS         := $(patsubst $(TEST_DIR)/%.c,$(TEST_BUILD_DIR)/%.o,$(TESTS))
 PARAMS        := $(wildcard $(PARAM_DIR)/*.param)
 PARAM_DEP_GEN := tools/paramdep_generator.sh
-DEPS          := $(OBJS:.o=.d) $(TOBJS:.o=.d) $(OBJS:.o=.params.d) $(TOBJS:.o=.params.d)
+DEPS          := $(OBJS:.o=.d) $(TOBJS:.o=.d) $(OBJS:.o=.param.d) $(TOBJS:.o=.param.d)
 
 param_value = $(firstword $(file <$(1)))
 PARAM_FLAGS := $(foreach f,$(PARAMS),-DNYX_PARAMETER_$(basename $(notdir $(f)))=$(call param_value,$(f)))
