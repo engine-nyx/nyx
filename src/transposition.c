@@ -38,8 +38,6 @@ age(const transposition_table *tt, u8 generation)
 	return (tt->generation - generation) & BITMASK(5);
 }
 
-constexpr int age_weight = PARAMETER(tt_age_weight);
-
 void
 store(transposition_table *tt, u64 key, tt_entry data)
 {
@@ -64,7 +62,7 @@ store(transposition_table *tt, u64 key, tt_entry data)
 	// replace older entries with strategy
 	dest = ent = cluster_of(tt, key);
 	for (i = 1; i < cluster_size; ++i)
-		if (ent[i].depth - (age_weight * age(tt, ent[i].generation)) < dest->depth - (age_weight * age(tt, dest->generation)))
+		if (ent[i].depth - (PARAMETER(tt_age_weight) * age(tt, ent[i].generation)) < dest->depth - (PARAMETER(tt_age_weight) * age(tt, dest->generation)))
 			dest = &ent[i];
 
 	*dest = data;

@@ -39,8 +39,6 @@ static const int PIECE_VALUE[NUM_PIECE_TYPES] =
 	[KING]   = oo,
 };
 
-constexpr int CAPTURED_PIECE_SCORE_WEIGHT = PARAMETER(captured_piece_score_weight);
-
 static int
 score_capture(move m, const struct search_state *ss)
 {
@@ -52,7 +50,7 @@ score_capture(move m, const struct search_state *ss)
 	capture = ss->pos->by_square[m.to];
 
 	score += ss->hist->capture[pc][m.to][ptype_of(capture)];
-	score += CAPTURED_PIECE_SCORE_WEIGHT * PIECE_VALUE[ptype_of(capture)];
+	score += PARAMETER(captured_piece_score_weight) * PIECE_VALUE[ptype_of(capture)];
 
 	return score;
 }
@@ -142,9 +140,6 @@ next_move(selector *s)
 	return s->sms[s->current++].m;
 }
 
-constexpr int GOOD_SEE_THRESHOLD = PARAMETER(good_see_threshold);
-constexpr int GOOD_QUIET_THRESHOLD = PARAMETER(good_quiet_threshold);
-
 static bool see_ge(const position *pos, move m, int ge);
 
 static bool
@@ -154,7 +149,7 @@ has_good_captures(selector *s)
 
 	while (s->current < s->num_good_captures)
 	{
-		if (see_ge(s->ss->pos, s->sms[s->current].m, GOOD_SEE_THRESHOLD /* TODO: make dependent on score */))
+		if (see_ge(s->ss->pos, s->sms[s->current].m, PARAMETER(good_see_threshold) /* TODO: make dependent on score */))
 			return true;
 
 		--s->num_good_captures;
@@ -169,7 +164,7 @@ has_good_captures(selector *s)
 static bool
 has_good_quiets(const selector *s)
 {
-	return s->current < s->num_moves && s->sms[s->current].score >= GOOD_QUIET_THRESHOLD;
+	return s->current < s->num_moves && s->sms[s->current].score >= PARAMETER(good_quiet_threshold);
 }
 
 static move
