@@ -32,7 +32,9 @@ mate_score_distance(int score)
 	if (!is_mate_score(score))
 		return oo;
 
-	return score + (score < 0 ? +oo : -oo);
+	return score < 0 ?
+		oo + score :
+		oo - score ;
 }
 static int
 adjust_mate_score(int score, signed ply)
@@ -338,7 +340,7 @@ search_internal(position *pos, limit lim, transposition_table *tt, bool info_pri
 	tt_new_search(tt);
 
 	score = 0;
-	for (ss->depth = 0; !tm_soft_expired(tm, ss) && ss->depth <= mate_score_distance(score); ++ss->depth)
+	for (ss->depth = 0; !tm_soft_expired(tm, ss) && ss->depth <= mate_score_distance(score) + 1; ++ss->depth)
 	{
 		score = search_rec(ss, -oo, oo, tm, true);
 
