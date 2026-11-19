@@ -114,7 +114,7 @@ qsearch_rec(struct search_state *ss, int alpha, int beta, time_manager *tm)
 			break;
 		}
 
-		if (stand_pat + PIECE_VALUE[ptype_of(pos->by_square[m.to])] + PARAMETER(delta_small) < alpha)
+		if (!pos->sf->checkers && stand_pat + PIECE_VALUE[ptype_of(pos->by_square[m.to])] + PARAMETER(delta_small) < alpha)
 			continue;
 
 		do_move(pos, m, &sf);
