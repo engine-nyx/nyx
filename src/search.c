@@ -62,18 +62,29 @@ tt_skip(tt_entry ent, int alpha, int beta)
 static void record_move(struct search_state *ss, move m);
 static void update_histories(struct search_state *ss, selector *s, move best_move, enum bound_type bound);
 
+static const int PIECE_VALUE[NUM_PIECE_TYPES] =
+{
+	[NONE]   = PARAMETER(delta_none),
+	[PAWN]   = PARAMETER(delta_pawn),
+	[KNIGHT] = PARAMETER(delta_knight),
+	[BISHOP] = PARAMETER(delta_bishop),
+	[ROOK]   = PARAMETER(delta_rook),
+	[QUEEN]  = PARAMETER(delta_queen),
+};
+
 static int
 qsearch_rec(struct search_state *ss, int alpha, int beta, time_manager *tm)
 {
 	position *pos;
 	selector s;
 	move m, best_move;
-	int score, best_score;
+	int score, best_score, stand_pat;
 	state_frame sf;
 	tt_entry ent;
 
 	pos = ss->pos;
-	best_score = pos->sf->checkers ? -oo : evaluate(pos);
+	stand_pat = evaluate(pos);
+	best_score = pos->sf->checkers ? -oo : stand_pat;
 	best_move = NULL_MOVE;
 	if (best_score >= beta)
 		return best_score;
@@ -84,6 +95,9 @@ qsearch_rec(struct search_state *ss, int alpha, int beta, time_manager *tm)
 	if (ent.bound == UPPER) beta  = MIN(beta, adjust_mate_score(ent.score, ss->ply));
 	if (tt_skip(ent, alpha, beta))
 		return adjust_mate_score(ent.score, ss->ply);
+
+	if (!pos->sf->checkers && best_score < alpha - PARAMETER(delta_big))
+		return alpha;
 
 	++ss->depth, ++ss->ply;
 	++ss->nodes;
@@ -99,6 +113,9 @@ qsearch_rec(struct search_state *ss, int alpha, int beta, time_manager *tm)
 			best_score = VALUE_DRAW;
 			break;
 		}
+
+		if (stand_pat + PIECE_VALUE[ptype_of(pos->by_square[m.to])] + PARAMETER(delta_small) < alpha)
+			continue;
 
 		do_move(pos, m, &sf);
 
