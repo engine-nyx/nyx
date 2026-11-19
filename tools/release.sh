@@ -47,5 +47,4 @@ git commit -m "Bump version to $VERSION" -- "$VERSION_FILE" 2>/dev/null || true
 
 git tag -a "v$VERSION" -F "$TAG_FILE"
 
-git push
-git push origin "v$VERSION"
+git push origin HEAD "v$VERSION"
