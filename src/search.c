@@ -82,19 +82,21 @@ qsearch_rec(struct search_state *ss, int alpha, int beta, time_manager *tm)
 	state_frame sf;
 	tt_entry ent;
 
+	assert(alpha < beta);
+
 	pos = ss->pos;
+	ent = probe(ss->tt, pos->key);
+
+	if (ent.bound == LOWER) alpha = MAX(alpha, adjust_mate_score(ent.score, ss->ply));
+	if (ent.bound == UPPER) beta  = MIN(beta, adjust_mate_score(ent.score, ss->ply));
+	if (tt_skip(ent, alpha, beta) || alpha >= beta)
+		return adjust_mate_score(ent.score, ss->ply);
+
 	stand_pat = evaluate(pos);
 	best_score = pos->sf->checkers ? -oo : stand_pat;
 	best_move = NULL_MOVE;
 	if (best_score >= beta)
 		return best_score;
-
-	ent = probe(ss->tt, pos->key);
-
-	if (ent.bound == LOWER) alpha = MAX(alpha, adjust_mate_score(ent.score, ss->ply));
-	if (ent.bound == UPPER) beta  = MIN(beta, adjust_mate_score(ent.score, ss->ply));
-	if (tt_skip(ent, alpha, beta))
-		return adjust_mate_score(ent.score, ss->ply);
 
 	if (!pos->sf->checkers && best_score < alpha - PARAMETER(delta_big))
 		return alpha;
@@ -177,6 +179,8 @@ search_rec(struct search_state *ss, int alpha, int beta, time_manager *tm, bool 
 	tt_entry ent;
 	bool first_move;
 
+	assert(alpha < beta);
+
 	pos = ss->pos;
 	ent = probe(ss->tt, pos->key);
 
@@ -184,7 +188,7 @@ search_rec(struct search_state *ss, int alpha, int beta, time_manager *tm, bool 
 	{
 		if (ent.bound == LOWER) alpha = MAX(alpha, adjust_mate_score(ent.score, ss->ply));
 		if (ent.bound == UPPER) beta  = MIN(beta, adjust_mate_score(ent.score, ss->ply));
-		if (tt_skip(ent, alpha, beta))
+		if (tt_skip(ent, alpha, beta) || alpha >= beta)
 			return adjust_mate_score(ent.score, ss->ply);
 	}
 
