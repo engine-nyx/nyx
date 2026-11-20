@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
-"""Feed a UCI command file to the engine, waiting for `bestmove` after each `go`.
+"""Feed UCI commands from stdin to the engine, waiting for `bestmove` after each `go`.
 
-By default this replays the `input` file in the repository root through
-`make run`.  Unlike `make run < input`, the next `position`/`go` command is
-only sent once the engine has finished searching and printed `bestmove`.
+By default this starts the engine via `make run`.  Unlike `make run`, the next
+`position`/`go` command is only sent once the engine has finished searching
+and printed `bestmove`.
 
 Usage:
-    tools/replay_input.py [FILE] [--timeout SECONDS] [-- COMMAND...]
+    tools/replay_input.py [--timeout SECONDS] [-- COMMAND...] < input
 
 Examples:
-    tools/replay_input.py
-    tools/replay_input.py input -- make run
-    tools/replay_input.py input --timeout 120 -- ./build/release/nyx
+    tools/replay_input.py < input
+    tools/replay_input.py --timeout 120 -- make run < input
+    tools/replay_input.py -- ./build/release/nyx < input
+    tools/replay_input.py            # type commands interactively
 """
 
 from __future__ import annotations
@@ -35,9 +36,8 @@ def reader(stream, out: queue.Queue[str | None]) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Replay UCI commands, waiting for bestmove after each go."
+        description="Feed UCI commands from stdin, waiting for bestmove after each go."
     )
-    parser.add_argument("input", nargs="?", default="input", help="command file")
     parser.add_argument(
         "--timeout",
         type=float,
@@ -55,13 +55,6 @@ def main() -> int:
     command = [part for part in command if part != "--"]
     if not command:
         command = ["make", "run"]
-
-    try:
-        with open(args.input, encoding="utf-8") as file:
-            commands = [line.strip() for line in file if line.strip()]
-    except OSError as error:
-        print(f"replay_input: {error}", file=sys.stderr)
-        return 1
 
     proc = subprocess.Popen(
         command,
@@ -91,7 +84,11 @@ def main() -> int:
                 return
 
     try:
-        for command_line in commands:
+        for raw_line in sys.stdin:
+            command_line = raw_line.strip()
+            if not command_line:
+                continue
+
             print(f"> {command_line}")
             proc.stdin.write(command_line + "\n")
             proc.stdin.flush()
