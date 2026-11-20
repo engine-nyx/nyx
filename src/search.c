@@ -14,13 +14,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-constexpr int VALUE_DRAW = 0;
+constexpr int DRAW = 0;
 static int
-VALUE_MATE(unsigned ply)
+MATE_IN(unsigned ply)
 {
-	return oo - ply;
+	return MATE_IN_ZERO - ply;
 }
-constexpr int MATE_THRESHOLD = oo - MAX_PLY;
+constexpr int MATE_THRESHOLD = MATE_IN_ZERO - MAX_PLY;
 static bool
 is_mate_score(int score)
 {
@@ -33,8 +33,8 @@ mate_score_distance(int score)
 		return oo;
 
 	return score < 0 ?
-		oo + score :
-		oo - score ;
+		MATE_IN_ZERO + score :
+		MATE_IN_ZERO - score ;
 }
 static int
 adjust_mate_score(int score, signed ply)
@@ -84,6 +84,11 @@ qsearch_rec(struct search_state *ss, int alpha, int beta, time_manager *tm)
 
 	assert(alpha < beta);
 
+	alpha = MAX(alpha, -MATE_IN(ss->ply));
+	beta  = MIN(beta,  +MATE_IN(ss->ply) + 1);
+	if (alpha >= beta)
+		return alpha;
+
 	pos = ss->pos;
 	ent = probe(ss->tt, pos->key);
 
@@ -112,7 +117,7 @@ qsearch_rec(struct search_state *ss, int alpha, int beta, time_manager *tm)
 	{
 		if (pos->sf->rule50 > 100)
 		{
-			best_score = VALUE_DRAW;
+			best_score = DRAW;
 			break;
 		}
 
@@ -123,7 +128,7 @@ qsearch_rec(struct search_state *ss, int alpha, int beta, time_manager *tm)
 
 		if (is_repetition(pos))
 		{
-			score = VALUE_DRAW;
+			score = DRAW;
 		}
 		else
 		{
@@ -147,7 +152,7 @@ qsearch_rec(struct search_state *ss, int alpha, int beta, time_manager *tm)
 	{
 		best_move = NULL_MOVE;
 		if (pos->sf->checkers)
-			best_score = -VALUE_MATE(ss->ply);
+			best_score = -MATE_IN(ss->ply);
 	}
 
 	if (!tm->has_expired) store(ss->tt, pos->key, (tt_entry)
@@ -180,6 +185,11 @@ search_rec(struct search_state *ss, int alpha, int beta, time_manager *tm, bool 
 	bool first_move;
 
 	assert(alpha < beta);
+
+	alpha = MAX(alpha, -MATE_IN(ss->ply));
+	beta  = MIN(beta,  +MATE_IN(ss->ply) + 1);
+	if (alpha >= beta)
+		return alpha;
 
 	pos = ss->pos;
 	ent = probe(ss->tt, pos->key);
@@ -223,7 +233,7 @@ search_rec(struct search_state *ss, int alpha, int beta, time_manager *tm, bool 
 	{
 		if (pos->sf->rule50 > 100)
 		{
-			best_score = VALUE_DRAW;
+			best_score = DRAW;
 			best_move = NULL_MOVE;
 			break;
 		}
@@ -233,7 +243,7 @@ search_rec(struct search_state *ss, int alpha, int beta, time_manager *tm, bool 
 
 		if (is_repetition(pos))
 		{
-			score = VALUE_DRAW;
+			score = DRAW;
 		}
 		else if (first_move)
 		{
@@ -272,7 +282,7 @@ search_rec(struct search_state *ss, int alpha, int beta, time_manager *tm, bool 
 	if (!s.selected)
 	{
 		best_move = NULL_MOVE;
-		best_score = pos->sf->checkers ? -VALUE_MATE(ss->ply) : VALUE_DRAW;
+		best_score = pos->sf->checkers ? -MATE_IN(ss->ply) : DRAW;
 	}
 	else
 	{
@@ -310,7 +320,7 @@ uci_info(struct search_state *ss, int score, time_manager *tm)
 	spent = now() - tm->start;
 	score_metric = is_mate_score(score) ? "mate" : "cp";
 	score_value  = is_mate_score(score) ?
-		score < 0 ? -(score + oo) / 2 : -(score - oo - 1) / 2 :
+		score < 0 ? -(score + MATE_IN_ZERO) / 2 : -(score - MATE_IN_ZERO - 1) / 2 :
 		score;
 
 	printf

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: NLPL
 
 #include <assert.h>
+#include <nyx/search.h>
 #include <nyx/transposition.h>
 #include <nyx/types.h>
 #include <nyx/utils.h>
@@ -43,6 +44,8 @@ store(transposition_table *tt, u64 key, tt_entry data)
 {
 	tt_entry *dest, *ent;
 	usize i;
+
+	assert(data.score >= -MATE_IN_ZERO && data.score <= MATE_IN_ZERO);
 
 	data.generation = tt->generation;
 	data.key = (u16) key;

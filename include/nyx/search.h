@@ -72,6 +72,8 @@ struct search_state
 	pctype moved_pieces[MAX_PLY];
 };
 
+constexpr int MATE_IN_ZERO = oo - 1;
+
 struct search_result search(position *pos, limit lim, transposition_table *tt);
 struct search_result search_uci(position *pos, limit lim, transposition_table *tt);
 
