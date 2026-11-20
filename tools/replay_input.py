@@ -51,8 +51,10 @@ def main() -> int:
         help="command used to start the engine (default: make run)",
     )
     args, command = parser.parse_known_args()
+    command = args.command
 
     command = [part for part in command if part != "--"]
+    print(f"Commands: {command}; Args: {args}")
     if not command:
         command = ["make", "run"]
 
