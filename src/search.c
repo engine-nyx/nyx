@@ -85,7 +85,7 @@ qsearch_rec(struct search_state *ss, int alpha, int beta, time_manager *tm)
 	assert(alpha < beta);
 
 	alpha = MAX(alpha, -MATE_IN(ss->ply));
-	beta  = MIN(beta,  +MATE_IN(ss->ply) + 1);
+	beta  = MIN(beta,  +MATE_IN(ss->ply + 1));
 	if (alpha >= beta)
 		return alpha;
 
@@ -187,7 +187,7 @@ search_rec(struct search_state *ss, int alpha, int beta, time_manager *tm, bool 
 	assert(alpha < beta);
 
 	alpha = MAX(alpha, -MATE_IN(ss->ply));
-	beta  = MIN(beta,  +MATE_IN(ss->ply) + 1);
+	beta  = MIN(beta,  +MATE_IN(ss->ply + 1));
 	if (alpha >= beta)
 		return alpha;
 
