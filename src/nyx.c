@@ -54,7 +54,7 @@ main(int argc, char **argv)
 	position_init();
 	evaluation_init();
 
-	setvbuf(stdout, NULL, _IOLBF, 0);
+	setvbuf(stdout, NULL, _IOLBF, 4096);
 
 	if (argc == 1)
 	{
