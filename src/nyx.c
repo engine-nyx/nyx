@@ -57,7 +57,11 @@ main(int argc, char **argv)
 	position_init();
 	evaluation_init();
 
-	setvbuf(stdout, OUTBUF, _IOLBF, lengthof(OUTBUF));
+	if (setvbuf(stdout, OUTBUF, _IOLBF, lengthof(OUTBUF)))
+	{
+		perror("setvbuf:");
+		exit(EXIT_FAILURE);
+	}
 
 	if (argc == 1)
 	{
