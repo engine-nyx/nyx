@@ -1,6 +1,7 @@
 // Copyright (c) 2026 Kilian Chung
 // SPDX-License-Identifier: NLPL
 
+#include <future/c2y.h>
 #include <nyx/attacks.h>
 #include <nyx/evaluation.h>
 #include <nyx/generation.h>
@@ -46,6 +47,8 @@ str_join(int argc, char **argv, char sep_char, char *dest)
 	}
 }
 
+static char OUTBUF[4096];
+
 int
 main(int argc, char **argv)
 {
@@ -54,7 +57,7 @@ main(int argc, char **argv)
 	position_init();
 	evaluation_init();
 
-	setvbuf(stdout, NULL, _IOLBF, 4096);
+	setvbuf(stdout, OUTBUF, _IOLBF, lengthof(OUTBUF));
 
 	if (argc == 1)
 	{
