@@ -267,13 +267,13 @@ search_rec(struct search_state *ss, int alpha, int beta, time_manager *tm, bool 
 			best_score = score;
 			best_move = m;
 
-			if (score >= beta) break;
-
 			if (pv)
 			{
 				ss->pv[ss->ply - 1][0] = m;
 				*movecpy(ss->pv[ss->ply - 1] + 1, ss->pv[ss->ply], ss->depth) = NULL_MOVE;
 			}
+
+			if (score >= beta) break;
 		}
 	}
 
