@@ -23,7 +23,7 @@ PARAM_FLAGS := $(foreach f,$(PARAMS),-DNYX_PARAMETER_$(basename $(notdir $(f)))=
 
 CFLAGS  := -std=c23 -Wall -Wextra -Wpedantic -Wshadow -Werror -Iinclude --embed-dir=. -MMD -MP
 CFLAGS  += -O3 -flto=auto
-LDFLAGS := -static -flto=auto
+LDFLAGS := -flto=auto
 
 LD := $(CC)
 all: $(TARGET_RELEASE) $(TARGET_TEST)
