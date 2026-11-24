@@ -7,7 +7,6 @@
 #include <nyx/position.h>
 #include <nyx/types.h>
 #include <nyx/utils.h>
-#include <stdio.h>
 
 node_count
 perft(position *p, unsigned depth)
@@ -59,10 +58,10 @@ perft_verbose(position *p, unsigned depth)
 		total += nodes;
 
 		print_move(ms[i]);
-		printf(": %" PRIuFAST64 "\n", nodes);
+		OUT(": %" PRIuFAST64 "\n", nodes);
 	}
 
-	printf("\nTotal nodes: %" PRIuFAST64 "\n", total);
+	OUT("\nTotal nodes: %" PRIuFAST64 "\n", total);
 
 	return total;
 }

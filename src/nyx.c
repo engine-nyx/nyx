@@ -1,7 +1,6 @@
 // Copyright (c) 2026 Kilian Chung
 // SPDX-License-Identifier: NLPL
 
-#include <future/c2y.h>
 #include <nyx/attacks.h>
 #include <nyx/evaluation.h>
 #include <nyx/generation.h>
@@ -47,8 +46,6 @@ str_join(int argc, char **argv, char sep_char, char *dest)
 	}
 }
 
-static char OUTBUF[4096];
-
 int
 main(int argc, char **argv)
 {
@@ -56,12 +53,6 @@ main(int argc, char **argv)
 	generation_init();
 	position_init();
 	evaluation_init();
-
-	if (setvbuf(stdout, OUTBUF, _IOLBF, lengthof(OUTBUF)))
-	{
-		perror("setvbuf:");
-		exit(EXIT_FAILURE);
-	}
 
 	if (argc == 1)
 	{
@@ -87,16 +78,15 @@ main(int argc, char **argv)
 		tt_resize(&tt, 100000);
 
 		print_board(&p);
-		printf("Press Ctrl+C to stop search...");
-		fflush(stdout);
+		OUT("Press Ctrl+C to stop search...");
 
 		struct search_result res = search(&p, lim, &tt);
 
 		tt_free(&tt);
 
-		printf("\nBest move: ");
+		OUT("\nBest move: ");
 		print_move(res.best);
-		printf(" (%d)\nAt depth %u: %" PRIuFAST64 " nodes (%" PRIuFAST64 " qnodes)\n", res.score, res.depth, res.nodes, res.qnodes);
+		OUT(" (%d)\nAt depth %u: %" PRIuFAST64 " nodes (%" PRIuFAST64 " qnodes)\n", res.score, res.depth, res.nodes, res.qnodes);
 		print_line(res.pv, res.depth);
 	}
 

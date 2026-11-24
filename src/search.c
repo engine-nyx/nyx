@@ -11,7 +11,6 @@
 #include <nyx/transposition.h>
 #include <nyx/types.h>
 #include <nyx/utils.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 constexpr int DRAW = 0;
@@ -323,7 +322,7 @@ uci_info(struct search_state *ss, int score, time_manager *tm)
 		score < 0 ? -(score + MATE_IN_ZERO) / 2 : -(score - MATE_IN_ZERO - 1) / 2 :
 		score;
 
-	printf
+	OUT
 	(
 		"info "
 		"depth %u "
@@ -348,10 +347,10 @@ uci_info(struct search_state *ss, int score, time_manager *tm)
 	{
 		if (is_null(ss->pv[0][i])) break;
 
-		printf(" ");
+		OUT(" ");
 		print_move(ss->pv[0][i]);
 	}
-	printf("\n");
+	OUT("\n");
 }
 
 static struct search_result

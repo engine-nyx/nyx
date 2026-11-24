@@ -6,6 +6,7 @@
 
 #include <nyx/position.h>
 #include <nyx/types.h>
+#include <stdio.h>
 
 #define BITMASK(bits) (bits >= sizeof(unsigned long long) * 8 ? ((unsigned long long) 0) - 1 : ((unsigned long long) 1 << (bits)) - 1)
 usize str_consume(const char **s, const char *pattern);
@@ -31,5 +32,7 @@ usize do_lan_move(position *p, const char *lan, state_frame *sf);
 move promotion_move(square from, square to, ptype prom);
 
 move *movecpy(move *restrict dest, const move *restrict src, usize n);
+
+#define OUT(...) do { printf(__VA_ARGS__); fflush(stdout); } while (false)
 
 #endif // NYX_UTILS_H

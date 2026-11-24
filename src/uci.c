@@ -91,13 +91,13 @@ uci_id(void)
 {
 	const char *start, *end;
 
-	puts("id name Nyx v" NYX_VERSION);
+	OUT("id name Nyx v" NYX_VERSION "\n");
 
 	for (start = end = AUTHORS; *start && end; start = end + 1)
 	{
 		end = strchr(start, '\n');
 
-		printf("id author %.*s\n", (int) (end ? end - start : (int) strlen(start)), start);
+		OUT("id author %.*s\n", (int) (end ? end - start : (int) strlen(start)), start);
 	}
 }
 
@@ -108,11 +108,11 @@ uci_options(void)
 
 	for (i = 0; i < lengthof(UCI_OPTIONS); ++i)
 	{
-		printf("option name %s ", UCI_OPTIONS[i].name);
-		printf("type spin ");
-		printf("default %zu ", UCI_OPTIONS[i].value);
-		printf("min %zu ", UCI_OPTIONS[i].min);
-		printf("max %zu\n", UCI_OPTIONS[i].max);
+		OUT("option name %s ", UCI_OPTIONS[i].name);
+		OUT("type spin ");
+		OUT("default %zu ", UCI_OPTIONS[i].value);
+		OUT("min %zu ", UCI_OPTIONS[i].min);
+		OUT("max %zu\n", UCI_OPTIONS[i].max);
 	}
 }
 
@@ -137,10 +137,10 @@ static void
 uci_uci(const char *)
 {
 	uci_id();
-	puts("");
+	OUT("\n");
 	uci_options();
-	puts("");
-	puts("uciok");
+	OUT("\n");
+	OUT("uciok\n");
 }
 
 static void
@@ -154,7 +154,7 @@ uci_ucinewgame(const char *)
 static void
 uci_isready(const char *)
 {
-	puts("readyok");
+	OUT("readyok\n");
 }
 
 static void
@@ -232,9 +232,9 @@ search_start(void *)
 	UCI_state.stop = false;
 	UCI_state.lim.stop = &UCI_state.stop;
 	res = search_uci(&UCI_state.p, UCI_state.lim, &UCI_state.tt);
-	printf("bestmove ");
+	OUT("bestmove ");
 	print_move(res.best);
-	printf("\n");
+	OUT("\n");
 	return 0;
 }
 
@@ -370,7 +370,7 @@ uci_handle(const char *cmd)
 		}
 	}
 
-	puts("Invalid command!");
+	OUT("Invalid command!\n");
 }
 
 static constexpr usize UCI_BUF_SIZE = 4096;
