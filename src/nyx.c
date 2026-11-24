@@ -78,15 +78,15 @@ main(int argc, char **argv)
 		tt_resize(&tt, 100000);
 
 		print_board(&p);
-		OUT("Press Ctrl+C to stop search...");
+		FOUT("Press Ctrl+C to stop search...");
 
 		struct search_result res = search(&p, lim, &tt);
 
 		tt_free(&tt);
 
-		OUT("\nBest move: ");
+		FOUT("\nBest move: ");
 		print_move(res.best);
-		OUT(" (%d)\nAt depth %u: %" PRIuFAST64 " nodes (%" PRIuFAST64 " qnodes)\n", res.score, res.depth, res.nodes, res.qnodes);
+		FOUT(" (%d)\nAt depth %u: %" PRIuFAST64 " nodes (%" PRIuFAST64 " qnodes)\n", res.score, res.depth, res.nodes, res.qnodes);
 		print_line(res.pv, res.depth);
 	}
 

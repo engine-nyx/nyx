@@ -33,6 +33,6 @@ move promotion_move(square from, square to, ptype prom);
 
 move *movecpy(move *restrict dest, const move *restrict src, usize n);
 
-#define OUT(...) do { printf(__VA_ARGS__); fflush(stdout); } while (false)
+#define FOUT(...) do { printf(__VA_ARGS__); fflush(stdout); } while (false)
 
 #endif // NYX_UTILS_H

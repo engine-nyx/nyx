@@ -58,10 +58,10 @@ perft_verbose(position *p, unsigned depth)
 		total += nodes;
 
 		print_move(ms[i]);
-		OUT(": %" PRIuFAST64 "\n", nodes);
+		FOUT(": %" PRIuFAST64 "\n", nodes);
 	}
 
-	OUT("\nTotal nodes: %" PRIuFAST64 "\n", total);
+	FOUT("\nTotal nodes: %" PRIuFAST64 "\n", total);
 
 	return total;
 }

@@ -322,7 +322,7 @@ uci_info(struct search_state *ss, int score, time_manager *tm)
 		score < 0 ? -(score + MATE_IN_ZERO) / 2 : -(score - MATE_IN_ZERO - 1) / 2 :
 		score;
 
-	OUT
+	FOUT
 	(
 		"info "
 		"depth %u "
@@ -347,10 +347,10 @@ uci_info(struct search_state *ss, int score, time_manager *tm)
 	{
 		if (is_null(ss->pv[0][i])) break;
 
-		OUT(" ");
+		FOUT(" ");
 		print_move(ss->pv[0][i]);
 	}
-	OUT("\n");
+	FOUT("\n");
 }
 
 static struct search_result
