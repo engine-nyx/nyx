@@ -15,6 +15,7 @@ BEFORE()
 	attacks_init();
 	generation_init();
 	position_init();
+	search_init();
 	return TEST_SUCCESS;
 }
 

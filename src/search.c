@@ -3,7 +3,9 @@
 
 #include <assert.h>
 #include <inttypes.h>
+#include <math.h>
 #include <nyx/evaluation.h>
+#include <nyx/generation.h>
 #include <nyx/position.h>
 #include <nyx/search.h>
 #include <nyx/selection.h>
@@ -12,6 +14,8 @@
 #include <nyx/types.h>
 #include <nyx/utils.h>
 #include <stdlib.h>
+
+static unsigned LMR_REDUCTION[MAX_PLY][MAX_MOVES];
 
 constexpr int DRAW = 0;
 static int
@@ -172,6 +176,20 @@ qsearch_rec(struct search_state *ss, int alpha, int beta, time_manager *tm)
 
 constexpr unsigned NMP_REDUCTION = PARAMETER(nmp_reduction);
 
+static bool
+nmp_condition(const struct search_state *ss, bool pv)
+{ return !pv && !ss->pos->sf->checkers; }
+
+static bool
+lmr_condition(const struct search_state *ss, const selector *s)
+{
+	return
+		ss->depth >= 3 &&
+		s->selected >= 3 &&
+		!ss->pos->sf->checkers &&
+		!ss->pos->sf->previous->checkers;
+}
+
 static int
 search_rec(struct search_state *ss, int alpha, int beta, time_manager *tm, bool pv)
 {
@@ -209,7 +227,7 @@ search_rec(struct search_state *ss, int alpha, int beta, time_manager *tm, bool 
 
 	if (pv) ss->pv[ss->ply][0] = NULL_MOVE;
 
-	if (!pv && !pos->sf->checkers) /* NMP condition */
+	if (nmp_condition(ss, pv))
 	{
 		unsigned reduction = MIN(ss->depth, NMP_REDUCTION);
 		ss->depth -= reduction;
@@ -252,7 +270,16 @@ search_rec(struct search_state *ss, int alpha, int beta, time_manager *tm, bool 
 		}
 		else
 		{
-			score = -search_rec(ss, -(MAX(best_score, alpha) + 1), -MAX(best_score, alpha), tm, false);
+			if (lmr_condition(ss, &s))
+			{
+				unsigned reduction = MIN(ss->depth, LMR_REDUCTION[ss->depth + 1][s.selected]);
+				ss->depth -= reduction;
+				score = -search_rec(ss, -(MAX(best_score, alpha) + 1), -MAX(best_score, alpha), tm, false);
+				ss->depth += reduction;
+			}
+
+			if (!lmr_condition(ss, &s) || score > best_score)
+				score = -search_rec(ss, -(MAX(best_score, alpha) + 1), -MAX(best_score, alpha), tm, false);
 
 			// re-search fail-high nodes
 			if (score > best_score && pv)
@@ -472,6 +499,24 @@ update_histories(struct search_state *ss, selector *s, move best_move, enum boun
 				gravity_update(&ss->hist->main[ss->pos->stm][m.from][m.to], bonus);
 				update_continuations(ss, m, bonus);
 			}
+		}
+	}
+}
+
+void
+search_init(void)
+{
+	usize depth, move_idx;
+	double reduction;
+
+	for (depth = 1; depth < MAX_PLY; ++depth)
+	{
+		for (move_idx = 1; move_idx < MAX_MOVES; ++move_idx)
+		{
+			reduction = log(depth) * log(move_idx);
+			reduction /= PARAMETER(lmr_b);
+			reduction += PARAMETER(lmr_a);
+			LMR_REDUCTION[depth][move_idx] = MAX((signed) reduction, 0);
 		}
 	}
 }

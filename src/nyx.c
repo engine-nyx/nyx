@@ -53,6 +53,7 @@ main(int argc, char **argv)
 	generation_init();
 	position_init();
 	evaluation_init();
+	search_init();
 
 	if (argc == 1)
 	{
