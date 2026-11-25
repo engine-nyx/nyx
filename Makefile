@@ -21,25 +21,34 @@ DEPS          := $(OBJS:.o=.d) $(TOBJS:.o=.d) $(OBJS:.o=.param.d) $(TOBJS:.o=.pa
 param_value = $(firstword $(file <$(1)))
 PARAM_FLAGS := $(foreach f,$(PARAMS),-DNYX_PARAMETER_$(basename $(notdir $(f)))=$(call param_value,$(f)))
 
-CFLAGS  := -std=c23 -Wall -Wextra -Wpedantic -Wshadow -Werror -Iinclude --embed-dir=. -MMD -MP
-CFLAGS  += -O3 -flto=auto
-LDFLAGS := -flto=auto
+CFLAGS  ?= -flto=auto -O3
+LDFLAGS ?= -flto=auto
+LDLIBS  ?=
+
+PROJ_CFLAGS  := -std=c23 -Wall -Wextra -Wpedantic -Wshadow -Werror -Iinclude --embed-dir=. -MMD -MP
+PROJ_LDFLAGS :=
+PROJ_LDLIBS  := -lm
+
+ALL_CFLAGS  = $(PROJ_CFLAGS) $(CFLAGS)
+ALL_LDFLAGS = $(PROJ_LDFLAGS) $(LDFLAGS)
+ALL_LDLIBS  = $(PROJ_LDLIBS) $(LDLIBS)
 
 LD := $(CC)
+
 all: $(TARGET_RELEASE) $(TARGET_TEST)
 
 $(TARGET_RELEASE): $(OBJS) | $(RELEASE_BUILD_DIR)
-	$(LD) $(LDFLAGS) $^ -o $@
+	$(LD) $(ALL_LDFLAGS) $^ $(ALL_LDLIBS) -o $@
 
 $(TARGET_TEST): $(filter-out $(RELEASE_BUILD_DIR)/nyx.o,$(OBJS)) $(TOBJS) | $(TEST_BUILD_DIR)
-	$(LD) $(LDFLAGS) $^ -o $@
+	$(LD) $(ALL_LDFLAGS) $^ $(ALL_LDLIBS) -o $@
 
 $(RELEASE_BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(RELEASE_BUILD_DIR)
-	$(CC) $(CPPFLAGS) $(PARAM_FLAGS) $(CFLAGS) -c $< -o $@
+	$(CC) $(CPPFLAGS) $(PARAM_FLAGS) $(ALL_CFLAGS) -c $< -o $@
 	$(PARAM_DEP_GEN) $< $@ $(PARAM_DIR) > $(RELEASE_BUILD_DIR)/$*.param.d
 
 $(TEST_BUILD_DIR)/%.o: $(TEST_DIR)/%.c | $(TEST_BUILD_DIR)
-	$(CC) $(CPPFLAGS) $(PARAM_FLAGS) $(CFLAGS) -c $< -o $@
+	$(CC) $(CPPFLAGS) $(PARAM_FLAGS) $(ALL_CFLAGS) -c $< -o $@
 	$(PARAM_DEP_GEN) $< $@ $(PARAM_DIR) > $(TEST_BUILD_DIR)/$*.param.d
 
 $(BUILD_DIR) $(RELEASE_BUILD_DIR) $(TEST_BUILD_DIR):
