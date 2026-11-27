@@ -15,8 +15,6 @@
 #include <nyx/utils.h>
 #include <stdlib.h>
 
-static unsigned LMR_REDUCTION[MAX_PLY][MAX_MOVES];
-
 constexpr int DRAW = 0;
 static int
 MATE_IN(unsigned ply)
@@ -101,12 +99,12 @@ qsearch_rec(struct search_state *ss, int alpha, int beta, time_manager *tm)
 		return adjust_mate_score(ent.score, ss->ply);
 
 	stand_pat = evaluate(pos);
-	best_score = pos->sf->checkers ? -oo : stand_pat;
+	best_score = in_check(pos) ? -oo : stand_pat;
 	best_move = NULL_MOVE;
 	if (best_score >= beta)
 		return best_score;
 
-	if (!pos->sf->checkers && best_score < alpha - PARAMETER(delta_big))
+	if (!in_check(pos) && best_score < alpha - PARAMETER(delta_big))
 		return alpha;
 
 	++ss->depth, ++ss->ply;
@@ -124,7 +122,7 @@ qsearch_rec(struct search_state *ss, int alpha, int beta, time_manager *tm)
 			break;
 		}
 
-		if (!pos->sf->checkers && stand_pat + PIECE_VALUE[ptype_of(pos->by_square[m.to])] + PARAMETER(delta_small) < alpha)
+		if (!in_check(pos) && stand_pat + PIECE_VALUE[ptype_of(pos->by_square[m.to])] + PARAMETER(delta_small) < alpha)
 			continue;
 
 		do_move(pos, m, &sf);
@@ -154,7 +152,7 @@ qsearch_rec(struct search_state *ss, int alpha, int beta, time_manager *tm)
 	if (!s.selected)
 	{
 		best_move = NULL_MOVE;
-		if (pos->sf->checkers)
+		if (in_check(pos))
 			best_score = -MATE_IN(ss->ply);
 	}
 
@@ -174,11 +172,13 @@ qsearch_rec(struct search_state *ss, int alpha, int beta, time_manager *tm)
 	return best_score;
 }
 
-constexpr unsigned NMP_REDUCTION = PARAMETER(nmp_reduction);
+static unsigned LMR_REDUCTION[MAX_PLY][MAX_MOVES];
 
 static bool
 nmp_condition(const struct search_state *ss, bool pv)
-{ return !pv && !ss->pos->sf->checkers; }
+{
+	return !pv && !in_check(ss->pos);
+}
 
 static bool
 lmr_condition(const struct search_state *ss, const selector *s)
@@ -186,8 +186,38 @@ lmr_condition(const struct search_state *ss, const selector *s)
 	return
 		ss->depth >= 3 &&
 		s->selected >= 3 &&
-		!ss->pos->sf->checkers &&
+		!in_check(ss->pos) &&
 		!ss->pos->sf->previous->checkers;
+}
+
+static bool
+rfp_condition(const struct search_state *ss, bool pv, tt_entry ent, int eval, int beta)
+{
+	int margin;
+
+	margin = PARAMETER(rfp_margin_a) * ss->depth + PARAMETER(rfp_margin_b);
+
+	return
+		ss->depth <= 7 &&
+		!in_check(ss->pos) &&
+		eval - margin >= beta &&
+		ent.bound != INVALID &&
+		!pv &&
+		!is_capture(ss->pos, ent.best_move);
+}
+
+static bool
+fp_condition(const struct search_state *ss, int eval, int alpha, move m)
+{
+	int margin;
+
+	margin = PARAMETER(fp_margin_a) * ss->depth + PARAMETER(fp_margin_b);
+
+	return
+		ss->depth <= 3 &&
+		!in_check(ss->pos) &&
+		eval + margin <= alpha &&
+		!is_capture(ss->pos, m);
 }
 
 static int
@@ -196,7 +226,7 @@ search_rec(struct search_state *ss, int alpha, int beta, time_manager *tm, bool 
 	position *pos;
 	selector s;
 	move m, best_move;
-	int score, best_score;
+	int score, best_score, stand_pat;
 	state_frame sf;
 	tt_entry ent;
 	bool first_move;
@@ -222,6 +252,10 @@ search_rec(struct search_state *ss, int alpha, int beta, time_manager *tm, bool 
 	if (!ss->depth)
 		return qsearch_rec(ss, alpha, beta, tm);
 
+	stand_pat = evaluate(pos);
+	if (rfp_condition(ss, pv, ent, stand_pat, beta))
+		return stand_pat;
+
 	--ss->depth, ++ss->ply;
 	++ss->nodes;
 
@@ -229,7 +263,7 @@ search_rec(struct search_state *ss, int alpha, int beta, time_manager *tm, bool 
 
 	if (nmp_condition(ss, pv))
 	{
-		unsigned reduction = MIN(ss->depth, NMP_REDUCTION);
+		unsigned reduction = MIN(ss->depth, PARAMETER(nmp_reduction));
 		ss->depth -= reduction;
 		do_move(pos, NULL_MOVE, &sf);
 		score = -search_rec(ss, -beta, -(beta - 1), tm, false);
@@ -268,7 +302,7 @@ search_rec(struct search_state *ss, int alpha, int beta, time_manager *tm, bool 
 
 			first_move = false;
 		}
-		else
+		else if (!fp_condition(ss, stand_pat, MAX(best_score, alpha), m))
 		{
 			if (lmr_condition(ss, &s))
 			{
@@ -308,7 +342,7 @@ search_rec(struct search_state *ss, int alpha, int beta, time_manager *tm, bool 
 	if (!s.selected)
 	{
 		best_move = NULL_MOVE;
-		best_score = pos->sf->checkers ? -MATE_IN(ss->ply) : DRAW;
+		best_score = in_check(pos) ? -MATE_IN(ss->ply) : DRAW;
 	}
 	else
 	{
