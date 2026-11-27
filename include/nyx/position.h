@@ -42,11 +42,12 @@ void put_piece(position *p, pctype pc, square sq);
 void do_move(position *p, move m, state_frame *sf);
 void undo_move(position *p, move m);
 
-square king_square(const position *p, color c);
+square king_square(const position *pos, color c);
 
-bool is_legal(const position *p, move m);
-bool is_pseudo_legal(const position *p, move m);
+bool is_legal(const position *pos, move m);
+bool is_pseudo_legal(const position *pos, move m);
 bool is_capture(const position *pos, move m);
+bool in_check(const position *pos);
 
 void finalize_position(position *p);
 

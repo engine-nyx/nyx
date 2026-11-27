@@ -270,7 +270,7 @@ selector_of(const struct search_state *ss, move tt, enum search_stage stage)
 		.ss=ss,
 	};
 
-	if (ss->pos->sf->checkers)
+	if (in_check(ss->pos))
 	{
 		s.stage = STAGE_TT_EVASIONS;
 	}
@@ -280,7 +280,7 @@ selector_of(const struct search_state *ss, move tt, enum search_stage stage)
 	case QUIESCENCE : s.stage = STAGE_TT_QUIESCE; break;
 	}
 
-	tt_is_quiesce = ss->pos->sf->checkers ||
+	tt_is_quiesce = in_check(ss->pos) ||
 		ss->pos->by_square[tt.to] != EMPTY ||
 		tt.type == EN_PASSANT ||
 		tt.type == PROMOTION;

@@ -387,7 +387,7 @@ generate_legals(const position *p, move *ms)
 
 	pinned = p->sf->blockers[p->stm] & p->by_color[p->stm];
 
-	num_moves = p->sf->checkers ?
+	num_moves = in_check(p) ?
 		generate_evasions    (p, ms):
 		generate_non_evasions(p, ms);
 

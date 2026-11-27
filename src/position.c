@@ -59,9 +59,9 @@ position_init(void)
 }
 
 square
-king_square(const position *p, color c)
+king_square(const position *pos, color c)
 {
-	return lsb(p->by_ptype[KING] & p->by_color[c]);
+	return lsb(pos->by_ptype[KING] & pos->by_color[c]);
 }
 
 static int PIECE_VALUE[NUM_PIECE_COLORED_TYPES] =
@@ -425,28 +425,28 @@ do_null_move(position *pos, state_frame *sf)
 
 // we assume no check
 bool
-is_legal(const position *p, move m)
+is_legal(const position *pos, move m)
 {
 	pctype pc;
 	bitboard enemy; // TODO: check if should use attackers_to or attackers_exist
 
-	pc = p->by_square[m.from];
-	enemy = p->by_color[other_color(p->stm)];
+	pc = pos->by_square[m.from];
+	enemy = pos->by_color[other_color(pos->stm)];
 
 	if (m.type == CASTLING)
-		return !((attackers_to(p, m.to) | attackers_to(p, (m.from + m.to) / 2)) & enemy);
+		return !((attackers_to(pos, m.to) | attackers_to(pos, (m.from + m.to) / 2)) & enemy);
 
 	if (ptype_of(pc) == KING)
-		return !attackers_exist(p, m.to, p->by_ptype[ALL] ^ bbsq(m.from), other_color(p->stm));
+		return !attackers_exist(pos, m.to, pos->by_ptype[ALL] ^ bbsq(m.from), other_color(pos->stm));
 
-	if (!(p->sf->blockers[p->stm] & bbsq(m.from)))
+	if (!(pos->sf->blockers[pos->stm] & bbsq(m.from)))
 		return true;
 
-	return dia_straight_lut[m.from][m.to] & bbsq(king_square(p, p->stm));
+	return dia_straight_lut[m.from][m.to] & bbsq(king_square(pos, pos->stm));
 }
 
 bool
-is_pseudo_legal(const position *p, move m)
+is_pseudo_legal(const position *pos, move m)
 {
 	move ms[MAX_MOVES];
 	usize generated, i;
@@ -456,7 +456,7 @@ is_pseudo_legal(const position *p, move m)
 
 	if (m.type != NORMAL)
 	{
-		generated = generate(p->sf->checkers ? EVASIONS : NON_EVASIONS, p, ms);
+		generated = generate(in_check(pos) ? EVASIONS : NON_EVASIONS, pos, ms);
 
 		for (i = 0; i < generated; ++i)
 			if (ms[i].raw == m.raw)
@@ -466,13 +466,13 @@ is_pseudo_legal(const position *p, move m)
 
 	assert(!m.prom && "Prom field of normal move should be empty");
 
-	pc = p->by_square[m.from];
+	pc = pos->by_square[m.from];
 	pt = ptype_of(pc);
 
-	if (pc == EMPTY || color_of(pc) != p->stm)
+	if (pc == EMPTY || color_of(pc) != pos->stm)
 		return false;
 
-	if (p->by_color[p->stm] & bbsq(m.to))
+	if (pos->by_color[pos->stm] & bbsq(m.to))
 		return false;
 
 	if (pt == PAWN)
@@ -480,25 +480,25 @@ is_pseudo_legal(const position *p, move m)
 		if (rank_of(m.to) == 0 || rank_of(m.to) == 7)
 			return false;
 
-		is_capture_pawn = attacks_pawn(m.from, p->stm) & p->by_color[other_color(p->stm)] & bbsq(m.to);
-		is_single_pawn = m.to == m.from + white_black(+8, -8, p->stm) && p->by_square[m.to] == EMPTY;
-		is_double_pawn = m.to == m.from + white_black(+16, -16, p->stm) && p->by_square[m.to] == EMPTY &&
-			rank_of(m.from) == white_black(1, 6, p->stm) && p->by_square[m.from + white_black(+8, -8, p->stm)] == EMPTY;
+		is_capture_pawn = attacks_pawn(m.from, pos->stm) & pos->by_color[other_color(pos->stm)] & bbsq(m.to);
+		is_single_pawn = m.to == m.from + white_black(+8, -8, pos->stm) && pos->by_square[m.to] == EMPTY;
+		is_double_pawn = m.to == m.from + white_black(+16, -16, pos->stm) && pos->by_square[m.to] == EMPTY &&
+			rank_of(m.from) == white_black(1, 6, pos->stm) && pos->by_square[m.from + white_black(+8, -8, pos->stm)] == EMPTY;
 
 		if (!(is_capture_pawn || is_single_pawn || is_double_pawn))
 			return false;
 	}
-	else if (!(attacks_piece(pt, m.from, p->by_ptype[ALL]) & bbsq(m.to)))
+	else if (!(attacks_piece(pt, m.from, pos->by_ptype[ALL]) & bbsq(m.to)))
 		return false;
 
-	if (p->sf->checkers && pt != KING)
+	if (in_check(pos) && pt != KING)
 	{
 		// in double check, it's the king that has to move
-		if (popcnt(p->sf->checkers) > 1)
+		if (popcnt(pos->sf->checkers) > 1)
 			return false;
 
 		// blocking piece
-		if (!(between_lut[king_square(p, p->stm)][lsb(p->sf->checkers)] & bbsq(m.to)))
+		if (!(between_lut[king_square(pos, pos->stm)][lsb(pos->sf->checkers)] & bbsq(m.to)))
 			return false;
 	}
 
@@ -529,4 +529,9 @@ is_capture(const position *pos, move m)
 	return pos->by_square[m.to] != EMPTY ||
 		m.type == EN_PASSANT ||
 		(m.type == PROMOTION && promtype_of(m) == QUEEN);
+}
+
+bool in_check(const position *pos)
+{
+	return (bool) pos->sf->checkers;
 }
